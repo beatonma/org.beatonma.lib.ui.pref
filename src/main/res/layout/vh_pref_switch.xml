@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout
+        android:id="@+id/top_level_container"
+        style="@style/Item.Padded.Double">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/switchview"
+            android:id="@+id/text_container"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/title"
+                style="@style/Text.Primary"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/description"
+                style="@style/Text.Secondary"/>
+        </LinearLayout>
+
+        <android.support.v7.widget.SwitchCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/text_container"
+            android:layout_alignBottom="@+id/text_container"
+            android:id="@+id/switchview"/>
+
+    </RelativeLayout>
+</layout>
