@@ -2,7 +2,7 @@ package org.beatonma.lib.ui.pref;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class PrefUtils {
     private final static String DEFAULT_PREFS = "prefs";

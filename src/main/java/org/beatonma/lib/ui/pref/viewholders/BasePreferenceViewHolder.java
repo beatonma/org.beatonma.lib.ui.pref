@@ -1,7 +1,7 @@
 package org.beatonma.lib.ui.pref.viewholders;
 
 import android.content.SharedPreferences;
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 import android.view.View;
 import android.widget.TextView;
 

@@ -1,6 +1,6 @@
 package org.beatonma.lib.ui.pref;
 
-import android.databinding.BindingAdapter;
+import androidx.databinding.BindingAdapter;
 import android.view.View;
 
 import com.google.gson.Gson;

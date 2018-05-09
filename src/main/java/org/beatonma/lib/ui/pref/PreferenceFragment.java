@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 import org.beatonma.lib.load.AsyncTaskResult;
 import org.beatonma.lib.log.Log;
@@ -17,7 +17,7 @@ import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 
 public abstract class PreferenceFragment extends BaseFragment
-        implements LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
+        implements androidx.loader.app.LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
     private final static int LOADER_PREFS = 34659;
 
     private final PreferenceAdapter mAdapter = new PreferenceAdapter(this);
@@ -58,7 +58,7 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public Loader<AsyncTaskResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
+    public androidx.loader.content.Loader<AsyncTaskResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
         switch (id) {
             case LOADER_PREFS:
                 return new PreferenceLoader.SupportPreferenceLoader(mWeakContext.get(), getPreferenceDefinitions());
@@ -68,7 +68,7 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public void onLoadFinished(@NonNull final Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
+    public void onLoadFinished(@NonNull final androidx.loader.content.Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
         final Context context = mWeakContext.get();
         if (context != null) {
             Log.d(TAG, "fragment loading complete");

@@ -1,7 +1,7 @@
 package org.beatonma.lib.ui.pref;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.beatonma.lib.load.AsyncTaskResult;
 import org.beatonma.lib.load.BaseAsyncTaskLoader;

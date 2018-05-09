@@ -4,7 +4,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.beatonma.lib.load.AsyncTaskResult;
 import org.beatonma.lib.ui.activity.BaseActivity;
