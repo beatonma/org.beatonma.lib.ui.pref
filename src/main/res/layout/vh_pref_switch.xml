@@ -8,7 +8,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@+id/switchview"
+            android:layout_toStartOf="@+id/checkable"
             android:id="@+id/text_container"
             android:orientation="vertical">
             <TextView
@@ -27,7 +27,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignTop="@+id/text_container"
             android:layout_alignBottom="@+id/text_container"
-            android:id="@+id/switchview"/>
+            android:id="@+id/checkable"/>
 
     </RelativeLayout>
 </layout>
