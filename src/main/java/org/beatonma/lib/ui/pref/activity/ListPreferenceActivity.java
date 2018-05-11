@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import androidx.databinding.ViewDataBinding;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,6 +27,9 @@ import org.beatonma.lib.ui.recyclerview.RVUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.databinding.ViewDataBinding;
 
 public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
         implements LoaderManager.LoaderCallbacks<AsyncTaskResult<List<ListItem>>> {
@@ -51,15 +52,19 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
 
     @Override
     public void save(final Integer obj) {
-        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
-        editor.putInt(mListPreference.getKey(), obj);
-        editor.apply();
+//        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
+//        editor.putInt(mListPreference.getKey(), obj);
+//        editor.apply();
     }
 
-    public void saveAndClose(final int value) {
-        save(value);
+    public void saveAndClose(final int value, final String name) {
+        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
+        editor.putInt(mListPreference.getKey(), value);
+        editor.putString(mListPreference.getDisplayKey(), name);
+        editor.apply();
 
         mListPreference.update(value);
+        mListPreference.update(name);
         final Intent intent = new Intent();
         intent.putExtra(EXTRA_LIST_PREFERENCE, mListPreference);
         setResult(RESULT_OK, intent);
@@ -126,7 +131,7 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     private static class ListLoader extends BaseAsyncTaskLoader<List<ListItem>> {
         private final ListPreference preference;
 
-        public ListLoader(final Context context, final ListPreference preference) {
+        ListLoader(final Context context, final ListPreference preference) {
             super(context);
             this.preference = preference;
         }
@@ -143,22 +148,22 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
                     preference.getDisplayListResourceId() == 0
                             ? null
                             : resources.getStringArray(preference.getDisplayListResourceId());
-            final int[] values =
-                    preference.getValuesListResourceId() == 0
-                            ? null
-                            :resources.getIntArray(preference.getValuesListResourceId());
+//            final int[] values =
+//                    preference.getValuesListResourceId() == 0
+//                            ? null
+//                            :resources.getIntArray(preference.getValuesListResourceId());
             if (display == null) {
                 result.failure("Unable to read display list");
                 return result;
             }
 
             for (int i = 0; i < display.length; i++) {
-                final int val = values == null ? i : values[i];
+//                final int val = values == null ? i : values[i];
                 items.add(
                         new ListItem()
                                 .text(display[i])
-                                .value(val)
-                                .checked(val == preference.getSelectedValue()));
+                                .value(i)
+                                .checked(i == preference.getSelectedValue()));
             }
 
             result.success(items);
@@ -211,7 +216,7 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
                         }
                     }
 
-                    saveAndClose(item.value());
+                    saveAndClose(item.value(), item.text());
                 };
 
                 itemView.setOnClickListener(clickListener);

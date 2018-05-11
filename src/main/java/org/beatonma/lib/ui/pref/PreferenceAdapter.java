@@ -2,10 +2,9 @@ package org.beatonma.lib.ui.pref;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.ui.activity.ActivityBuilder;
@@ -21,6 +20,8 @@ import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+
+import androidx.annotation.NonNull;
 
 public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     private final static String TAG = "PreferenceAdapter";
@@ -56,16 +57,55 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
         mPreferenceGroup = group;
     }
 
+    /**
+     * Layout must contain TextViews with the following IDs:
+     *  - 'title'
+     *  - 'description'
+     *
+     * Layout must contain a {@link CompoundButton} (or subclass) view with ID:
+     *  - 'checkable'
+     */
+    public int getSwitchLayout() {
+        return R.layout.vh_pref_switch;
+    }
+
+    /**
+     * Layout must contain TextViews with the following IDs:
+     *  - 'title'
+     *  - 'description'
+     */
+    public int getListSingleLayout() {
+        return getSimpleLayout();
+    }
+
+    /**
+     * Layout must contain TextViews with the following IDs:
+     *  - 'title'
+     *  - 'description'
+     */
+    public int getSimpleLayout() {
+        return R.layout.vh_pref_simple;
+    }
+
     public void notifyUpdate(final String key, final String value) {
-        mPreferenceGroup.notifyUpdate(key, value);
+        final int position = mPreferenceGroup.notifyUpdate(key, value);
+        if (position >= 0) {
+            notifyItemChanged(position);
+        }
     }
 
     public void notifyUpdate(final String key, final int value) {
-        mPreferenceGroup.notifyUpdate(key, value);
+        final int position = mPreferenceGroup.notifyUpdate(key, value);
+        if (position >= 0) {
+            notifyItemChanged(position);
+        }
     }
 
     public void notifyUpdate(final String key, final boolean value) {
-        mPreferenceGroup.notifyUpdate(key, value);
+        final int position = mPreferenceGroup.notifyUpdate(key, value);
+        if (position >= 0) {
+            notifyItemChanged(position);
+        }
     }
 
     @Override
@@ -94,21 +134,21 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     public BaseViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         switch (viewType) {
             case TYPE_BOOLEAN:
-                return new SwitchPreferenceViewHolder(inflate(parent, R.layout.vh_pref_switch)) {
+                return new SwitchPreferenceViewHolder(inflate(parent, getSwitchLayout())) {
                     @Override
                     public void bind(final int position) {
                         bind(mWeakPrefs, (BooleanPreference) mPreferenceGroup.getPreferences().get(position));
                     }
                 };
             case TYPE_LIST_SINGLE:
-                return new ListPreferenceViewHolder(inflate(parent, R.layout.vh_pref_simple)) {
+                return new ListPreferenceViewHolder(inflate(parent, getListSingleLayout())) {
                     @Override
                     public void bind(final int position) {
                         bind(mWeakPrefs, (ListPreference) mPreferenceGroup.getPreferences().get(position));
                     }
                 };
             case 0:
-                return new BasePreferenceViewHolder(inflate(parent, R.layout.vh_pref_simple)) {
+                return new BasePreferenceViewHolder(inflate(parent, getSimpleLayout())) {
                     @Override
                     public void bind(final int position) {
                         bind(mWeakPrefs, mPreferenceGroup.getPreferences().get(position));
@@ -120,11 +160,11 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     }
 
     public class SwitchPreferenceViewHolder extends BasePreferenceViewHolder<BooleanPreference> {
-        private final SwitchCompat mSwitch;
+        private final CompoundButton mSwitch;
 
-        public SwitchPreferenceViewHolder(final View v) {
+        SwitchPreferenceViewHolder(final View v) {
             super(v);
-            mSwitch = v.findViewById(R.id.switchview);
+            mSwitch = v.findViewById(R.id.checkable);
         }
 
         @Override
@@ -147,18 +187,18 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     }
 
     public class ListPreferenceViewHolder extends BasePreferenceViewHolder<ListPreference> {
-        public ListPreferenceViewHolder(final View v) {
+        ListPreferenceViewHolder(final View v) {
             super(v);
         }
 
         @Override
         public void bind(final WeakReference<SharedPreferences> weakPrefs, final ListPreference preference) {
             super.bind(weakPrefs, preference);
+            setDescription(preference.getSelectedDisplay());
             itemView.setOnClickListener(
                     v -> ActivityBuilder.forActivity(itemView.getContext(), ListPreferenceActivity.class)
                             .putExtra(ListPreferenceActivity.EXTRA_LIST_PREFERENCE, preference)
                             .forResult(mWeakFragment.get(), ListPreferenceActivity.REQUEST_CODE_UPDATE)
-                            // todo
                             .animationSource(v)
                             .start());
         }

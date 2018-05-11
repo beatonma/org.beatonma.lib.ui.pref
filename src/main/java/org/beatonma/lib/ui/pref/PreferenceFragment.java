@@ -4,28 +4,32 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
 
 import org.beatonma.lib.load.AsyncTaskResult;
-import org.beatonma.lib.log.Log;
 import org.beatonma.lib.ui.activity.BaseFragment;
 import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+
 public abstract class PreferenceFragment extends BaseFragment
-        implements androidx.loader.app.LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
+        implements LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
     private final static int LOADER_PREFS = 34659;
 
-    private final PreferenceAdapter mAdapter = new PreferenceAdapter(this);
+    private final PreferenceAdapter mAdapter = buildAdapter();
 
     public abstract int getPreferenceDefinitions();
 
     public PreferenceAdapter getAdapter() {
         return mAdapter;
+    }
+
+    public PreferenceAdapter buildAdapter() {
+        return new PreferenceAdapter(this);
     }
 
     @Override
@@ -53,12 +57,13 @@ public abstract class PreferenceFragment extends BaseFragment
             final ListPreference lp = (ListPreference) extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE);
             if (lp != null) {
                 mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedValue());
+                mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedDisplay());
             }
         }
     }
 
     @Override
-    public androidx.loader.content.Loader<AsyncTaskResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
+    public Loader<AsyncTaskResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
         switch (id) {
             case LOADER_PREFS:
                 return new PreferenceLoader.SupportPreferenceLoader(mWeakContext.get(), getPreferenceDefinitions());
@@ -68,10 +73,9 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public void onLoadFinished(@NonNull final androidx.loader.content.Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
+    public void onLoadFinished(@NonNull final Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
         final Context context = mWeakContext.get();
         if (context != null) {
-            Log.d(TAG, "fragment loading complete");
             mAdapter.setPreferences(context, result.getData());
         }
     }
