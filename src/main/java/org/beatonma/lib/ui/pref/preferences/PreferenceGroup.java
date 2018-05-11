@@ -3,7 +3,6 @@ package org.beatonma.lib.ui.pref.preferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 public class PreferenceGroup extends BasePreference {
     private final static String TAG = "PreferenceGroup";
@@ -88,19 +89,22 @@ public class PreferenceGroup extends BasePreference {
         editor.apply();
     }
 
-    public void notifyUpdate(final String key, final int value) {
+    public int notifyUpdate(final String key, final int value) {
         final int position = mKeyMap.get(key);
         mPreferences.get(position).update(value);
+        return position;
     }
 
-    public void notifyUpdate(final String key, final String value) {
+    public int notifyUpdate(final String key, final String value) {
         final int position = mKeyMap.get(key);
         mPreferences.get(position).update(value);
+        return position;
     }
 
-    public void notifyUpdate(final String key, final boolean value) {
+    public int notifyUpdate(final String key, final boolean value) {
         final int position = mKeyMap.get(key);
         mPreferences.get(position).update(value);
+        return position;
     }
 
     public static PreferenceGroup fromJson(@NonNull final Context context, final int resourceId) {
