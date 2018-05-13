@@ -196,7 +196,8 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
             super.bind(weakPrefs, preference);
             setDescription(preference.getSelectedDisplay());
             itemView.setOnClickListener(
-                    v -> ActivityBuilder.forActivity(itemView.getContext(), ListPreferenceActivity.class)
+                    v -> ActivityBuilder.from(itemView.getContext())
+                            .to(ListPreferenceActivity.class)
                             .putExtra(ListPreferenceActivity.EXTRA_LIST_PREFERENCE, preference)
                             .forResult(mWeakFragment.get(), ListPreferenceActivity.REQUEST_CODE_UPDATE)
                             .animationSource(v)
