@@ -1,6 +1,5 @@
 package org.beatonma.lib.ui.pref;
 
-import androidx.databinding.BindingAdapter;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -11,6 +10,8 @@ import org.beatonma.lib.core.util.Sdk;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Locale;
+
+import androidx.databinding.BindingAdapter;
 
 public class ListItem implements Serializable {
     protected final static String TAG = "ListItem";
@@ -89,8 +90,8 @@ public class ListItem implements Serializable {
         return this;
     }
 
-    @BindingAdapter("bind:visible")
-    public static void hsetVisible(final View view, final boolean visible) {
+    @BindingAdapter("app:visible")
+    public static void setVisible(final View view, final boolean visible) {
         view.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
