@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
@@ -48,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/text"
             app:layout_constraintTop_toBottomOf="@+id/text"
-            bind:visible="@{!TextUtils.isEmpty(item.description())}"/>
+            app:visible="@{!TextUtils.isEmpty(item.description())}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
