@@ -1,19 +1,20 @@
 package org.beatonma.lib.ui.pref;
 
-import android.app.LoaderManager;
 import android.content.Intent;
-import android.content.Loader;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 
-import org.beatonma.lib.load.AsyncTaskResult;
+import org.beatonma.lib.load.AsyncResult;
 import org.beatonma.lib.ui.activity.BaseActivity;
-import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
+import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
+
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 public abstract class PreferenceActivity extends BaseActivity
-        implements LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
+        implements LoaderManager.LoaderCallbacks<AsyncResult<PreferenceGroup>> {
     private final static int LOADER_PREFS = 34657;
 
     private final PreferenceAdapter mAdapter = new PreferenceAdapter();
@@ -30,7 +31,7 @@ public abstract class PreferenceActivity extends BaseActivity
     @Override
     protected void onPostCreate(@Nullable final Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        getLoaderManager().initLoader(LOADER_PREFS, null, this);
+        LoaderManager.getInstance(this).initLoader(LOADER_PREFS, null, this);
     }
 
     @Override
@@ -67,12 +68,12 @@ public abstract class PreferenceActivity extends BaseActivity
     }
 
     @Override
-    public void onLoadFinished(final Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
+    public void onLoadFinished(final Loader<AsyncResult<PreferenceGroup>> loader, final AsyncResult<PreferenceGroup> result) {
         mAdapter.setPreferences(this, result.getData());
     }
 
     @Override
-    public void onLoaderReset(final Loader<AsyncTaskResult<PreferenceGroup>> loader) {
+    public void onLoaderReset(final Loader<AsyncResult<PreferenceGroup>> loader) {
 
     }
 }
