@@ -6,7 +6,6 @@ import android.content.res.Resources;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.beatonma.lib.log.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,7 +41,6 @@ public class BooleanPreference extends SimplePreference {
     @Override
     public void load(final SharedPreferences preferences) {
         mChecked = preferences.getBoolean(getKey(), mChecked);
-        Log.d(TAG, "loading %s=%b", getKey(), mChecked);
     }
 
     @Override
@@ -59,7 +57,7 @@ public class BooleanPreference extends SimplePreference {
     }
 
     public String getSelectedDescription() {
-        return mSelectedDescription;
+        return mSelectedDescription == null ? getDescription() : mSelectedDescription;
     }
 
     public void setSelectedDescription(final String selectedDescription) {
@@ -67,7 +65,7 @@ public class BooleanPreference extends SimplePreference {
     }
 
     public String getUnselectedDescription() {
-        return mUnselectedDescription;
+        return mUnselectedDescription == null ? getDescription() : mUnselectedDescription;
     }
 
     public void setUnselectedDescription(final String unselectedDescription) {
