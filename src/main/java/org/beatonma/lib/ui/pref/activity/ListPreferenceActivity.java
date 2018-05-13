@@ -1,9 +1,7 @@
 package org.beatonma.lib.ui.pref.activity;
 
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -11,8 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.beatonma.lib.core.util.CollectionUtil;
-import org.beatonma.lib.load.AsyncTaskResult;
-import org.beatonma.lib.load.BaseAsyncTaskLoader;
+import org.beatonma.lib.load.AsyncResult;
+import org.beatonma.lib.load.SupportBaseAsyncTaskLoader;
 import org.beatonma.lib.log.Log;
 import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.prefs.databinding.ActivityListBinding;
@@ -30,9 +28,11 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
-        implements LoaderManager.LoaderCallbacks<AsyncTaskResult<List<ListItem>>> {
+        implements LoaderManager.LoaderCallbacks<AsyncResult<List<ListItem>>> {
     public final static String EXTRA_LIST_PREFERENCE = "extra_list_preference";
     public final static int REQUEST_CODE_UPDATE = 936;
 
@@ -89,7 +89,7 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
 
         setTitle(mListPreference.getName());
 
-        getLoaderManager().initLoader(LIST_LOADER, null, this);
+        LoaderManager.getInstance(this).initLoader(LIST_LOADER, null, this);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     }
 
     @Override
-    public Loader<AsyncTaskResult<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
+    public Loader<AsyncResult<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LIST_LOADER:
                 return new ListLoader(this, mListPreference);
@@ -107,8 +107,8 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     }
 
     @Override
-    public void onLoadFinished(final Loader<AsyncTaskResult<List<ListItem>>> loader,
-                               final AsyncTaskResult<List<ListItem>> result) {
+    public void onLoadFinished(final Loader<AsyncResult<List<ListItem>>> loader,
+                               final AsyncResult<List<ListItem>> result) {
         switch (loader.getId()) {
             case LIST_LOADER:
                 if (result.isFailure()) {
@@ -122,13 +122,13 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     }
 
     @Override
-    public void onLoaderReset(final Loader<AsyncTaskResult<List<ListItem>>> loader) {
+    public void onLoaderReset(final Loader<AsyncResult<List<ListItem>>> loader) {
 
     }
 
 
 
-    private static class ListLoader extends BaseAsyncTaskLoader<List<ListItem>> {
+    private static class ListLoader extends SupportBaseAsyncTaskLoader<List<ListItem>> {
         private final ListPreference preference;
 
         ListLoader(final Context context, final ListPreference preference) {
@@ -137,8 +137,8 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
         }
 
         @Override
-        public AsyncTaskResult<List<ListItem>> loadInBackground() {
-            final AsyncTaskResult.Builder<List<ListItem>> result = AsyncTaskResult.getBuilder();
+        public AsyncResult<List<ListItem>> loadInBackground() {
+            final AsyncResult.Builder<List<ListItem>> result = AsyncResult.getBuilder();
             final List<ListItem> items = new ArrayList<>();
 
             final Context context = getContext();
@@ -177,7 +177,7 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
         }
 
         @Override
-        protected void onReleaseResources(final AsyncTaskResult<List<ListItem>> data) {
+        protected void onReleaseResources(final AsyncResult<List<ListItem>> data) {
 
         }
     }
