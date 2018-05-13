@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.beatonma.lib.load.AsyncTaskResult;
+import org.beatonma.lib.load.AsyncResult;
 import org.beatonma.lib.ui.activity.BaseFragment;
 import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
@@ -17,7 +17,7 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 public abstract class PreferenceFragment extends BaseFragment
-        implements LoaderManager.LoaderCallbacks<AsyncTaskResult<PreferenceGroup>> {
+        implements LoaderManager.LoaderCallbacks<AsyncResult<PreferenceGroup>> {
     private final static int LOADER_PREFS = 34659;
 
     private final PreferenceAdapter mAdapter = buildAdapter();
@@ -35,7 +35,7 @@ public abstract class PreferenceFragment extends BaseFragment
     @Override
     public void postInit() {
         super.postInit();
-        getLoaderManager().initLoader(LOADER_PREFS, null, this);
+        LoaderManager.getInstance(this).initLoader(LOADER_PREFS, null, this);
     }
 
     @Override
@@ -63,7 +63,7 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public Loader<AsyncTaskResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
+    public Loader<AsyncResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
         switch (id) {
             case LOADER_PREFS:
                 return new PreferenceLoader.SupportPreferenceLoader(mWeakContext.get(), getPreferenceDefinitions());
@@ -73,7 +73,7 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public void onLoadFinished(@NonNull final Loader<AsyncTaskResult<PreferenceGroup>> loader, final AsyncTaskResult<PreferenceGroup> result) {
+    public void onLoadFinished(@NonNull final Loader<AsyncResult<PreferenceGroup>> loader, final AsyncResult<PreferenceGroup> result) {
         final Context context = mWeakContext.get();
         if (context != null) {
             mAdapter.setPreferences(context, result.getData());
@@ -81,7 +81,7 @@ public abstract class PreferenceFragment extends BaseFragment
     }
 
     @Override
-    public void onLoaderReset(@NonNull final Loader<AsyncTaskResult<PreferenceGroup>> loader) {
+    public void onLoaderReset(@NonNull final Loader<AsyncResult<PreferenceGroup>> loader) {
 
     }
 }
