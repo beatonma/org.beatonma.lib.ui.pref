@@ -66,7 +66,7 @@ public abstract class PreferenceFragment extends BaseFragment
     public Loader<AsyncResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
         switch (id) {
             case LOADER_PREFS:
-                return new PreferenceLoader.SupportPreferenceLoader(mWeakContext.get(), getPreferenceDefinitions());
+                return new PreferenceLoader(mWeakContext.get(), getPreferenceDefinitions());
             default:
                 return null;
         }
