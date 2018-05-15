@@ -15,6 +15,7 @@ import org.beatonma.lib.log.Log;
 import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.prefs.databinding.ActivityListBinding;
 import org.beatonma.lib.prefs.databinding.VhListItemSingleBinding;
+import org.beatonma.lib.ui.activity.popup.PopupActivity;
 import org.beatonma.lib.ui.pref.ListItem;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
@@ -31,7 +32,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
+public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
         implements LoaderManager.LoaderCallbacks<AsyncResult<List<ListItem>>> {
     public final static String EXTRA_LIST_PREFERENCE = "extra_list_preference";
     public final static int REQUEST_CODE_UPDATE = 936;
@@ -45,16 +46,14 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     private List<ListItem> mItems;
 
     @Override
-    protected void initExtras(final Bundle extras) {
-        super.initExtras(extras);
-        mListPreference = (ListPreference) extras.getSerializable(EXTRA_LIST_PREFERENCE);
+    protected ActivityListBinding getBinding() {
+        return mBinding;
     }
 
     @Override
-    public void save(final Integer obj) {
-//        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
-//        editor.putInt(mListPreference.getKey(), obj);
-//        editor.apply();
+    protected void initExtras(final Bundle extras) {
+        super.initExtras(extras);
+        mListPreference = (ListPreference) extras.getSerializable(EXTRA_LIST_PREFERENCE);
     }
 
     public void saveAndClose(final int value, final String name) {
@@ -92,10 +91,10 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
         LoaderManager.getInstance(this).initLoader(LIST_LOADER, null, this);
     }
 
-    @Override
-    protected ActivityListBinding getBinding() {
-        return mBinding;
-    }
+//    @Override
+//    protected ActivityListBinding getBinding() {
+//        return mBinding;
+//    }
 
     @Override
     public Loader<AsyncResult<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
@@ -125,7 +124,6 @@ public class ListPreferenceActivity extends BasePreferencePopupActivity<Integer>
     public void onLoaderReset(final Loader<AsyncResult<List<ListItem>>> loader) {
 
     }
-
 
 
     private static class ListLoader extends SupportBaseAsyncTaskLoader<List<ListItem>> {
