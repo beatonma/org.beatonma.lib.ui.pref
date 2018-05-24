@@ -16,10 +16,11 @@ android {
 }
 
 dependencies {
-    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "androidx.recyclerview:recyclerview:$materialVersion"
-    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$versions.constraint"
+    implementation "com.google.android.material:material:$versions.androidx"
+    implementation "androidx.recyclerview:recyclerview:$versions.androidx"
+    implementation "androidx.core:core-ktx:$versions.androidx"
+    implementation "com.google.code.gson:gson:$versions.gson"
 
     api project(":modules:ui:style")
     api project(":modules:ui:recyclerview")
