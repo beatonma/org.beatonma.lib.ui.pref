@@ -134,7 +134,6 @@ class MaterialColorsFragment: BaseFragment(),
                     }
                     VIEW_LEVEL_COLORS -> {
                         patch.setOnClickListener { selectColor(patch, position) }
-//                        patch.setOnClickListener { showSwatches() }
                     }
                 }
             }
@@ -184,13 +183,9 @@ class MaterialColorsFragment: BaseFragment(),
             if (oldSize > newSize) notifyItemRangeRemoved(newSize, oldSize - newSize)
             else if (oldSize < newSize) notifyItemRangeInserted(oldSize, newSize - oldSize)
 
+            // Force all remaining views to rebind so we can update listeners
             val minSize = Math.min(oldSize, newSize)
-            val changePositions = mutableListOf<Int>()
-            for (i in 0 until minSize) {
-                changePositions.add(i)  // Force all views to rebind so we can update listeners
-//                if (old?.get(i) != new?.get(i)) changePositions.add(i)
-            }
-            changePositions.forEach { notifyItemChanged(it) }
+            (0 until minSize).forEach { notifyItemChanged(it) }
         }
     }
 }
