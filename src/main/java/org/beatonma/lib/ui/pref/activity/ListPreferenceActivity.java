@@ -16,7 +16,7 @@ import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.prefs.databinding.ActivityListBinding;
 import org.beatonma.lib.prefs.databinding.VhListItemSingleBinding;
 import org.beatonma.lib.ui.activity.popup.PopupActivity;
-import org.beatonma.lib.ui.pref.ListItem;
+import org.beatonma.lib.ui.pref.activity.data.ListItem;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter;
@@ -42,12 +42,27 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     private ListPreference mListPreference;
 
     private ActivityListBinding mBinding;
-    private final ListAdapter mAdapter = new ListAdapter();
+    private final ListAdapter mAdapter = buildAdapter();
     private List<ListItem> mItems;
 
     @Override
     protected ActivityListBinding getBinding() {
         return mBinding;
+    }
+
+    public ListAdapter buildAdapter() {
+        final ListAdapter adapter = new ListAdapter();
+        adapter.setEmptyViews(new EmptyViewsAdapter() {
+            @Override
+            public Collection getDataset() {
+                return getItems();
+            }
+        });
+        return adapter;
+    }
+
+    public List<ListItem> getItems() {
+        return mItems;
     }
 
     @Override
@@ -79,12 +94,6 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     protected void initLayout(final ViewDataBinding binding) {
         mBinding = (ActivityListBinding) binding;
         RVUtil.setup(mBinding.recyclerview, mAdapter);
-        mAdapter.setEmptyViews(new EmptyViewsAdapter() {
-            @Override
-            public Collection getDataset() {
-                return mItems;
-            }
-        });
 
         setTitle(mListPreference.getName());
 
@@ -100,7 +109,7 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     public Loader<AsyncResult<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LIST_LOADER:
-                return new ListLoader(this, mListPreference);
+                return new PrefListLoader(this, mListPreference);
         }
         return null;
     }
@@ -126,10 +135,10 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     }
 
 
-    private static class ListLoader extends SupportBaseAsyncTaskLoader<List<ListItem>> {
+    public static class PrefListLoader extends SupportBaseAsyncTaskLoader<List<ListItem>> {
         private final ListPreference preference;
 
-        ListLoader(final Context context, final ListPreference preference) {
+        PrefListLoader(final Context context, final ListPreference preference) {
             super(context);
             this.preference = preference;
         }
@@ -181,6 +190,11 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     }
 
     private class ListAdapter extends EmptyBaseRecyclerViewAdapter {
+        @Override
+        public List getItems() {
+            return mItems;
+        }
+
         @NonNull
         @Override
         public BaseViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
