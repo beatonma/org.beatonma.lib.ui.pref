@@ -175,6 +175,8 @@ public class PreferenceGroup extends BasePreference {
                 return new BooleanPreference(context, resources, json);
             case ListPreference.TYPE:
                 return new ListPreference(context, resources, json);
+            case ColorPreference.TYPE:
+                return new ColorPreference(context, resources, json);
             case SimplePreference.TYPE:
             case "":
                 return new SimplePreference(context, resources, json);
