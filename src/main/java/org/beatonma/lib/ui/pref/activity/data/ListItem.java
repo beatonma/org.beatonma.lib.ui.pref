@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref;
+package org.beatonma.lib.ui.pref.activity.data;
 
 import android.view.View;
 
