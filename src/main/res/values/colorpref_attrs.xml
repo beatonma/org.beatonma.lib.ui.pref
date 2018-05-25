@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="ColorPatchView">
+    <attr name="patch_cornerRadius" format="dimension|reference"/>
+    <attr name="patch_isCircle" format="boolean"/>
+    <attr name="patch_color" format="color|reference"/>
+  </declare-styleable>
+</resources>
