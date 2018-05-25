@@ -1,9 +1,11 @@
 package org.beatonma.lib.ui.pref.view
 
 import android.animation.*
+import android.annotation.TargetApi
+import android.os.Build
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import org.beatonma.lib.log.Log
+import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.pref.heightF
 import org.beatonma.lib.ui.pref.squared
@@ -23,21 +25,24 @@ import org.beatonma.lib.ui.style.Interpolate
 
 class ColorItemAnimator(
         val gridWidth: Int,
-        val epicenter: GridItem = GridItem(0, gridWidth) , // List position from which animations should emanate
         val stepDelay: Long = 60,  // Delay between 'layers' of items relative to epicenter
-        val ripple: Float = 0.05F,  // Distance (relative to viewholder size) to move items away from epicenter
+        val ripple: Float = -0.04F,  // Distance (relative to viewholder size) to move items away from epicenter
         interpolator: TimeInterpolator = Interpolate.getMotionInterpolator(),
-        addDur: Long = 220,
-        moveDur: Long = 220,
-        changeDur: Long = 450,
-        removeDur: Long = 220
+        addDur: Long = 300,
+        moveDur: Long = 300,
+        changeDur: Long = 300,
+        removeDur: Long = 300
 ) : BaseItemAnimator(interpolator) {
 
-    private val tempGridItem = GridItem(0, gridWidth)
+    private val enterInterpolator = Interpolate.getEnterInterpolator()
+    private val changeInterpolator = interpolator
+    private val exitInterpolator = Interpolate.getExitInterpolator()
+
+    private val epicenter = GridItem(0) // List position from which animations should emanate
+    private val tempGridItem = GridItem(0)
 
     companion object {
         private const val TAG = "ColorItemAnimator"
-        private const val DEBUG_DURATION = 1200L
     }
 
     init {
@@ -50,7 +55,6 @@ class ColorItemAnimator(
 
     fun setEpicenter(index: Int) {
         epicenter.updateIndex(index)
-        Log.d(TAG, "epicenter updated")
     }
 
     /**
@@ -60,18 +64,44 @@ class ColorItemAnimator(
         return (stepDelay * distance).toLong()
     }
 
+    /**
+     * We want all animation types to run at the same time so we need to remove the choreography
+     * applied in parent
+     */
+    override fun runPendingAnimations() {
+        if (mPendingRemovals.isEmpty() && mPendingMoves.isEmpty()
+                && mPendingChanges.isEmpty() && mPendingMoves.isEmpty()) {
+            return
+        }
+        val animations = AnimatorSet()
+        val removals = AnimatorSet()
+        val changes = AnimatorSet()
+        val additions = AnimatorSet()
+
+        removals.playTogether(mPendingRemovals.map { getRemoveAnim(it) })
+        mPendingRemovals.clear()
+
+        changes.playTogether(mPendingChanges.map { getChangeAnim(it) })
+        mPendingChanges.clear()
+
+        additions.playTogether(mPendingAdditions.map { getAddAnimator(it) })
+        mPendingAdditions.clear()
+
+        animations.playTogether(removals, changes, additions)
+        animations.start()
+    }
+
     override fun onAnimateAdd(holder: RecyclerView.ViewHolder?): Boolean {
         holder?.itemView?.scaleX = 0F
         holder?.itemView?.scaleY = 0F
         return true
     }
 
-    override fun animateAddImpl(holder: RecyclerView.ViewHolder?) {
+    fun getAddAnimator(holder: RecyclerView.ViewHolder?): Animator? {
         try {
             holder as BasePatchViewHolder
-        }
-        catch (e: Exception) {
-            return super.animateAddImpl(holder)
+        } catch (e: Exception) {
+            return null
         }
 
         tempGridItem.measureForIndex(holder.index, epicenter)
@@ -80,32 +110,17 @@ class ColorItemAnimator(
         mAddAnimations.add(holder)
 
         val all = AnimatorSet()
-        val translate = AnimatorSet()
-        val scale = AnimatorSet()
-
-        scale.playTogether(
-                ObjectAnimator.ofFloat(patch, "scaleX", 0F, 1F),
-                ObjectAnimator.ofFloat(patch, "scaleY", 0F, 1F)
+        val scale = scaleAnim(patch, 0F, 1F)
+        val translate = translateAnim(
+                patch,
+                floatArrayOf(patch.widthF() * ripple * tempGridItem.xDistance, 0F),
+                floatArrayOf(patch.heightF() * ripple * tempGridItem.yDistance, 0F)
         )
 
-        translate.playTogether(
-                ObjectAnimator.ofFloat(
-                        patch,
-                        "translationX",
-                        0F,
-                        -1F * patch.widthF() * ripple * tempGridItem.xDistance,
-                        0F),
-                ObjectAnimator.ofFloat(
-                        patch,
-                        "translationY",
-                        0F,
-                        patch.heightF() * ripple * tempGridItem.yDistance,
-                        0F
-                )
-        )
+        all.playTogether(translate, scale)
 
         all.duration = addDuration
-        all.interpolator = interpolator
+        all.interpolator = enterInterpolator
         all.startDelay = getDelayFor(tempGridItem.distance)
         all.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator?) {
@@ -124,19 +139,51 @@ class ColorItemAnimator(
                 dispatchFinishedWhenDone()
             }
         })
-        all.playTogether(translate, scale)
-        all.start()
+        return all
     }
 
-    override fun animateRemoveImpl(holder: RecyclerView.ViewHolder?) {
-        super.animateRemoveImpl(holder)
+    fun getRemoveAnim(holder: RecyclerView.ViewHolder?): Animator? {
         try {
             holder as BasePatchViewHolder
+        } catch (e: Exception) {
+            return null
         }
-        catch (e: Exception) {
-            return
-        }
-        Log.d(TAG, "animateRemove")
+
+        tempGridItem.measureForIndex(holder.index, epicenter)
+
+        val patch = holder.patch
+        mRemoveAnimations.add(holder)
+
+        val all = AnimatorSet()
+        val scale = scaleAnim(patch, 1F, 0F, 0F, 0F)
+        val translate = translateAnim(
+                patch,
+                floatArrayOf(0F, patch.widthF() * ripple * tempGridItem.xDistance),
+                floatArrayOf(0F, patch.heightF() * ripple * tempGridItem.yDistance))
+
+        all.playTogether(translate, scale)
+
+        all.duration = addDuration
+        all.interpolator = exitInterpolator
+        all.startDelay = getDelayFor(tempGridItem.distance)
+        all.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator?) {
+                dispatchRemoveStarting(holder)
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+                patch.scaleX = 0F
+                patch.scaleY = 0F
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                animation?.removeListener(this)
+                dispatchRemoveFinished(holder)
+                mRemoveAnimations.remove(holder)
+                dispatchFinishedWhenDone()
+            }
+        })
+        return all
     }
 
     override fun onAnimateChange(
@@ -157,60 +204,94 @@ class ColorItemAnimator(
         return true
     }
 
-    override fun animateChangeImpl(changeInfo: ChangeInfo?) {
-        if (changeInfo == null) return
+    fun getChangeAnim(changeInfo: ChangeInfo?): Animator? {
+        if (changeInfo == null) return null
 
-        val oldHolder : BasePatchViewHolder = changeInfo.oldHolder as BasePatchViewHolder
-        val newHolder : BasePatchViewHolder = changeInfo.newHolder as BasePatchViewHolder
+        val oldHolder: BasePatchViewHolder = changeInfo.oldHolder as BasePatchViewHolder
+        val newHolder: BasePatchViewHolder = changeInfo.newHolder as BasePatchViewHolder
 
-        val oldView = oldHolder.itemView
-        val newView = newHolder.itemView
+        val oldView = oldHolder.patch
+        val newView = newHolder.patch
+
+        mChangeAnimations.add(changeInfo.oldHolder)
 
         tempGridItem.measureForIndex(oldHolder.index, epicenter)
 
         val all = AnimatorSet()
-        val translate = AnimatorSet()
-
-        translate.playTogether(
-                ObjectAnimator.ofFloat(
-                        oldView,
-                        "translationX",
-                        0F,
-                        -1F * oldView.widthF() * ripple * tempGridItem.xDistance,
-                        0F
-                ),
-                ObjectAnimator.ofFloat(
-                        oldView,
-                        "translationY",
-                        0F,
-                        -1 * oldView.heightF() * ripple * tempGridItem.yDistance,
-                        0F
-                )
+        val translate = translateAnim(
+                oldView,
+                floatArrayOf(0F, oldView.widthF() * ripple * tempGridItem.xDistance, 0F),
+                floatArrayOf(0F, oldView.heightF() * ripple * tempGridItem.yDistance, 0F)
         )
 
+
+        val color = colorAnim(oldView, oldView.color, newView.color)
+        all.playTogether(translate, color)
+
         all.duration = changeDuration
-        all.interpolator = interpolator
+        all.interpolator = changeInterpolator
         all.startDelay = getDelayFor(tempGridItem.distance)
-        all.addListener(object: AnimatorListenerAdapter() {
+        all.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator?) {
                 dispatchChangeStarting(oldHolder, true)
+                dispatchChangeStarting(newHolder, false)
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+                newView.alpha = 1F
+                oldView.alpha = 0F
             }
 
             override fun onAnimationEnd(animation: Animator?) {
                 newView.alpha = 1F
+                oldView.alpha = 0F
                 all.removeListener(this)
                 dispatchChangeFinished(oldHolder, true)
+                dispatchChangeFinished(newHolder, false)
                 mChangeAnimations.remove(oldHolder)
                 dispatchFinishedWhenDone()
             }
         })
-
-        all.play(translate)
-        all.start()
+        return all
     }
 
-    class GridItem(index: Int,
-                   private val gridWidth: Int) {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun colorAnim(view: View, vararg colors: Int): Animator? {
+        if (!Sdk.isLollipop()) return null
+
+        val animator = ValueAnimator.ofArgb(*colors)
+        animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
+            override fun onAnimationUpdate(anim: ValueAnimator?) {
+                view.setBackgroundColor(anim?.animatedValue as Int)
+                if (anim.animatedFraction >= 1F) {
+                    animator.removeUpdateListener(this)
+                }
+            }
+        })
+        return animator
+    }
+
+    private fun scaleAnim(view: View, vararg values: Float): Animator {
+        val scale = AnimatorSet()
+
+        scale.playTogether(
+                ObjectAnimator.ofFloat(view, "scaleX", *values),
+                ObjectAnimator.ofFloat(view, "scaleY", *values)
+        )
+        return scale
+    }
+
+    private fun translateAnim(view: View, xValues: FloatArray, yValues: FloatArray): Animator {
+        val translate = AnimatorSet()
+
+        translate.playTogether(
+                ObjectAnimator.ofFloat(view, "translationX", *xValues),
+                ObjectAnimator.ofFloat(view, "translationY", *yValues)
+        )
+        return translate
+    }
+
+    inner class GridItem(index: Int) {
         var x: Int = index % gridWidth
         var y: Int = index / gridWidth
         var distance: Double = 0.0  // Linear distance to the last associated item
@@ -226,14 +307,6 @@ class ColorItemAnimator(
             x = index % gridWidth
             y = index / gridWidth
         }
-
-//        fun distanceTo(other: GridItem): Double {
-//            val yDiff: Double = (other.y - this.y).toDouble()
-//            val xDiff: Double = (other.x - this.x).toDouble()
-//
-//            distance = Math.sqrt(yDiff.squared() + xDiff.squared())
-//            return Math.sqrt(yDiff.squared() + xDiff.squared() )
-//        }
 
         private fun measureDistanceTo(other: GridItem) {
             yDistance = (other.y - this.y)
@@ -254,170 +327,3 @@ abstract class BasePatchViewHolder(
         val patch: ColorPatchView = view.findViewById(R.id.colorpatch),
         var index: Int = 0 // position in dataset
 ) : BaseViewHolder(view)
-
-//class ColorItemAnimator(
-//        val gridWidth: Int,
-//        val interpolator: TimeInterpolator = Interpolate.getMotionInterpolator(),
-//        var epicenter: Int = 0, // List position from which animations should emanate
-//        addDur: Long = 160,
-//        moveDur: Long = 120,
-//        removeDur: Long = 120) : SimpleItemAnimator() {
-//
-//    init {
-//        addDuration = addDur
-//        moveDuration = moveDur
-//        removeDuration = removeDur
-//    }
-//
-//    private val pendingAdditions: MutableList<RecyclerView.ViewHolder> = mutableListOf()
-//    private val pendingRemovals: MutableList<RecyclerView.ViewHolder> = mutableListOf()
-//    private val pendingMoves: MutableList<MoveInfo> = mutableListOf()
-//    private val pendingChanges: MutableList<ChangeInfo> = mutableListOf()
-//
-//    private val tempHolders: MutableList<RecyclerView.ViewHolder> = mutableListOf()
-//    private val tempMoves: MutableList<MoveInfo> = mutableListOf()
-//    private val tempChanges: MutableList<ChangeInfo> = mutableListOf()
-//
-//    data class MoveInfo(val holder: RecyclerView.ViewHolder,
-//                        val fromX: Int, val fromY: Int,
-//                        val toX: Int, val toY: Int)
-//
-//    data class ChangeInfo(val oldHolder: RecyclerView.ViewHolder,
-//                          val newHolder: RecyclerView.ViewHolder,
-//                          val fromX: Int, val fromY: Int,
-//                          val toX: Int, val toY: Int)
-//
-//
-//    override fun animateAdd(holder: RecyclerView.ViewHolder?): Boolean {
-//        // TODO animate
-//        if (holder != null) {
-//            pendingAdditions += holder
-//        }
-//        return true
-//    }
-//
-//    override fun animateMove(holder: RecyclerView.ViewHolder?, fromX: Int, fromY: Int, toX: Int, toY: Int): Boolean {
-//        // TODO animate
-//        if (holder != null) {
-//            pendingMoves += MoveInfo(holder, fromX, fromY, toX, toY)
-//        }
-//        return true
-//    }
-//
-//    override fun animateChange(oldHolder: RecyclerView.ViewHolder?,
-//                               newHolder: RecyclerView.ViewHolder?,
-//                               fromX: Int, fromY: Int,
-//                               toX: Int, toY: Int): Boolean {
-//
-//        if (oldHolder == newHolder) return animateMove(oldHolder, fromX, fromY, toX, toY)
-//        if (oldHolder == null) return animateAdd(newHolder)
-//        if (newHolder == null) return animateRemove(oldHolder)
-//
-//        // TODO animate
-//
-//        pendingChanges += ChangeInfo(oldHolder, newHolder, fromX, fromY, toX, toY)
-//
-//        return true
-//    }
-//
-//    override fun animateRemove(holder: RecyclerView.ViewHolder?): Boolean {
-//        // TODO animate
-//        if (holder != null) {
-//            pendingRemovals += holder
-//        }
-//        return true
-//    }
-//
-//    override fun endAnimation(holder: RecyclerView.ViewHolder) {
-//        endAddAnimation(holder)
-//        endRemoveAnimation(holder)
-//
-//        // TODO changes, moves
-//    }
-//
-//    override fun endAnimations() {
-//        pendingAdditions.forEach { endAddAnimation(it) }
-//        pendingRemovals.forEach { endRemoveAnimation(it) }
-//        pendingMoves.forEach { endMoveAnimation(it) }
-//        pendingChanges.forEach { endChangeAnimation(it) }
-//    }
-//
-//    override fun runPendingAnimations() {
-//
-//        if (pendingRemovals.isNotEmpty()) {
-//            tempHolders.cloneOf(pendingRemovals).forEach { animateRemove(it) }
-//            pendingRemovals.clear()
-//        }
-//
-//        if (pendingMoves.isNotEmpty()) {
-//            tempMoves.cloneOf(pendingMoves).forEach {
-//                with (it) {
-//                    animateMove( holder, fromX, fromY, toX, toY)
-//                }
-//            }
-//            pendingMoves.clear()
-//        }
-//
-//        if (pendingChanges.isNotEmpty()) {
-//            tempChanges.cloneOf(pendingChanges).forEach {
-//                with(it) {
-//                    animateChange(oldHolder, newHolder, fromX, fromY, toX, toY)
-//                }
-//            }
-//            pendingChanges.clear()
-//        }
-//
-//        if (pendingAdditions.isNotEmpty()) {
-//            tempHolders.cloneOf(pendingAdditions).forEach { animateAdd(it) }
-//            pendingAdditions.clear()
-//        }
-//    }
-//
-//    override fun isRunning(): Boolean {
-//        return pendingAdditions.isNotEmpty() or pendingRemovals.isNotEmpty() or pendingMoves.isNotEmpty()
-//    }
-//
-//    private fun endAddAnimation(holder: RecyclerView.ViewHolder) {
-//        if (pendingAdditions.remove(holder)) {
-//            holder.itemView.animate().cancel()
-//            dispatchAddFinished(holder)
-//            clearAnimatedValues(holder.itemView)
-//        }
-//    }
-//
-//    private fun endRemoveAnimation(holder: RecyclerView.ViewHolder) {
-//        if (pendingRemovals.remove(holder)) {
-//            holder.itemView.animate().cancel()
-//            dispatchRemoveFinished(holder)
-//        }
-//    }
-//
-//    private fun endMoveAnimation(info: MoveInfo) {
-//        if (pendingMoves.remove(info)) {
-//            val holder: RecyclerView.ViewHolder = info.holder
-//            holder.itemView.animate().cancel()
-//            dispatchMoveFinished(holder)
-//        }
-//    }
-//
-//    private fun endChangeAnimation(info: ChangeInfo) {
-//        if (pendingChanges.remove(info)) {
-//            info.oldHolder.itemView.animate().cancel()
-//            info.newHolder.itemView.animate().cancel()
-//            dispatchChangeFinished(info.oldHolder, true)
-//            dispatchChangeFinished(info.newHolder, false)
-//        }
-//    }
-//
-//    private fun clearAnimatedValues(view: View) {
-////        with (view) {
-////            alpha = 1F
-////            translationX = 0F
-////            translationY = 0F
-////        }
-//    }
-//
-//    private fun dispatchFinishedWhenDone() {
-//        if (!isRunning) dispatchAnimationsFinished()
-//    }
-//}
