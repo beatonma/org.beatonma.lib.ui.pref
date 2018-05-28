@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref.view
+package org.beatonma.lib.ui.pref.color
 
 import android.animation.ValueAnimator
 import android.annotation.TargetApi
@@ -7,10 +7,10 @@ import android.content.res.TypedArray
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.view.animation.OvershootInterpolator
 import androidx.annotation.ColorInt
 import org.beatonma.lib.core.util.*
 import org.beatonma.lib.prefs.R
@@ -30,7 +30,7 @@ class ColorPatchView @JvmOverloads constructor(
         private const val CHOSEN_INDENT_DIP = 1.5F
         private const val CHOSEN_OPACITY = 100  // 0-255
         private const val CHOSEN_PADDING = 0.75F // Multiplier of default view padding
-                                                // View size is increased by reducing padding
+        // View size is increased by reducing padding
     }
 
     //    private val fill = FillAnimation()
@@ -39,26 +39,37 @@ class ColorPatchView @JvmOverloads constructor(
     private val outlineBounds = Rect()  // Mutable boundary which may change to show view state
 
     // Selected/chosen animation
-    private val cornerRadii: FloatArray
+    private val innerCornerRadii: FloatArray
     private val path = Path()
     private val pathMeasure = PathMeasure()
+    private val scaleInterpolator = OvershootInterpolator()
     private val animationInterpolator = Interpolate.getMotionInterpolator()
     private val chosenAnimBounds = RectF()
     private var chosenAnimStart: Long = -1
     private val chosenPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
     var chosen = false
-        set(value) {
-            field = value
-            if (value) onChosen() else onUnchosen()
-        }
+//        set(value) {
+//            val changed = field != value
+//            field = value
+//            if (changed) {
+//                if (value) onChosen() else onUnchosen()
+//            }
+//        }
 
     @ColorInt
     var color = 0
+        set(value) {
+            field = value
+            setBackgroundColor(color)
+            chosenPaint.color = selectionColorFor(color)
+//            updateColor(value, false)
+        }
 
     init {
         val a: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.ColorPatchView, defStyleAttr, 0)
         cornerRadius = a.dimen(context, R.styleable.ColorPatchView_patch_cornerRadius)
-        circular = a.getBoolean(R.styleable.ColorPatchView_patch_isCircle, false)
+        circular = a.boolean(context, R.styleable.ColorPatchView_patch_isCircle, false)
         color = a.color(context, R.styleable.ColorPatchView_patch_color)
         a.recycle()
 
@@ -70,15 +81,15 @@ class ColorPatchView @JvmOverloads constructor(
             color = selectionColorFor(color)
         }
 
-        cornerRadii = floatArrayOf(
-                cornerRadius, cornerRadius, cornerRadius, cornerRadius,
-                cornerRadius, cornerRadius, cornerRadius, cornerRadius)
+        val innerRadius = cornerRadius * 0.5F
+        innerCornerRadii = floatArrayOf(
+                innerRadius, innerRadius, innerRadius, innerRadius,
+                innerRadius, innerRadius, innerRadius, innerRadius)
 
         if (Sdk.isLollipop()) {
             clipToOutline = true
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
-                    Log.d(TAG, "getOutline")
                     if (circular) outline.setOval(outlineBounds)
                     else outline.setRoundRect(outlineBounds, cornerRadius)
                 }
@@ -106,17 +117,25 @@ class ColorPatchView @JvmOverloads constructor(
         chosenAnimBounds.inset(inset, inset)
     }
 
-    fun setColor(@ColorInt color: Int, animate: Boolean = false) {
+    fun choose(value: Boolean, animate: Boolean = false) {
+        val changed = chosen != value
+        chosen = value
+        if (changed && animate) {
+            if (value) onChosen() else onUnchosen()
+        }
+    }
+
+//    fun updateColor(@ColorInt color: Int, animate: Boolean = false) {
 //        if (animate) {
 //            fill.start(color)
 //        }
 //        else {
 //            fill.cancel()
-        setBackgroundColor(color)
-        this.color = color
-        chosenPaint.color = selectionColorFor(color)
+//        setBackgroundColor(color)
+//        this.color = color
+//        chosenPaint.color = selectionColorFor(color)
 //        }
-    }
+//    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -131,13 +150,14 @@ class ColorPatchView @JvmOverloads constructor(
     }
 
     private fun drawChosen(canvas: Canvas): Boolean {
-        val progress = Math.min(1F, when {
-            chosenAnimStart >= 0 -> {
-                ((System.currentTimeMillis() - chosenAnimStart).toFloat() / CHOSEN_ANIM_DURATION)
-            }
-            chosen -> 1F
-            else -> return false
-        })
+        val progress = animationInterpolator.getInterpolation(
+                Math.min(1F, when {
+                    chosenAnimStart >= 0 -> {
+                        ((System.currentTimeMillis() - chosenAnimStart).toFloat() / CHOSEN_ANIM_DURATION)
+                    }
+                    chosen -> 1F
+                    else -> return false
+                }))
 
         // Directional progress, inverted if view is being unchosen
         val directionProgress = if (chosen) progress else 1F - progress
@@ -146,12 +166,11 @@ class ColorPatchView @JvmOverloads constructor(
         if (circular) {
             if (directionProgress == 1F) {
                 path.addOval(chosenAnimBounds, Path.Direction.CW)
-            }
-            else {
+            } else {
                 path.addArc(chosenAnimBounds, 0F, 360F * directionProgress)
             }
         } else {
-            path.addRoundRect(chosenAnimBounds, cornerRadii, Path.Direction.CW)
+            path.addRoundRect(chosenAnimBounds, innerCornerRadii, Path.Direction.CW)
             pathMeasure.setPath(path, false)
             path.reset()
             pathMeasure.getSegment(0F, directionProgress * pathMeasure.length, path, true)
@@ -166,7 +185,7 @@ class ColorPatchView @JvmOverloads constructor(
 
         val anim = ValueAnimator.ofFloat(0F, 1F)
         anim.duration = CHOSEN_ANIM_DURATION
-        anim.interpolator = animationInterpolator
+        anim.interpolator = scaleInterpolator
         anim.addUpdateListener {
             val prog = it.animatedFraction
             outlineBounds.set(
@@ -186,7 +205,7 @@ class ColorPatchView @JvmOverloads constructor(
 
         val anim = ValueAnimator.ofFloat(0F, 1F)
         anim.duration = CHOSEN_ANIM_DURATION
-        anim.interpolator = animationInterpolator
+        anim.interpolator = scaleInterpolator
         anim.addUpdateListener {
             val prog = 1F - it.animatedFraction
             outlineBounds.set(
