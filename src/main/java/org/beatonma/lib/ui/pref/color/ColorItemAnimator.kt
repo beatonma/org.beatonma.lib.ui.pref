@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref.view
+package org.beatonma.lib.ui.pref.color
 
 import android.animation.*
 import android.annotation.TargetApi
@@ -27,11 +27,8 @@ class ColorItemAnimator(
         val gridWidth: Int,
         val stepDelay: Long = 60,  // Delay between 'layers' of items relative to epicenter
         val ripple: Float = -0.04F,  // Distance (relative to viewholder size) to move items away from epicenter
-        interpolator: TimeInterpolator = Interpolate.getMotionInterpolator(),
-        addDur: Long = 300,
-        moveDur: Long = 300,
-        changeDur: Long = 300,
-        removeDur: Long = 300
+        val duration: Long = 300,
+        interpolator: TimeInterpolator = Interpolate.getMotionInterpolator()
 ) : BaseItemAnimator(interpolator) {
 
     private val enterInterpolator = Interpolate.getEnterInterpolator()
@@ -47,10 +44,10 @@ class ColorItemAnimator(
 
     init {
         supportsChangeAnimations = true
-        addDuration = addDur
-        moveDuration = moveDur
-        removeDuration = removeDur
-        changeDuration = changeDur
+        addDuration = duration
+        moveDuration = duration
+        removeDuration = duration
+        changeDuration = duration
     }
 
     fun setEpicenter(index: Int) {
