@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref.activity
+package org.beatonma.lib.ui.pref.color
 
 import android.content.Context
 import android.os.Bundle
@@ -13,8 +13,6 @@ import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.ActivityEditColorBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
-import org.beatonma.lib.ui.pref.activity.data.ColorItem
-import org.beatonma.lib.ui.pref.view.ColorPatchView
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.RVUtil
@@ -100,19 +98,17 @@ class AllColorsPreferenceActivity : PopupActivity<ActivityEditColorBinding>(),
     }
 
     inner class ColorViewHolder(val view: View) : BaseViewHolder(view) {
-        val patch: ColorPatchView = view.findViewById(R.id.colorpatch)
+        private val patch: ColorPatchView = view.findViewById(R.id.colorpatch)
 
         override fun bind(position: Int) {
             val color = colors!![position]
-            patch.setColor(color.color)
+            patch.color = color.color
         }
     }
 
 
     class ColorLoader(context: Context) : SupportBaseAsyncTaskLoader<MutableList<ColorItem>>(context) {
-        override fun onReleaseResources(data: AsyncResult<MutableList<ColorItem>>?) {
-
-        }
+        override fun onReleaseResources(data: AsyncResult<MutableList<ColorItem>>?) {}
 
         override fun loadInBackground(): AsyncResult<MutableList<ColorItem>>? {
             val builder: AsyncResult.Builder<MutableList<ColorItem>> = AsyncResult.getBuilder()
