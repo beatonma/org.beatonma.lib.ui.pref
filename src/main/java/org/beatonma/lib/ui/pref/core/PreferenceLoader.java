@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref;
+package org.beatonma.lib.ui.pref.core;
 
 import android.content.Context;
 

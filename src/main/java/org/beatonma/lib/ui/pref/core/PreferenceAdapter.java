@@ -1,27 +1,35 @@
-package org.beatonma.lib.ui.pref;
+package org.beatonma.lib.ui.pref.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.transition.TransitionManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import org.beatonma.lib.core.util.Sdk;
+import org.beatonma.lib.log.Log;
 import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.ui.activity.ActivityBuilder;
-import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
+import org.beatonma.lib.ui.pref.color.ColorPatchView;
+import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity;
+import org.beatonma.lib.ui.pref.list.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.BasePreference;
 import org.beatonma.lib.ui.pref.preferences.BooleanPreference;
+import org.beatonma.lib.ui.pref.preferences.ColorPreference;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 import org.beatonma.lib.ui.pref.preferences.SimplePreference;
-import org.beatonma.lib.ui.pref.viewholders.BasePreferenceViewHolder;
+import org.beatonma.lib.ui.pref.view.BasePreferenceViewHolder;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     private final static String TAG = "PreferenceAdapter";
@@ -30,24 +38,40 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
     private final static int TYPE_BOOLEAN = 1;
     private final static int TYPE_LIST_SINGLE = 2;
     private final static int TYPE_LIST_MULTI = 3;
+    private final static int TYPE_COLOR_SINGLE = 11;
+    private final static int TYPE_COLOR_GROUP = 12;
     private final static int TYPE_GROUP = 65;
 
     private final WeakReference<PreferenceFragment> mWeakFragment;
     private WeakReference<SharedPreferences> mWeakPrefs;
     private PreferenceGroup mPreferenceGroup;
 
+    @Override
+    public List getItems() {
+        return mPreferenceGroup == null ? null : mPreferenceGroup.getPreferences();
+    }
+
     public PreferenceAdapter() {
         this(null);
     }
 
     public PreferenceAdapter(final PreferenceFragment fragmentContext) {
+        this(fragmentContext, null);
+    }
+
+    public PreferenceAdapter(final PreferenceFragment fragmentContext, final EmptyViews emptyViews) {
         mWeakFragment = fragmentContext == null ? null : new WeakReference<>(fragmentContext);
-        setEmptyViews(new EmptyViewsAdapter() {
+
+        setEmptyViews(emptyViews != null ? emptyViews : new EmptyViewsAdapter() {
             @Override
             public Collection<?> getDataset() {
                 return mPreferenceGroup == null ? null : mPreferenceGroup.getPreferences();
             }
         });
+    }
+
+    public PreferenceGroup getPreferenceGroup() {
+        return mPreferenceGroup;
     }
 
     public void setPreferences(final Context context, final PreferenceGroup group) {
@@ -87,10 +111,37 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
         return R.layout.vh_pref_simple;
     }
 
+    /**
+     * Layout must contain TextViews with the following IDs:
+     *  - 'title'
+     *  - 'description'
+     *
+     *  Layout must contain a ColorPatch with ID:
+     *  - 'color'
+     */
+    public int getColorSingleLayout() {
+        return R.layout.vh_pref_color_single;
+    }
+
+    /**
+     * Layout must contain TextViews with the following IDs:
+     *  - 'title'
+     *  - 'description'
+     *
+     *  Layout must contain a {@link RecyclerView} with ID:
+     *  - 'colors'
+     */
+    public int getColorGroupLayout() {
+        return R.layout.vh_pref_color_group;
+    }
+
     public void notifyUpdate(final String key, final String value) {
         final int position = mPreferenceGroup.notifyUpdate(key, value);
         if (position >= 0) {
             notifyItemChanged(position);
+        }
+        else {
+            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%s", key, value);
         }
     }
 
@@ -99,12 +150,28 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
         if (position >= 0) {
             notifyItemChanged(position);
         }
+        else {
+            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%d", key, value);
+        }
     }
 
     public void notifyUpdate(final String key, final boolean value) {
         final int position = mPreferenceGroup.notifyUpdate(key, value);
         if (position >= 0) {
             notifyItemChanged(position);
+        }
+        else {
+            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%b", key, value);
+        }
+    }
+
+    public void notifyUpdate(final String key, final Object value) {
+        final int position = mPreferenceGroup.notifyUpdate(key, value);
+        if (position >= 0) {
+            notifyItemChanged(position);
+        }
+        else {
+            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%s", key, value);
         }
     }
 
@@ -121,6 +188,8 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
                 return TYPE_BOOLEAN;
             case ListPreference.TYPE:
                 return TYPE_LIST_SINGLE;
+            case ColorPreference.TYPE:
+                return TYPE_COLOR_SINGLE;
             case BasePreference.TYPE:
             case SimplePreference.TYPE:
                 return TYPE_SIMPLE;
@@ -145,6 +214,13 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
                     @Override
                     public void bind(final int position) {
                         bind(mWeakPrefs, (ListPreference) mPreferenceGroup.getPreferences().get(position));
+                    }
+                };
+            case TYPE_COLOR_SINGLE:
+                return new ColorPreferenceViewHolder(inflate(parent, getColorSingleLayout())) {
+                    @Override
+                    public void bind(final int position) {
+                        bind(mWeakPrefs, (ColorPreference) mPreferenceGroup.getPreferences().get(position));
                     }
                 };
             case 0:
@@ -174,6 +250,9 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
 
             mSwitch.setOnCheckedChangeListener(
                     (v, checked) -> {
+                        if (Sdk.isKitkat()) {
+                            TransitionManager.beginDelayedTransition((ViewGroup) itemView);
+                        }
                         preference.setChecked(checked);
                         setDescription(
                                 checked
@@ -205,4 +284,38 @@ public class PreferenceAdapter extends EmptyBaseRecyclerViewAdapter {
         }
     }
 
+    public class ColorPreferenceViewHolder extends BasePreferenceViewHolder<ColorPreference> {
+        private final ColorPatchView patch;
+        private boolean firstDisplay = true;    // We only want to animate on new views
+        ColorPreferenceViewHolder(final View v) {
+            super(v);
+            patch = v.findViewById(R.id.colorpatch);
+        }
+
+        @Override
+        public void bind(final WeakReference<SharedPreferences> sharedPrefs, final ColorPreference preference) {
+            super.bind(sharedPrefs, preference);
+            patch.setColor(preference.getColor());
+            firstDisplay = false;
+            itemView.setOnClickListener((v) ->
+                ActivityBuilder.from(v.getContext())
+                        .to(SwatchColorPreferenceActivity.class)
+                        .putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
+                        .forResult(mWeakFragment.get(), SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE)
+                        .animationSource(v)
+                        .start());
+        }
+    }
+
+//    public class ColorGroupPreferenceViewHolder extends BasePreferenceViewHolder<ColorGroupPreference> {
+//        ColorPreferenceViewHolder(final View v) {
+//            super(v);
+//        }
+//
+//        @Override
+//        public void bind(final WeakReference<SharedPreferences> sharedPrefs, final ColorGroupPreference preference) {
+//            super.bind(sharedPrefs, preference);
+//            // TODO
+//        }
+//    }
 }

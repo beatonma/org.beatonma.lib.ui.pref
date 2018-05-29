@@ -1,11 +1,11 @@
-package org.beatonma.lib.ui.pref;
+package org.beatonma.lib.ui.pref.core;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import org.beatonma.lib.load.AsyncResult;
 import org.beatonma.lib.ui.activity.BaseActivity;
-import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
+import org.beatonma.lib.ui.pref.list.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 

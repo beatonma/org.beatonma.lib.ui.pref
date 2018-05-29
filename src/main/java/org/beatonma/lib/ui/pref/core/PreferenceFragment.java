@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref;
+package org.beatonma.lib.ui.pref.core;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,7 +7,9 @@ import android.os.Bundle;
 
 import org.beatonma.lib.load.AsyncResult;
 import org.beatonma.lib.ui.activity.BaseFragment;
-import org.beatonma.lib.ui.pref.activity.ListPreferenceActivity;
+import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity;
+import org.beatonma.lib.ui.pref.list.ListPreferenceActivity;
+import org.beatonma.lib.ui.pref.preferences.ColorPreference;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 
@@ -40,11 +42,15 @@ public abstract class PreferenceFragment extends BaseFragment
 
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
         switch (requestCode) {
             case ListPreferenceActivity.REQUEST_CODE_UPDATE:
-                if (resultCode == Activity.RESULT_OK) {
-                    onListPreferenceUpdated(data);
-                }
+                onListPreferenceUpdated(data);
+                break;
+            case SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE:
+                onColorPreferenceUpdated(data);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -54,13 +60,24 @@ public abstract class PreferenceFragment extends BaseFragment
     private void onListPreferenceUpdated(final Intent intent) {
         final Bundle extras = intent.getExtras();
         if (extras != null) {
-            final ListPreference lp = (ListPreference) extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE);
-            if (lp != null) {
-                mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedValue());
-                mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedDisplay());
+            final ListPreference pref = (ListPreference) extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE);
+            if (pref != null) {
+                mAdapter.notifyUpdate(pref.getKey(), pref.getSelectedValue());
+                mAdapter.notifyUpdate(pref.getKey(), pref.getSelectedDisplay());
             }
         }
     }
+
+    private void onColorPreferenceUpdated(final Intent intent) {
+        final Bundle extras = intent.getExtras();
+        if (extras != null) {
+            final ColorPreference pref = (ColorPreference) extras.getSerializable(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE);
+            if (pref != null) {
+                mAdapter.notifyUpdate(pref.getKey(), pref);
+            }
+        }
+    }
+
 
     @Override
     public Loader<AsyncResult<PreferenceGroup>> onCreateLoader(final int id, @Nullable final Bundle args) {
