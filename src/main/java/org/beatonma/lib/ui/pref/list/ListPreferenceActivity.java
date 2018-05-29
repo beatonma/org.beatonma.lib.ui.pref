@@ -1,4 +1,4 @@
-package org.beatonma.lib.ui.pref.activity;
+package org.beatonma.lib.ui.pref.list;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +16,6 @@ import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.prefs.databinding.ActivityListBinding;
 import org.beatonma.lib.prefs.databinding.VhListItemSingleBinding;
 import org.beatonma.lib.ui.activity.popup.PopupActivity;
-import org.beatonma.lib.ui.pref.activity.data.ListItem;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter;
@@ -72,13 +71,15 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     }
 
     public void saveAndClose(final int value, final String name) {
-        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
-        editor.putInt(mListPreference.getKey(), value);
-        editor.putString(mListPreference.getDisplayKey(), name);
-        editor.apply();
-
         mListPreference.update(value);
         mListPreference.update(name);
+
+        final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
+        mListPreference.save(editor);
+//        editor.putInt(mListPreference.getKey(), value);
+//        editor.putString(mListPreference.getDisplayKey(), name);
+        editor.apply();
+
         final Intent intent = new Intent();
         intent.putExtra(EXTRA_LIST_PREFERENCE, mListPreference);
         setResult(RESULT_OK, intent);
