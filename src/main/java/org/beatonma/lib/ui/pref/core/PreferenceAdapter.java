@@ -20,7 +20,6 @@ import org.beatonma.lib.ui.pref.preferences.ColorPreference;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup;
 import org.beatonma.lib.ui.pref.preferences.SimplePreference;
-import org.beatonma.lib.ui.pref.view.BasePreferenceViewHolder;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter;
 
