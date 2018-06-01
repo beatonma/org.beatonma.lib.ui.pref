@@ -3,7 +3,10 @@ package org.beatonma.lib.ui.pref.color
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.core.view.ViewCompat
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.transaction
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
@@ -14,9 +17,12 @@ import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.ColorPreference
 
 
-class SwatchColorPreferenceActivity : PopupActivity<ActivityColorBinding>() {
+class SwatchColorPreferenceActivity : PopupActivity() {
+
+    override val layoutId: Int = R.layout.activity_color
+
     private var binding: ActivityColorBinding? = null
-    private lateinit var viewModel: ColorViewModel
+    private lateinit var viewModel: ColorPreferenceViewModel
 
     companion object {
         const val EXTRA_COLOR_PREFERENCE = "extra_color_preference"
@@ -25,29 +31,74 @@ class SwatchColorPreferenceActivity : PopupActivity<ActivityColorBinding>() {
 
     override fun onPreCreate() {
         super.onPreCreate()
-        viewModel = ViewModelProviders.of(this).get(ColorViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(ColorPreferenceViewModel::class.java)
         viewModel.colorPreference.observe(this, Observer { save(it) })
     }
 
-    override fun getBinding(): ActivityColorBinding? {
-        return binding
-    }
+    override fun initLayout(binding: ViewDataBinding) {
+        setTitle(R.string.pref_color_choose)
 
-    override fun getLayoutId(): Int {
-        return R.layout.activity_color
-    }
-
-    override fun initLayout(binding: ViewDataBinding?) {
         this.binding = binding as ActivityColorBinding
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MaterialColorsFragment(), MaterialColorsFragment.TAG)
-                .commit()
+
+        if (viewModel.colorPreference.value?.swatch ?: 0 < 0) {
+            customiseColor(viewModel.colorPreference.value!!.color)
+        }
+        else {
+            showMaterialColors()
+        }
+    }
+
+    override fun setState(savedState: Bundle?) {
+        super.setState(savedState)
+    }
+
+    override fun onBackPressed() {
+        supportFragmentManager.findFragmentByTag(MaterialColorsFragment.TAG)?.let {
+            it as MaterialColorsFragment
+            if (it.onBackPressed()) {
+                // If fragment consumes the event then stop here
+                return
+            }
+        }
+        super.onBackPressed()
     }
 
     override fun initExtras(extras: Bundle?) {
         super.initExtras(extras)
         viewModel.colorPreference.value =
-                extras?.getSerializable(EXTRA_COLOR_PREFERENCE) as ColorPreference
+                extras?.getSerializable(EXTRA_COLOR_PREFERENCE) as? ColorPreference?
+    }
+
+    fun showMaterialColors() {
+        val fragment = supportFragmentManager.findFragmentByTag(MaterialColorsFragment.TAG)
+                ?: MaterialColorsFragment()
+        prepareResize()
+        supportFragmentManager.transaction {
+            replace(R.id.fragment_container, fragment, MaterialColorsFragment.TAG)
+            setReorderingAllowed(true)
+        }
+    }
+
+    fun customiseColor(color: Int, sharedView: View? = null) {
+        val transitionName = if (sharedView != null) ViewCompat.getTransitionName(sharedView) else null
+        val fragment: CustomColorFragment =
+                supportFragmentManager.findFragmentByTag(CustomColorFragment.TAG) as? CustomColorFragment
+                ?: CustomColorFragment()
+        fragment.updateArgs(color, transitionName)
+
+        prepareResize()
+        supportFragmentManager.transaction {
+            replace(R.id.fragment_container, fragment, CustomColorFragment.TAG)
+            setReorderingAllowed(true)
+            if (transitionName != null) {
+                addSharedElement(
+                        sharedView!!,
+                        transitionName)
+
+                // If we are customising a template color, allow the user to return to it easily
+                addToBackStack(CustomColorFragment.TAG)
+            }
+        }
     }
 
     fun save(pref: ColorPreference?) {
@@ -65,9 +116,16 @@ class SwatchColorPreferenceActivity : PopupActivity<ActivityColorBinding>() {
         setResult(RESULT_OK, intent)
         close()
     }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.apply {
+
+        }
+    }
 }
 
-class ColorViewModel: ViewModel() {
+class ColorPreferenceViewModel : ViewModel() {
     val colorPreference: MutableLiveData<ColorPreference> = MutableLiveData()
 }
 
