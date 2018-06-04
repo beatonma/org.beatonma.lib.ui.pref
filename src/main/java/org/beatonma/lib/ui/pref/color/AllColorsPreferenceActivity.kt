@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import org.beatonma.lib.load.AsyncResult
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.ActivityEditColorBinding
+import org.beatonma.lib.prefs.databinding.ActivityAllColorsBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
@@ -19,18 +19,20 @@ import org.beatonma.lib.ui.recyclerview.RVUtil
 import org.beatonma.lib.ui.recyclerview.SlideInItemAnimator
 
 
-class AllColorsPreferenceActivity : PopupActivity<ActivityEditColorBinding>(),
+class AllColorsPreferenceActivity : PopupActivity(),
         LoaderManager.LoaderCallbacks<AsyncResult<MutableList<ColorItem>>> {
     companion object {
         private const val LOADER_COLORS = 2458
         private const val COLOR_GROUP_WIDTH = 13
     }
 
+    override val layoutId: Int = R.layout.activity_all_colors
+
     private var patchSizeNormal = 0
-    private var patchSizeSelected = 0
+//    private var patchSizeSelected = 0
     private var spacerWidth = 0
 
-    private var binding: ActivityEditColorBinding? = null
+    private var binding: ActivityAllColorsBinding? = null
     private var colorAdapter: ColorAdapter = buildAdapter()
 
     private var colors: MutableList<ColorItem>? = null
@@ -40,28 +42,20 @@ class AllColorsPreferenceActivity : PopupActivity<ActivityEditColorBinding>(),
         return ColorAdapter()
     }
 
-    override fun getBinding(): ActivityEditColorBinding? {
-        return binding
-    }
-
-    override fun initLayout(binding: ViewDataBinding?) {
+    override fun initLayout(binding: ViewDataBinding) {
         setTitle(R.string.pref_color_choose)
 
-        this.binding = binding as ActivityEditColorBinding
+        this.binding = binding as ActivityAllColorsBinding
         RVUtil.setup(binding.colors, colorAdapter,
                 GridLayoutManager(this, COLOR_GROUP_WIDTH))
         binding.colors.itemAnimator = SlideInItemAnimator(3)
 
-        patchSizeNormal = resources.getDimensionPixelSize(R.dimen.color_patch_size)
-        patchSizeSelected = resources.getDimensionPixelSize(R.dimen.color_patch_selected)
+        patchSizeNormal = resources.getDimensionPixelSize(R.dimen.color_patch_small)
+//        patchSizeSelected = resources.getDimensionPixelSize(R.dimen.color_patch_selected)
         spacerWidth = resources.getDimensionPixelSize(R.dimen.item_padding_default)
 
         LoaderManager.getInstance(this)
                 .initLoader(LOADER_COLORS, null, this)
-    }
-
-    override fun getLayoutId(): Int {
-        return R.layout.activity_edit_color
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?):
@@ -91,7 +85,7 @@ class AllColorsPreferenceActivity : PopupActivity<ActivityEditColorBinding>(),
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
             return when (viewType) {
                 VIEW_TYPE_DEFAULT ->
-                    ColorViewHolder(inflate(parent, R.layout.vh_pref_color_patch))
+                    ColorViewHolder(inflate(parent, R.layout.vh_pref_color_patch_small))
                 else -> return super.onCreateViewHolder(parent, viewType)
             }
         }
