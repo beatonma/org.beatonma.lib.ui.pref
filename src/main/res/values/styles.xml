@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="ColorPatch">
+    <item name="android:layout_width">@dimen/color_patch_small</item>
+    <item name="android:layout_height">@dimen/color_patch_small</item>
+    <item name="android:elevation">2dp</item>
+    <item name="android:minWidth">@dimen/color_patch_small</item>
+    <item name="android:minHeight">@dimen/color_patch_small</item>
+    <item name="android:padding">8dp</item>
+    <item name="patch_cornerRadius">@dimen/card_corner_radius</item>
+    <item name="patch_isCircle">false</item>
+    <item name="android:stateListAnimator">@animator/raise</item>
+  </style>
+
+  <style name="ColorPatch.Round" parent="ColorPatch">
+    <item name="patch_isCircle">true</item>
+  </style>
+</resources>
