@@ -31,7 +31,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
+public class ListPreferenceActivity extends PopupActivity
         implements LoaderManager.LoaderCallbacks<AsyncResult<List<ListItem>>> {
     public final static String EXTRA_LIST_PREFERENCE = "extra_list_preference";
     public final static int REQUEST_CODE_UPDATE = 936;
@@ -43,11 +43,6 @@ public class ListPreferenceActivity extends PopupActivity<ActivityListBinding>
     private ActivityListBinding mBinding;
     private final ListAdapter mAdapter = buildAdapter();
     private List<ListItem> mItems;
-
-    @Override
-    protected ActivityListBinding getBinding() {
-        return mBinding;
-    }
 
     public ListAdapter buildAdapter() {
         final ListAdapter adapter = new ListAdapter();
