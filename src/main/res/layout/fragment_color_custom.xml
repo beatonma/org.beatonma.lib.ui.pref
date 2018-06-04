@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <org.beatonma.lib.ui.pref.color.ColorPatchView
+      android:id="@+id/preview"
+      android:layout_width="@dimen/color_custom_preview_size"
+      android:layout_height="@dimen/color_custom_preview_size"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:patch_cornerRadius="@dimen/card_corner_radius"
+      tools:background="@color/Accent"/>
+
+    <!-- fake tabs with no viewpager - they just change the function of the seekbars below -->
+    <com.google.android.material.tabs.TabLayout
+      android:id="@+id/tabs"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@null"
+      android:clipChildren="false"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/preview"
+      app:tabGravity="center"
+      app:tabIndicatorFullWidth="false"
+      app:tabMode="fixed"
+      app:tabSelectedTextColor="@color/TextPrimary"
+      app:tabTextColor="@color/TextSecondary"
+      app:tabUnboundedRipple="true"/>
+
+    <androidx.constraintlayout.widget.Barrier
+      android:id="@+id/barrier2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:barrierDirection="bottom"
+      app:constraint_referenced_ids="tabs"/>
+
+    <TextView
+      android:id="@+id/label1"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar1"
+      app:layout_constraintEnd_toStartOf="@+id/seekbar1"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/seekbar1"
+      tools:text="label1"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+      android:id="@+id/seekbar1"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:minHeight="@dimen/min_touch_target_size"
+      app:layout_constraintBottom_toTopOf="@+id/seekbar2"
+      app:layout_constraintEnd_toStartOf="@+id/value1"
+      app:layout_constraintHeight_min="@dimen/min_touch_target_size"
+      app:layout_constraintStart_toEndOf="@+id/label1"
+      app:layout_constraintTop_toBottomOf="@+id/barrier2"
+      />
+
+    <TextView
+      android:id="@+id/value1"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar1"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/seekbar1"
+      app:layout_constraintTop_toTopOf="@+id/seekbar1"
+      tools:text="value1"/>
+
+
+    <TextView
+      android:id="@+id/label2"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar2"
+      app:layout_constraintEnd_toStartOf="@+id/seekbar2"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/seekbar2"
+      tools:text="label2"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+      android:id="@+id/seekbar2"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:minHeight="@dimen/min_touch_target_size"
+      app:layout_constraintBottom_toTopOf="@+id/seekbar3"
+      app:layout_constraintEnd_toStartOf="@+id/value2"
+      app:layout_constraintHeight_min="@dimen/min_touch_target_size"
+      app:layout_constraintStart_toEndOf="@+id/label2"
+      app:layout_constraintTop_toBottomOf="@+id/seekbar1"
+      />
+
+    <TextView
+      android:id="@+id/value2"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar2"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/seekbar2"
+      app:layout_constraintTop_toTopOf="@+id/seekbar2"
+      tools:text="value2"/>
+
+
+    <TextView
+      android:id="@+id/label3"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar3"
+      app:layout_constraintEnd_toStartOf="@+id/seekbar3"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/seekbar3"
+      tools:text="label3"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+      android:id="@+id/seekbar3"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:minHeight="@dimen/min_touch_target_size"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/value3"
+      app:layout_constraintHeight_min="@dimen/min_touch_target_size"
+      app:layout_constraintStart_toEndOf="@+id/label3"
+      app:layout_constraintTop_toBottomOf="@+id/seekbar2"/>
+
+    <TextView
+      android:id="@+id/value3"
+      style="@style/Text.Primary.Label"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar3"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/seekbar3"
+      app:layout_constraintTop_toTopOf="@+id/seekbar3"
+      tools:text="value3"/>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
