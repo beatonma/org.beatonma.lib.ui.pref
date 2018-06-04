@@ -1,0 +1,16 @@
+<manifest
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  package="org.beatonma.lib.prefs">
+
+  <application>
+    <activity
+      android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
+      android:exported="true"/>
+    <activity
+      android:name="org.beatonma.lib.ui.pref.color.AllColorsPreferenceActivity"
+      android:exported="true"/>
+    <activity
+      android:name="org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity"
+      android:exported="true"/>
+  </application>
+</manifest>
