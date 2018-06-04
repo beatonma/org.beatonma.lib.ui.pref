@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.annotation.NonNull
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import org.beatonma.lib.core.kotlin.extensions.clone
 import org.beatonma.lib.log.Log
 import org.json.JSONArray
 import org.json.JSONException
@@ -28,27 +29,51 @@ internal inline fun JSONArray.forEachObj(body: (JSONObject) -> Unit) {
     }
 }
 
+/**
+ * Callbacks that must be handled by any preference capable of hosting other preferences
+ */
+internal interface PreferenceContainer {
+    /**
+     * Load child preferences
+     */
+    fun load(preferences: SharedPreferences)
 
-class PreferenceGroup : BasePreference {
+    fun load(context: Context)
+
+    /**
+     * Save child preferences
+     */
+    fun save(editor: SharedPreferences.Editor)
+
+    fun save(context: Context)
+
+    /**
+     * Find a child preference and update it with the given value
+     * Return the index of the preference so it can be refreshed in the UI
+     */
+    fun notifyUpdate(key: String, value: Int): Int
+
+    fun notifyUpdate(key: String, value: String): Int
+    fun notifyUpdate(key: String, value: Boolean): Int
+    fun notifyUpdate(key: String, obj: Any): Int
+}
+
+class PreferenceGroup : BasePreference, PreferenceContainer {
 
     @SerializedName("keymap")
-    private val mKeyMap = HashMap<String, Int>()
-
-    @SerializedName("preferences")
-    private val mPreferences = ArrayList<BasePreference>()
+    private val keyMap = HashMap<String, Int>()
 
     val isEmpty: Boolean
-        get() = mPreferences.isEmpty()
+        get() = preferences.isEmpty()
 
-    var preferences: List<BasePreference>
-        get() = mPreferences
+    @SerializedName("preferences")
+    var preferences = mutableListOf<BasePreference>()
         private set(prefs) {
-            mPreferences.clear()
-            mPreferences.addAll(prefs)
+            field.clone(prefs)
 
-            mKeyMap.clear()
-            for (i in mPreferences.indices) {
-                mKeyMap[mPreferences[i].key] = i
+            keyMap.clear()
+            for (i in field.indices) {
+                keyMap[field[i].key!!] = i
             }
         }
 
@@ -60,62 +85,72 @@ class PreferenceGroup : BasePreference {
         // TODO build nested group
     }
 
-    override fun setName(name: String) {
-        super.setName(name)
-        prefs = name
-    }
-
-    override fun getType(): String {
-        return TYPE
-    }
+    override val type: String
+        get() = TYPE
 
     override fun load(preferences: SharedPreferences) {
-        for (p in mPreferences) {
+        for (p in this.preferences) {
             p.load(preferences)
         }
     }
 
     override fun save(editor: SharedPreferences.Editor) {
-        for (p in mPreferences) {
+        for (p in preferences) {
             p.save(editor)
         }
     }
 
-    fun load(context: Context) {
+    override fun load(context: Context) {
         val preferences = context.getSharedPreferences(
                 name, Context.MODE_PRIVATE)
         load(preferences)
     }
 
-    fun save(context: Context) {
+    override fun save(context: Context) {
         val editor = context.getSharedPreferences(
                 name, Context.MODE_PRIVATE).edit()
         save(editor)
         editor.apply()
     }
 
-    fun notifyUpdate(key: String, value: Int): Int {
-        val position = mKeyMap[key]!!
-        mPreferences[position].update(value)
-        return position
+    override fun notifyUpdate(key: String, value: Int): Int {
+        if (key in keyMap) {
+            val position = keyMap[key]!!
+            if (preferences[position].update(value)) {
+                return position
+            }
+        }
+        return -1
     }
 
-    fun notifyUpdate(key: String, value: String): Int {
-        val position = mKeyMap[key]!!
-        mPreferences[position].update(value)
-        return position
+    override fun notifyUpdate(key: String, value: String): Int {
+        if (key in keyMap) {
+            val position = keyMap[key]!!
+            if (preferences[position].update(value)) {
+                return position
+            }
+        }
+        return -1
     }
 
-    fun notifyUpdate(key: String, value: Boolean): Int {
-        val position = mKeyMap[key]!!
-        mPreferences[position].update(value)
-        return position
+    override fun notifyUpdate(key: String, value: Boolean): Int {
+        if (key in keyMap) {
+            val position = keyMap[key]!!
+            if (preferences[position].update(value)) {
+                return position
+            }
+        }
+        return -1
     }
 
-    fun notifyUpdate(key: String, obj: Any): Int {
-        val position = mKeyMap[key]!!
-        mPreferences[position].update(obj)
-        return position
+    override fun notifyUpdate(key: String, obj: Any): Int {
+        if (key in keyMap) {
+            val position = keyMap[key]!!
+            if (preferences[position].update(obj)) {
+                return position
+            }
+        }
+        return -1
     }
 
     override fun toString(): String {
@@ -127,8 +162,8 @@ class PreferenceGroup : BasePreference {
     }
 
     companion object {
-        private val TAG = "PreferenceGroup"
-        val TYPE = "group"
+        private const val TAG = "PreferenceGroup"
+        const val TYPE = "group"
 
         /**
          * Build a complete preference tree from a JSON source file
@@ -162,6 +197,7 @@ class PreferenceGroup : BasePreference {
                 }
             }
 
+            group.prefs = prefsName
             group.name = prefsName
             group.preferences = preferences
 
