@@ -7,9 +7,6 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
-import org.beatonma.lib.ui.pref.heightF
-import org.beatonma.lib.ui.pref.squared
-import org.beatonma.lib.ui.pref.widthF
 import org.beatonma.lib.ui.recyclerview.BaseItemAnimator
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.style.Interpolate
@@ -23,11 +20,23 @@ import org.beatonma.lib.ui.style.Interpolate
  * animateRemove -> shrink out
  */
 
+private fun View.widthF(): Float {
+    return width.toFloat()
+}
+
+private fun View.heightF(): Float {
+    return height.toFloat()
+}
+
+private fun Double.squared(): Double {
+    return this * this
+}
+
 class ColorItemAnimator(
         val gridWidth: Int,
         val stepDelay: Long = 60,  // Delay between 'layers' of items relative to epicenter
         val ripple: Float = -0.04F,  // Distance (relative to viewholder size) to move items away from epicenter
-        val duration: Long = 300,
+        duration: Long = 300,
         interpolator: TimeInterpolator = Interpolate.getMotionInterpolator()
 ) : BaseItemAnimator(interpolator) {
 
@@ -254,7 +263,7 @@ class ColorItemAnimator(
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private fun colorAnim(view: View, vararg colors: Int): Animator? {
-        if (!Sdk.isLollipop()) return null
+        if (!Sdk.isLollipop) return null
 
         val animator = ValueAnimator.ofArgb(*colors)
         animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
