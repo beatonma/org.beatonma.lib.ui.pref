@@ -2,7 +2,6 @@ package org.beatonma.lib.ui.pref.preferences;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -33,11 +32,11 @@ public class ListPreference extends BasePreference {
     private String mSelectedDisplay;
 
 
-    public ListPreference(final Context context, final Resources resources, final JSONObject obj) throws JSONException {
-        super(context, resources, obj);
+    public ListPreference(final Context context, final JSONObject obj) throws JSONException {
+        super(context, obj);
 
         // This should point to a string array
-        mDisplayListResourceId = Res.getResourceId(context, resources, obj.optString(DISPLAY_LIST_ID, ""));
+        mDisplayListResourceId = ResKt.getResourceId(context, obj.optString(DISPLAY_LIST_ID, ""));
 
         // This should point to an integer array
 //        mValuesListResourceId = Res.getResourceId(context, resources, obj.optString(VALUES_LIST_ID, ""));
@@ -49,11 +48,11 @@ public class ListPreference extends BasePreference {
             mSelectedValue = Integer.valueOf(selectedRaw);
         }
         catch (final NumberFormatException e) {
-            mSelectedValue = Res.getInt(context, resources, selectedRaw); // Defaults to zero
+            mSelectedValue = ResKt.getInt(context, selectedRaw); // Defaults to zero
         }
 //        mSelectedValue = Res.getInt(context, resources, obj.optString(SELECTED_VALUE_ID, ""));
 
-        final String[] display = resources.getStringArray(mDisplayListResourceId);
+        final String[] display = context.getResources().getStringArray(mDisplayListResourceId);
         mSelectedDisplay = display[mSelectedValue];
     }
 
@@ -75,15 +74,17 @@ public class ListPreference extends BasePreference {
     }
 
     @Override
-    public void update(final int value) {
+    public boolean update(final int value) {
         super.update(value);
         mSelectedValue = value;
+        return true;
     }
 
     @Override
-    public void update(final String value) {
+    public boolean update(final String value) {
         super.update(value);
         mSelectedDisplay = value;
+        return true;
     }
 
     public int getDisplayListResourceId() {
