@@ -13,10 +13,12 @@ import java.util.regex.Pattern
  * else return the given text
  */
 internal fun getString(context: Context,
-                       text: String): String {
+                       text: String?): String? {
     val resId = getResourceId(context, text)
     return if (resId == 0) text else context.resources.getString(resId)
 }
+
+
 
 internal fun getInt(context: Context,
                     text: String): Int {
@@ -45,7 +47,7 @@ internal fun getStringArray(context: Context,
     return if (resId == 0) null else context.resources.getStringArray(resId)
 }
 
-internal fun getResourceId(context: Context, key: String): Int {
+internal fun getResourceId(context: Context, key: String?): Int {
     val pattern = Pattern.compile("@(\\w+)/(.*)")
     val m = pattern.matcher(key)
     if (m.matches()) {
