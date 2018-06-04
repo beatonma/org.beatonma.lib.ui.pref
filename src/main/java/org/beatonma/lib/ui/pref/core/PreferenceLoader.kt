@@ -13,7 +13,14 @@ class PreferenceLoader(context: Context, private val mResourceID: Int) : Support
 
     override fun loadInBackground(): AsyncResult<PreferenceGroup> {
         val result = AsyncResult.getBuilder<PreferenceGroup>()
-        val prefs = PreferenceGroup.fromJson(context, mResourceID)
+        val prefs: PreferenceGroup
+        try {
+             prefs = PreferenceGroup.fromJson(context, mResourceID)
+        }
+        catch (e: Exception) {
+            result.failure(e)
+            return result
+        }
 
         if (prefs.isEmpty) {
             result.failure("Loaded preferences are empty - please check your definitions!")
@@ -25,7 +32,7 @@ class PreferenceLoader(context: Context, private val mResourceID: Int) : Support
         return result
     }
 
-    protected override fun onReleaseResources(data: AsyncResult<PreferenceGroup>) {
+    override fun onReleaseResources(data: AsyncResult<PreferenceGroup>) {
 
     }
 }
