@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">prefs</string>
+  <string name="app_name">prefs</string>
+
+  <string name="pref_color_choose">Choose a color</string>
+  <string name="pref_color_custom">Custom</string>
+  <string name="pref_color_preset">Preset</string>
+
+  <string name="colorspace_hsv">HSV</string>
+  <string name="colorspace_rgb">RGB</string>
+
+  <string name="hsv_hue_short">Hue</string>
+  <string name="hsv_saturation_short">Sat</string>
+  <string name="hsv_value_short">Val</string>
+
+  <string name="rgb_red_short">R</string>
+  <string name="rgb_green_short">G</string>
+  <string name="rgb_blue_short">B</string>
+
+  <string name="transition_color_preview">transition_color_preview</string>
 </resources>
