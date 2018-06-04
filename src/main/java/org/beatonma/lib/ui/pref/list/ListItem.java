@@ -90,7 +90,7 @@ public class ListItem implements Serializable {
         return this;
     }
 
-    @BindingAdapter("app:visible")
+    @BindingAdapter("visible")
     public static void setVisible(final View view, final boolean visible) {
         view.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
@@ -106,7 +106,7 @@ public class ListItem implements Serializable {
 
     public static Comparator<ListItem> getComparator() {
         return (left, right) -> {
-            if (Sdk.isKitkat()) {
+            if (Sdk.INSTANCE.isKitkat()) {
                 try {
                     return Integer.compare(Integer.valueOf(left.text()), Integer.valueOf(right.text()));
                 } catch (final NumberFormatException e) {
