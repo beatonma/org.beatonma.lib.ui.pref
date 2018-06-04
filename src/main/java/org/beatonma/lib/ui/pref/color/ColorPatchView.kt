@@ -12,7 +12,12 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.ColorInt
-import org.beatonma.lib.core.util.*
+import org.beatonma.lib.core.kotlin.extensions.boolean
+import org.beatonma.lib.core.kotlin.extensions.color
+import org.beatonma.lib.core.kotlin.extensions.dimen
+import org.beatonma.lib.core.util.Sdk
+import org.beatonma.lib.core.util.textColorFor
+import org.beatonma.lib.core.util.toHsv
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.style.Interpolate
 
@@ -21,7 +26,8 @@ import org.beatonma.lib.ui.style.Interpolate
 class ColorPatchView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
+        defStyleAttr: Int = R.attr.ColorPatchStyle
+) : View(context, attrs, defStyleAttr) {
 
     companion object {
         private const val TAG = "ColorPatchView"
@@ -49,13 +55,6 @@ class ColorPatchView @JvmOverloads constructor(
     private val chosenPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     var chosen = false
-//        set(value) {
-//            val changed = field != value
-//            field = value
-//            if (changed) {
-//                if (value) onChosen() else onUnchosen()
-//            }
-//        }
 
     @ColorInt
     var color = 0
@@ -63,11 +62,11 @@ class ColorPatchView @JvmOverloads constructor(
             field = value
             setBackgroundColor(color)
             chosenPaint.color = selectionColorFor(color)
-//            updateColor(value, false)
         }
 
     init {
-        val a: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.ColorPatchView, defStyleAttr, 0)
+        val a: TypedArray = context.obtainStyledAttributes(
+                attrs, R.styleable.ColorPatchView, defStyleAttr, R.style.ColorPatch)
         cornerRadius = a.dimen(context, R.styleable.ColorPatchView_patch_cornerRadius)
         circular = a.boolean(context, R.styleable.ColorPatchView_patch_isCircle, false)
         color = a.color(context, R.styleable.ColorPatchView_patch_color)
@@ -86,7 +85,7 @@ class ColorPatchView @JvmOverloads constructor(
                 innerRadius, innerRadius, innerRadius, innerRadius,
                 innerRadius, innerRadius, innerRadius, innerRadius)
 
-        if (Sdk.isLollipop()) {
+        if (Sdk.isLollipop) {
             clipToOutline = true
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
