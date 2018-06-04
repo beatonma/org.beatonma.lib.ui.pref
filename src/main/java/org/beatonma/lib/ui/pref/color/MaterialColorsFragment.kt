@@ -16,10 +16,10 @@ import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionSet
 import androidx.transition.Visibility.MODE_IN
+import org.beatonma.lib.core.kotlin.extensions.clone
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.FragmentColorMaterialBinding
 import org.beatonma.lib.ui.activity.BaseFragment
-import org.beatonma.lib.ui.pref.clone
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 
@@ -152,7 +152,7 @@ class MaterialColorsFragment : BaseFragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-            return PatchViewHolder(inflate(parent, R.layout.vh_pref_color_patch))
+            return PatchViewHolder(inflate(parent, R.layout.vh_pref_color_patch_small))
         }
 
         inner class PatchViewHolder(view: View) : BasePatchViewHolder(view) {
