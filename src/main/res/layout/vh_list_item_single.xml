@@ -5,7 +5,7 @@
     <data>
         <variable
             name="item"
-            type="org.beatonma.lib.ui.pref.ListItem"/>
+            type="org.beatonma.lib.ui.pref.list.ListItem"/>
         <import type="android.text.TextUtils"/>
     </data>
 
