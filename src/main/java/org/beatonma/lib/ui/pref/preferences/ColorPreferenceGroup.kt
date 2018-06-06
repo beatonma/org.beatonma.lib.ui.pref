@@ -77,7 +77,7 @@ constructor(context: Context,
         return -1
     }
 
-    override fun notifyUpdate(key: String, value: String): Int {
+    override fun notifyUpdate(key: String, value: String?): Int {
         if (key in keyMap) {
             val position = keyMap[key]!!
             if (colors[position].update(value)) {
@@ -97,7 +97,7 @@ constructor(context: Context,
         return -1
     }
 
-    override fun notifyUpdate(key: String, obj: Any): Int {
+    override fun notifyUpdate(key: String, obj: Any?): Int {
         if (key in keyMap) {
             val position = keyMap[key]!!
             if (colors[position].update(obj)) {
