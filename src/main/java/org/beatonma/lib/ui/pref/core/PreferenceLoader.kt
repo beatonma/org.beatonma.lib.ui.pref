@@ -1,8 +1,7 @@
 package org.beatonma.lib.ui.pref.core
 
 import android.content.Context
-
-import org.beatonma.lib.load.AsyncResult
+import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
 
@@ -11,8 +10,8 @@ import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
  */
 class PreferenceLoader(context: Context, private val mResourceID: Int) : SupportBaseAsyncTaskLoader<PreferenceGroup>(context) {
 
-    override fun loadInBackground(): AsyncResult<PreferenceGroup> {
-        val result = AsyncResult.getBuilder<PreferenceGroup>()
+    override fun loadInBackground(): Result<PreferenceGroup> {
+        val result = Result.getBuilder<PreferenceGroup>()
         val prefs: PreferenceGroup
         try {
              prefs = PreferenceGroup.fromJson(context, mResourceID)
@@ -32,7 +31,7 @@ class PreferenceLoader(context: Context, private val mResourceID: Int) : Support
         return result
     }
 
-    override fun onReleaseResources(data: AsyncResult<PreferenceGroup>) {
+    override fun onReleaseResources(data: Result<PreferenceGroup>?) {
 
     }
 }

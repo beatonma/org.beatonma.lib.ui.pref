@@ -8,7 +8,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
-import org.beatonma.lib.load.AsyncResult
+import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.ActivityAllColorsBinding
@@ -20,7 +20,7 @@ import org.beatonma.lib.ui.recyclerview.SlideInItemAnimator
 
 
 class AllColorsPreferenceActivity : PopupActivity(),
-        LoaderManager.LoaderCallbacks<AsyncResult<MutableList<ColorItem>>> {
+        LoaderManager.LoaderCallbacks<Result<MutableList<ColorItem>>> {
     companion object {
         private const val LOADER_COLORS = 2458
         private const val COLOR_GROUP_WIDTH = 13
@@ -59,12 +59,12 @@ class AllColorsPreferenceActivity : PopupActivity(),
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?):
-            Loader<AsyncResult<MutableList<ColorItem>>> {
+            Loader<Result<MutableList<ColorItem>>> {
         return ColorLoader(this)
     }
 
-    override fun onLoadFinished(loader: Loader<AsyncResult<MutableList<ColorItem>>>,
-                                result: AsyncResult<MutableList<ColorItem>>?) {
+    override fun onLoadFinished(loader: Loader<Result<MutableList<ColorItem>>>,
+                                result: Result<MutableList<ColorItem>>?) {
         when (loader.id) {
             LOADER_COLORS -> {
                 colorAdapter.diff(colors, result?.data)
@@ -73,7 +73,7 @@ class AllColorsPreferenceActivity : PopupActivity(),
         }
     }
 
-    override fun onLoaderReset(loader: Loader<AsyncResult<MutableList<ColorItem>>>) {
+    override fun onLoaderReset(loader: Loader<Result<MutableList<ColorItem>>>) {
 
     }
 
@@ -102,10 +102,10 @@ class AllColorsPreferenceActivity : PopupActivity(),
 
 
     class ColorLoader(context: Context) : SupportBaseAsyncTaskLoader<MutableList<ColorItem>>(context) {
-        override fun onReleaseResources(data: AsyncResult<MutableList<ColorItem>>?) {}
+        override fun onReleaseResources(data: Result<MutableList<ColorItem>>?) {}
 
-        override fun loadInBackground(): AsyncResult<MutableList<ColorItem>>? {
-            val builder: AsyncResult.Builder<MutableList<ColorItem>> = AsyncResult.getBuilder()
+        override fun loadInBackground(): Result<MutableList<ColorItem>>? {
+            val builder = Result.getBuilder<MutableList<ColorItem>>()
 
             val defs = intArrayOf(
                     R.array.material_red,

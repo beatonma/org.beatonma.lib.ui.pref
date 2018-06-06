@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.beatonma.lib.core.util.CollectionUtil;
-import org.beatonma.lib.load.AsyncResult;
+import org.beatonma.lib.load.Result;
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader;
 import org.beatonma.lib.log.Log;
 import org.beatonma.lib.prefs.R;
@@ -32,7 +32,7 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 public class ListPreferenceActivity extends PopupActivity
-        implements LoaderManager.LoaderCallbacks<AsyncResult<List<ListItem>>> {
+        implements LoaderManager.LoaderCallbacks<Result<List<ListItem>>> {
     public final static String EXTRA_LIST_PREFERENCE = "extra_list_preference";
     public final static int REQUEST_CODE_UPDATE = 936;
 
@@ -102,7 +102,7 @@ public class ListPreferenceActivity extends PopupActivity
 //    }
 
     @Override
-    public Loader<AsyncResult<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
+    public Loader<Result<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LIST_LOADER:
                 return new PrefListLoader(this, mListPreference);
@@ -111,8 +111,8 @@ public class ListPreferenceActivity extends PopupActivity
     }
 
     @Override
-    public void onLoadFinished(final Loader<AsyncResult<List<ListItem>>> loader,
-                               final AsyncResult<List<ListItem>> result) {
+    public void onLoadFinished(final Loader<Result<List<ListItem>>> loader,
+                               final Result<List<ListItem>> result) {
         switch (loader.getId()) {
             case LIST_LOADER:
                 if (result.isFailure()) {
@@ -126,7 +126,7 @@ public class ListPreferenceActivity extends PopupActivity
     }
 
     @Override
-    public void onLoaderReset(final Loader<AsyncResult<List<ListItem>>> loader) {
+    public void onLoaderReset(final Loader<Result<List<ListItem>>> loader) {
 
     }
 
@@ -140,8 +140,8 @@ public class ListPreferenceActivity extends PopupActivity
         }
 
         @Override
-        public AsyncResult<List<ListItem>> loadInBackground() {
-            final AsyncResult.Builder<List<ListItem>> result = AsyncResult.getBuilder();
+        public Result<List<ListItem>> loadInBackground() {
+            final Result.Builder<List<ListItem>> result = Result.Companion.getBuilder(null);
             final List<ListItem> items = new ArrayList<>();
 
             final Context context = getContext();
@@ -180,7 +180,7 @@ public class ListPreferenceActivity extends PopupActivity
         }
 
         @Override
-        protected void onReleaseResources(final AsyncResult<List<ListItem>> data) {
+        protected void onReleaseResources(final Result<List<ListItem>> data) {
 
         }
     }

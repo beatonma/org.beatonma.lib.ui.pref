@@ -3,13 +3,12 @@ package org.beatonma.lib.ui.pref.core
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import org.beatonma.lib.load.AsyncResult
+import org.beatonma.lib.load.Result
 import org.beatonma.lib.ui.activity.BaseFragment
 import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity
 import org.beatonma.lib.ui.pref.list.ListPreferenceActivity
@@ -18,7 +17,9 @@ import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
 import java.lang.ref.WeakReference
 
-abstract class PreferenceFragment : BaseFragment(), LoaderManager.LoaderCallbacks<AsyncResult<PreferenceGroup>> {
+abstract class PreferenceFragment : BaseFragment(),
+        LoaderManager.LoaderCallbacks<Result<PreferenceGroup>>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         private const val LOADER_PREFS = 34659
     }
@@ -70,17 +71,26 @@ abstract class PreferenceFragment : BaseFragment(), LoaderManager.LoaderCallback
         }
     }
 
-    override fun onCreateLoader(id: Int, @Nullable args: Bundle?): Loader<AsyncResult<PreferenceGroup>> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Result<PreferenceGroup>> {
         return PreferenceLoader(context!!, preferenceDefinitions)
     }
 
-    override fun onLoadFinished(@NonNull loader: Loader<AsyncResult<PreferenceGroup>>, result: AsyncResult<PreferenceGroup>) {
+    override fun onLoadFinished(loader: Loader<Result<PreferenceGroup>>, result: Result<PreferenceGroup>) {
         weakContext?.get()?.let {
-            adapter.setPreferences(it, result.data)
+            if (result.isComplete) {
+                val data = result.data
+                if (data != null) {
+                    adapter.setPreferences(it, data)
+                }
+            }
         }
     }
 
-    override fun onLoaderReset(@NonNull loader: Loader<AsyncResult<PreferenceGroup>>) {
+    override fun onLoaderReset(loader: Loader<Result<PreferenceGroup>>) {
+
+    }
+
+    override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
 
     }
 }
