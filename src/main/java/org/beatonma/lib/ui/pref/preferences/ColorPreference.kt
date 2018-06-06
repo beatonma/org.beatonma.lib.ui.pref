@@ -31,7 +31,8 @@ constructor(context: Context,
 
     init {
         color = getInt(context, obj.optString(COLOR, "0"))
-        Log.d(TAG, "ColorPreference built with color=$color")
+        swatch = getInt(context, obj.optString(SWATCH, "-1"))
+        swatchPosition = getInt(context, obj.optString(SWATCH_POSITION, "-1"))
     }
 
     override val type: String
