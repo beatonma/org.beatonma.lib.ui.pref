@@ -4,15 +4,17 @@ import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.TextView;
 
+import org.beatonma.lib.core.kotlin.extensions.ViewsKt;
 import org.beatonma.lib.log.Log;
 import org.beatonma.lib.prefs.R;
 import org.beatonma.lib.ui.pref.preferences.BasePreference;
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder;
-import org.beatonma.lib.ui.style.Views;
 
 import java.lang.ref.WeakReference;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public abstract class BasePreferenceViewHolder<T extends BasePreference>
         extends BaseViewHolder {
@@ -33,14 +35,8 @@ public abstract class BasePreferenceViewHolder<T extends BasePreference>
 
     }
 
-//    @CallSuper
-//    public void bind(final WeakReference<SharedPreferences> weakPrefs, final T preference) {
-//        mWeakPrefs = weakPrefs;
-//    }
-
     @CallSuper
-    public void bind(final WeakReference<SharedPreferences> sharedPrefs, final T preference) {
-//        super.bind(sharedPrefs, preference);
+    public void bind(@Nullable final WeakReference<SharedPreferences> sharedPrefs, @NonNull final T preference) {
         mWeakPrefs = sharedPrefs;
         setTitle(preference.getName());
         setDescription(preference.getDescription());
@@ -66,13 +62,13 @@ public abstract class BasePreferenceViewHolder<T extends BasePreference>
         title.setText(resID);
     }
 
-    public void setDescription(final String text) {
+    public void setDescription(@Nullable final String text) {
         description.setText(text);
-        Views.hideIfEmpty(description);
+        ViewsKt.hideIfEmpty(description);
     }
 
     public void setDescription(final int resID) {
         description.setText(resID);
-        Views.hideIfEmpty(description);
+        ViewsKt.hideIfEmpty(description);
     }
 }
