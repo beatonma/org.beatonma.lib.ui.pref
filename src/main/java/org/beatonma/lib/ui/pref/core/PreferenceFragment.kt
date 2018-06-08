@@ -27,7 +27,7 @@ abstract class PreferenceFragment : BaseFragment(),
     val adapter = buildAdapter()
     var weakContext: WeakReference<Context>? = null
 
-    abstract val preferenceDefinitions: Int
+    abstract var preferenceDefinitions: Int
 
     fun buildAdapter(): PreferenceAdapter {
         return PreferenceAdapter(this)
@@ -58,8 +58,7 @@ abstract class PreferenceFragment : BaseFragment(),
         val extras = intent?.extras
         if (extras != null) {
             val pref = extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE) as ListPreference
-            adapter.notifyUpdate(pref.key, pref.selectedValue)
-            adapter.notifyUpdate(pref.key, pref.selectedDisplay)
+            adapter.notifyUpdate(pref)
         }
     }
 
@@ -67,7 +66,7 @@ abstract class PreferenceFragment : BaseFragment(),
         val extras = intent?.extras
         if (extras != null) {
             val pref = extras.getSerializable(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE) as ColorPreference
-            adapter.notifyUpdate(pref.key, pref)
+            adapter.notifyUpdate(pref)
         }
     }
 
