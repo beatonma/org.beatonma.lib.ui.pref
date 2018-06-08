@@ -1,6 +1,9 @@
 package org.beatonma.lib.ui.pref.color
 
-import android.animation.*
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.TargetApi
 import android.os.Build
 import android.view.View
@@ -9,7 +12,6 @@ import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.recyclerview.BaseItemAnimator
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
-import org.beatonma.lib.ui.style.Interpolate
 
 /**
  * Implementation assumes the associated RecyclerView uses a GridLayoutManager with an adapter
@@ -20,13 +22,6 @@ import org.beatonma.lib.ui.style.Interpolate
  * animateRemove -> shrink out
  */
 
-private fun View.widthF(): Float {
-    return width.toFloat()
-}
-
-private fun View.heightF(): Float {
-    return height.toFloat()
-}
 
 private fun Double.squared(): Double {
     return this * this
@@ -34,29 +29,16 @@ private fun Double.squared(): Double {
 
 class ColorItemAnimator(
         val gridWidth: Int,
-        val stepDelay: Long = 60,  // Delay between 'layers' of items relative to epicenter
+        val stepDelay: Long = 60L,  // Delay between 'layers' of items relative to epicenter
         val ripple: Float = -0.04F,  // Distance (relative to viewholder size) to move items away from epicenter
-        duration: Long = 300,
-        interpolator: TimeInterpolator = Interpolate.getMotionInterpolator()
-) : BaseItemAnimator(interpolator) {
-
-    private val enterInterpolator = Interpolate.getEnterInterpolator()
-    private val changeInterpolator = interpolator
-    private val exitInterpolator = Interpolate.getExitInterpolator()
+        duration: Long = 300
+) : BaseItemAnimator(duration, duration, duration, duration) {
 
     private val epicenter = GridItem(0) // List position from which animations should emanate
     private val tempGridItem = GridItem(0)
 
     companion object {
         private const val TAG = "ColorItemAnimator"
-    }
-
-    init {
-        supportsChangeAnimations = true
-        addDuration = duration
-        moveDuration = duration
-        removeDuration = duration
-        changeDuration = duration
     }
 
     fun setEpicenter(index: Int) {
@@ -79,31 +61,30 @@ class ColorItemAnimator(
                 && mPendingChanges.isEmpty() && mPendingMoves.isEmpty()) {
             return
         }
-        val animations = AnimatorSet()
-        val removals = AnimatorSet()
-        val changes = AnimatorSet()
-        val additions = AnimatorSet()
 
-        removals.playTogether(mPendingRemovals.map { getRemoveAnim(it) })
+        val removals = AnimatorSet().apply { playTogether(mPendingRemovals.map { getRemoveAnimator(it) }) }
         mPendingRemovals.clear()
 
-        changes.playTogether(mPendingChanges.map { getChangeAnim(it) })
+        val changes = AnimatorSet().apply { playTogether(mPendingChanges.map { getChangeAnimator(it) }) }
         mPendingChanges.clear()
 
-        additions.playTogether(mPendingAdditions.map { getAddAnimator(it) })
+        val additions = AnimatorSet().apply { playTogether(mPendingAdditions.map { getAddAnimator(it) }) }
         mPendingAdditions.clear()
 
-        animations.playTogether(removals, changes, additions)
-        animations.start()
+        AnimatorSet().apply {
+            playTogether(removals, changes, additions)
+            start()
+        }
     }
 
-    override fun onAnimateAdd(holder: RecyclerView.ViewHolder?): Boolean {
-        holder?.itemView?.scaleX = 0F
-        holder?.itemView?.scaleY = 0F
+    override fun onAnimateAdd(holder: RecyclerView.ViewHolder): Boolean {
+        holder.itemView.scaleX = 0F
+        holder.itemView.scaleY = 0F
         return true
     }
 
-    fun getAddAnimator(holder: RecyclerView.ViewHolder?): Animator? {
+    override fun getAddAnimator(holder: RecyclerView.ViewHolder?): Animator? {
+        super.getAddAnimator(holder)
         try {
             holder as BasePatchViewHolder
         } catch (e: Exception) {
@@ -113,9 +94,7 @@ class ColorItemAnimator(
         tempGridItem.measureForIndex(holder.index, epicenter)
 
         val patch = holder.patch
-        mAddAnimations.add(holder)
 
-        val all = AnimatorSet()
         val scale = scaleAnim(patch, 0F, 1F)
         val translate = translateAnim(
                 patch,
@@ -123,32 +102,24 @@ class ColorItemAnimator(
                 floatArrayOf(patch.heightF() * ripple * tempGridItem.yDistance, 0F)
         )
 
-        all.playTogether(translate, scale)
+        return AnimatorSet().apply {
+            playTogether(translate, scale)
 
-        all.duration = addDuration
-        all.interpolator = enterInterpolator
-        all.startDelay = getDelayFor(tempGridItem.distance)
-        all.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?) {
-                dispatchAddStarting(holder)
-            }
-
-            override fun onAnimationCancel(animation: Animator?) {
-                patch.scaleX = 1F
-                patch.scaleY = 1F
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                animation?.removeListener(this)
-                dispatchAddFinished(holder)
-                mAddAnimations.remove(holder)
-                dispatchFinishedWhenDone()
-            }
-        })
-        return all
+            duration = addDuration
+            interpolator = enterInterpolator
+            startDelay = getDelayFor(tempGridItem.distance)
+            addListener(object: AddAnimatorListenerAdapter(holder) {
+                override fun onAnimationCancel(animation: Animator?) {
+                    super.onAnimationCancel(animation)
+                    patch.scaleX = 1F
+                    patch.scaleY = 1F
+                }
+            })
+        }
     }
 
-    fun getRemoveAnim(holder: RecyclerView.ViewHolder?): Animator? {
+    override fun getRemoveAnimator(holder: RecyclerView.ViewHolder?): Animator? {
+        super.getRemoveAnimator(holder)
         try {
             holder as BasePatchViewHolder
         } catch (e: Exception) {
@@ -158,47 +129,33 @@ class ColorItemAnimator(
         tempGridItem.measureForIndex(holder.index, epicenter)
 
         val patch = holder.patch
-        mRemoveAnimations.add(holder)
 
-        val all = AnimatorSet()
         val scale = scaleAnim(patch, 1F, 0F, 0F, 0F)
         val translate = translateAnim(
                 patch,
                 floatArrayOf(0F, patch.widthF() * ripple * tempGridItem.xDistance),
                 floatArrayOf(0F, patch.heightF() * ripple * tempGridItem.yDistance))
 
-        all.playTogether(translate, scale)
+        return AnimatorSet().apply {
+            playTogether(translate, scale)
 
-        all.duration = addDuration
-        all.interpolator = exitInterpolator
-        all.startDelay = getDelayFor(tempGridItem.distance)
-        all.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?) {
-                dispatchRemoveStarting(holder)
-            }
-
-            override fun onAnimationCancel(animation: Animator?) {
-                patch.scaleX = 0F
-                patch.scaleY = 0F
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                animation?.removeListener(this)
-                dispatchRemoveFinished(holder)
-                mRemoveAnimations.remove(holder)
-                dispatchFinishedWhenDone()
-            }
-        })
-        return all
+            duration = addDuration
+            interpolator = exitInterpolator
+            startDelay = getDelayFor(tempGridItem.distance)
+            addListener(object: RemoveAnimatorListenerAdapter(holder) {
+                override fun onAnimationCancel(animation: Animator?) {
+                    super.onAnimationCancel(animation)
+                    patch.scaleX = 0F
+                    patch.scaleY = 0F
+                }
+            })
+        }
     }
 
     override fun onAnimateChange(
             oldHolder: RecyclerView.ViewHolder?,
             newHolder: RecyclerView.ViewHolder?,
-            fromX: Int,
-            fromY: Int,
-            toX: Int,
-            toY: Int
+            fromX: Int, fromY: Int, toX: Int, toY: Int
     ): Boolean {
         if (oldHolder != null) {
             endAnimation(oldHolder)
@@ -210,8 +167,8 @@ class ColorItemAnimator(
         return true
     }
 
-    fun getChangeAnim(changeInfo: ChangeInfo?): Animator? {
-        if (changeInfo == null) return null
+    override fun getChangeAnimator(changeInfo: ChangeInfo): Animator? {
+        super.getChangeAnimator(changeInfo)
 
         val oldHolder: BasePatchViewHolder = changeInfo.oldHolder as BasePatchViewHolder
         val newHolder: BasePatchViewHolder = changeInfo.newHolder as BasePatchViewHolder
@@ -219,11 +176,8 @@ class ColorItemAnimator(
         val oldView = oldHolder.patch
         val newView = newHolder.patch
 
-        mChangeAnimations.add(changeInfo.oldHolder)
-
         tempGridItem.measureForIndex(oldHolder.index, epicenter)
 
-        val all = AnimatorSet()
         val translate = translateAnim(
                 oldView,
                 floatArrayOf(0F, oldView.widthF() * ripple * tempGridItem.xDistance, 0F),
@@ -232,33 +186,13 @@ class ColorItemAnimator(
 
 
         val color = colorAnim(oldView, oldView.color, newView.color)
-        all.playTogether(translate, color)
-
-        all.duration = changeDuration
-        all.interpolator = changeInterpolator
-        all.startDelay = getDelayFor(tempGridItem.distance)
-        all.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?) {
-                dispatchChangeStarting(oldHolder, true)
-                dispatchChangeStarting(newHolder, false)
-            }
-
-            override fun onAnimationCancel(animation: Animator?) {
-                newView.alpha = 1F
-                oldView.alpha = 0F
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                newView.alpha = 1F
-                oldView.alpha = 0F
-                all.removeListener(this)
-                dispatchChangeFinished(oldHolder, true)
-                dispatchChangeFinished(newHolder, false)
-                mChangeAnimations.remove(oldHolder)
-                dispatchFinishedWhenDone()
-            }
-        })
-        return all
+        return AnimatorSet().apply {
+            playTogether(translate, color)
+            duration = changeDuration
+            interpolator = changeInterpolator
+            startDelay = getDelayFor(tempGridItem.distance)
+            addListener(ChangeAnimatorListenerAdapter(changeInfo))
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
