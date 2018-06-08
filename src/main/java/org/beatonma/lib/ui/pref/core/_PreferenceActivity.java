@@ -3,7 +3,7 @@ package org.beatonma.lib.ui.pref.core;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.beatonma.lib.load.AsyncResult;
+import org.beatonma.lib.load.Result;
 import org.beatonma.lib.ui.activity.BaseActivity;
 import org.beatonma.lib.ui.pref.list.ListPreferenceActivity;
 import org.beatonma.lib.ui.pref.preferences.ListPreference;
@@ -13,8 +13,12 @@ import androidx.annotation.Nullable;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-public abstract class PreferenceActivity extends BaseActivity
-        implements LoaderManager.LoaderCallbacks<AsyncResult<PreferenceGroup>> {
+@Deprecated
+/*
+ * TODO convert to simple container for {@link PreferenceFragment}
+ */
+public abstract class _PreferenceActivity extends BaseActivity
+        implements LoaderManager.LoaderCallbacks<Result<PreferenceGroup>> {
     private final static int LOADER_PREFS = 34657;
 
     private final PreferenceAdapter mAdapter = new PreferenceAdapter();
@@ -52,7 +56,7 @@ public abstract class PreferenceActivity extends BaseActivity
         if (extras != null) {
             final ListPreference lp = (ListPreference) extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE);
             if (lp != null) {
-                mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedValue());
+//                mAdapter.notifyUpdate(lp.getKey(), lp.getSelectedValue());
             }
         }
     }
@@ -68,12 +72,12 @@ public abstract class PreferenceActivity extends BaseActivity
     }
 
     @Override
-    public void onLoadFinished(final Loader<AsyncResult<PreferenceGroup>> loader, final AsyncResult<PreferenceGroup> result) {
+    public void onLoadFinished(final Loader<Result<PreferenceGroup>> loader, final Result<PreferenceGroup> result) {
         mAdapter.setPreferences(this, result.getData());
     }
 
     @Override
-    public void onLoaderReset(final Loader<AsyncResult<PreferenceGroup>> loader) {
+    public void onLoaderReset(final Loader<Result<PreferenceGroup>> loader) {
 
     }
 }
