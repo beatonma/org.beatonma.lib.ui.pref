@@ -15,7 +15,7 @@ abstract class PreferenceActivity: BaseActivity() {
     /**
      * Layout resource file for this activity
      */
-    abstract val layoutId: Int
+    open val layoutId: Int = R.layout.activity_preferences
 
     /**
      * ID of the fragment container in the layout
