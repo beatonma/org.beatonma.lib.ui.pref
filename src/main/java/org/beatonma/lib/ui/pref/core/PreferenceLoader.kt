@@ -14,9 +14,8 @@ class PreferenceLoader(context: Context, private val mResourceID: Int) : Support
         val result = Result.getBuilder<PreferenceGroup>()
         val prefs: PreferenceGroup
         try {
-             prefs = PreferenceGroup.fromJson(context, mResourceID)
-        }
-        catch (e: Exception) {
+            prefs = PreferenceGroup.fromJson(context, mResourceID)
+        } catch (e: Exception) {
             result.failure(e)
             return result
         }
@@ -26,7 +25,6 @@ class PreferenceLoader(context: Context, private val mResourceID: Int) : Support
             return result
         }
 
-        prefs.load(context)
         result.success(prefs)
         return result
     }
