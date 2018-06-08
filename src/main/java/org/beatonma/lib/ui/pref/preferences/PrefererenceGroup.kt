@@ -37,25 +37,17 @@ internal interface PreferenceContainer {
      * Load child preferences
      */
     fun load(preferences: SharedPreferences)
-
     fun load(context: Context)
 
     /**
      * Save child preferences
      */
     fun save(editor: SharedPreferences.Editor)
-
     fun save(context: Context)
 
-    /**
-     * Find a child preference and update it with the given value
-     * Return the index of the preference so it can be refreshed in the UI
-     */
-    fun notifyUpdate(key: String, value: Int): Int
+    fun notifyUpdate(pref: BasePreference): Int
 
-    fun notifyUpdate(key: String, value: String): Int
-    fun notifyUpdate(key: String, value: Boolean): Int
-    fun notifyUpdate(key: String, obj: Any): Int
+    fun findKeyPosition(key: String): Int
 }
 
 class PreferenceGroup : BasePreference, PreferenceContainer {
@@ -63,21 +55,35 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
     @SerializedName("keymap")
     private val keyMap = HashMap<String, Int>()
 
+    /**
+     * key-to-key map. Displaying of first preference depends on the value of the second
+     */
+    @SerializedName("dependencies")
+    private val dependencies = HashMap<String, String>()
+
     val isEmpty: Boolean
         get() = preferences.isEmpty()
 
     @SerializedName("preferences")
-    var preferences = mutableListOf<BasePreference>()
+    private var preferences = mutableListOf<BasePreference>()
         private set(prefs) {
             field.clone(prefs)
 
-            keyMap.clear()
-            for (i in field.indices) {
-                keyMap[field[i].key!!] = i
+            dependencies.clear()
+            field.forEach { pref ->
+                pref.dependency?.let {
+                    dependencies[pref.key] = it.key
+                }
             }
         }
+    var displayablePreferences = mutableListOf<BasePreference>()
+        private set
 
     constructor() : super()
+
+    constructor(source: PreferenceGroup) : super(source) {
+        // TODO
+    }
 
     @Throws(JSONException::class)
     constructor(context: Context,
@@ -92,6 +98,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
         for (p in this.preferences) {
             p.load(preferences)
         }
+        updateDependencies()
     }
 
     override fun save(editor: SharedPreferences.Editor) {
@@ -113,44 +120,77 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
         editor.apply()
     }
 
-    override fun notifyUpdate(key: String, value: Int): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (preferences[position].update(value)) {
-                return position
+    override fun notifyUpdate(pref: BasePreference): Int {
+        val position = findKeyPosition(pref.key)
+        if (position >= 0) {
+            val p = preferences[position]
+            when (p) {
+                is ColorPreferenceGroup -> {
+                    val pCopy = p.copyOf()
+                    pCopy.notifyUpdate(pref)
+                    preferences[position] = pCopy
+                }
+                is PreferenceGroup -> TODO()
+                else -> preferences[position] = pref
+            }
+            Log.d(TAG, "Updated pref at $position")
+            updateDependencies()
+        } else Log.d(TAG, "pref $pref not found")
+
+        return position
+    }
+
+    /**
+     * Find the position of the key (or its container) in displayablePreferences
+     */
+    override fun findKeyPosition(key: String): Int {
+        keyMap[key]?.let { return it }
+        for (item in preferences.withIndex()) {
+            val p = item.value
+            if (p is PreferenceContainer) {
+                if (p.findKeyPosition(key) >= 0) {
+                    return item.index
+                }
             }
         }
         return -1
     }
 
-    override fun notifyUpdate(key: String, value: String): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (preferences[position].update(value)) {
-                return position
-            }
+    /**
+     * Refresh which preferences are displayed based on any {@link Dependency} relationships
+     */
+    fun updateDependencies() {
+        Log.d(TAG, "dependencies: $dependencies")
+
+        dependencies.forEach { (dependant, parent) ->
+            val p = findPreference(parent)
+            val c = findPreference(dependant)
+
+            c?.dependency?.passed = p?.meetsDependency(c) ?: true
         }
-        return -1
+
+        // Build list of preferences that pass any dependency conditions, or have no conditions
+        displayablePreferences.clear()
+        displayablePreferences.addAll(
+                preferences.filter {
+                    it.allowDisplay
+                })
+
+        // Build a map of key -> position
+        keyMap.clear()
+        for (i in preferences.indices) {
+            keyMap[preferences[i].key] = i
+        }
     }
 
-    override fun notifyUpdate(key: String, value: Boolean): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (preferences[position].update(value)) {
-                return position
-            }
+    private fun findPreference(key: String?): BasePreference? {
+        return preferences.firstOrNull {
+            it.key == key
         }
-        return -1
     }
 
-    override fun notifyUpdate(key: String, obj: Any): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (preferences[position].update(obj)) {
-                return position
-            }
-        }
-        return -1
+    override fun sameContents(other: Any?): Boolean {
+        return false
     }
 
     override fun toString(): String {
@@ -159,6 +199,10 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
                 .setPrettyPrinting()
                 .create()
                 .toJson(this)
+    }
+
+    override fun copyOf(): PreferenceGroup {
+        return PreferenceGroup(this)
     }
 
     companion object {
@@ -171,22 +215,15 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
          * @param resourceId
          * @return
          */
+        @Throws(JSONException::class)
         fun fromJson(@NonNull context: Context, resourceId: Int): PreferenceGroup {
             val group = PreferenceGroup()
             val preferences = ArrayList<BasePreference>()
 
             val resourceText = readTextResource(context, resourceId)
 
-            val baseJson: JSONObject
-            val jsonItems: JSONArray
-
-            try {
-                baseJson = JSONObject(resourceText)
-                jsonItems = baseJson.getJSONArray("items")
-            } catch (e: JSONException) {
-                Log.e(TAG, "Unable to read JSON resource id=%d: %s", resourceId, e)
-                return group
-            }
+            val baseJson = JSONObject(resourceText)
+            val jsonItems = baseJson.getJSONArray("items")
 
             val prefsName = baseJson.optString("prefs", "prefs")
             // Ooh this is tasty compared to the old java version
@@ -200,6 +237,9 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
             group.prefs = prefsName
             group.name = prefsName
             group.preferences = preferences
+
+            // Update preference state with SharedPreference values
+            group.load(context)
 
             return group
         }

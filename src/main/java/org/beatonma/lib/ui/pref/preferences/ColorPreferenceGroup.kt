@@ -3,13 +3,11 @@ package org.beatonma.lib.ui.pref.preferences
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.annotations.SerializedName
+import org.beatonma.lib.core.kotlin.extensions.clone
 import org.json.JSONException
 import org.json.JSONObject
 
-class ColorPreferenceGroup @Throws(JSONException::class)
-constructor(context: Context,
-            obj: JSONObject
-) : SimplePreference(context, obj), PreferenceContainer {
+class ColorPreferenceGroup : BasePreference, PreferenceContainer {
 
     companion object {
         private const val TAG = "ColorPreference"
@@ -22,7 +20,13 @@ constructor(context: Context,
     val colors: MutableList<ColorPreference> = mutableListOf()
     val keyMap = mutableMapOf<String, Int>()
 
-    init {
+    constructor(source: ColorPreferenceGroup): super(source) {
+        colors.clone(source.colors)
+        keyMap.putAll(source.keyMap)
+    }
+
+    @Throws(JSONException::class)
+    constructor(context: Context, obj: JSONObject) : super(context, obj) {
         obj.optJSONArray(CHILD_COLORS).forEachObj {
             colors.add(ColorPreference(context, it))
             for (i in colors.indices) {
@@ -34,8 +38,10 @@ constructor(context: Context,
     override var prefs: String? = null
         set(value) {
             super.prefs = value
-            for (c in colors) {
-                c.prefs = value
+            if (colors != null) { // super(source) calls this before colors is initiated
+                for (c in colors) {
+                    c.prefs = value
+                }
             }
         }
 
@@ -67,43 +73,24 @@ constructor(context: Context,
         editor.apply()
     }
 
-    override fun notifyUpdate(key: String, value: Int): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (colors[position].update(value)) {
-                return position
-            }
-        }
-        return -1
+    override fun sameContents(other: Any?): Boolean {
+        other as ColorPreferenceGroup
+        return colors == other.colors
     }
 
-    override fun notifyUpdate(key: String, value: String?): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (colors[position].update(value)) {
-                return position
-            }
+    override fun notifyUpdate(pref: BasePreference): Int {
+        val position = findKeyPosition(pref.key)
+        if (position >= 0) {
+            colors[position] = pref as ColorPreference
         }
-        return -1
+        return position
     }
 
-    override fun notifyUpdate(key: String, value: Boolean): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (colors[position].update(value)) {
-                return position
-            }
-        }
-        return -1
+    override fun findKeyPosition(key: String): Int {
+        return keyMap[key] ?: -1
     }
 
-    override fun notifyUpdate(key: String, obj: Any?): Int {
-        if (key in keyMap) {
-            val position = keyMap[key]!!
-            if (colors[position].update(obj)) {
-                return position
-            }
-        }
-        return -1
+    override fun copyOf(): ColorPreferenceGroup {
+        return ColorPreferenceGroup(this)
     }
 }

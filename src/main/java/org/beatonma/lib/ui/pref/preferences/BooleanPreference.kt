@@ -2,15 +2,22 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-
 import com.google.gson.annotations.SerializedName
-
 import org.json.JSONException
 import org.json.JSONObject
 
-class BooleanPreference @Throws(JSONException::class)
-constructor(context: Context,
-            obj: JSONObject) : SimplePreference(context, obj) {
+class BooleanPreference : BasePreference {
+
+    constructor() : super()
+
+    constructor(source: BooleanPreference) : super(source) {
+        isChecked = source.isChecked
+    }
+
+    @Throws(JSONException::class)
+    constructor(context: Context, obj: JSONObject) : super(context, obj) {
+        isChecked = obj.optBoolean(CHECKED, false)
+    }
 
     companion object {
         private const val TAG = "BoolPref"
@@ -43,8 +50,8 @@ constructor(context: Context,
             mUnselectedDescription = unselectedDescription
         }
 
-    init {
-        isChecked = obj.optBoolean(CHECKED, false)
+    override fun copyOf(): BooleanPreference {
+        return BooleanPreference(this)
     }
 
     override fun load(preferences: SharedPreferences) {
@@ -53,6 +60,15 @@ constructor(context: Context,
 
     override fun save(editor: SharedPreferences.Editor) {
         editor.putBoolean(key, isChecked)
+    }
+
+    override fun meetsDependency(dependency: Dependency?): Boolean {
+        if (dependency == null) return true
+        return when (dependency.operator) {
+            "==" -> dependency.value.toBoolean() == isChecked
+            "!=" -> dependency.value.toBoolean() != isChecked
+            else -> super.meetsDependency(dependency)
+        }
     }
 
     override fun toString(): String {

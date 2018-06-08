@@ -2,8 +2,6 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.annotation.NonNull
-import androidx.core.util.Pair
 import com.google.gson.annotations.SerializedName
 import org.json.JSONException
 import org.json.JSONObject
@@ -18,13 +16,14 @@ abstract class BasePreference : Serializable {
         private const val KEY = "key"
         private const val NAME = "name"
         private const val DESCRIPTION = "description"
+        private const val DEPENDENCY = "if"
     }
 
     @SerializedName("prefs")
     open var prefs: String? = null
 
     @SerializedName("key")
-    val key: String
+    var key: String
 
     @SerializedName("name")
     var name: String? = null
@@ -35,12 +34,27 @@ abstract class BasePreference : Serializable {
     /**
      * If set, this preference will only be displayed if the dependency rule is met
      */
-    private val mDependency: Pair<String, Any>? = null
+    @SerializedName("dependency")
+    var dependency: Dependency? = null
+
+    /**
+     * True if dependency condition is met, or no dependency is defined
+     */
+    var allowDisplay: Boolean = true
+        get() = dependency?.passed ?: true
 
     abstract val type: String
 
     constructor() {
         key = ""
+    }
+
+    constructor(source: BasePreference) {
+        key = source.key
+        prefs = source.prefs
+        name = source.name
+        description = source.description
+        dependency = source.dependency
     }
 
     @Throws(JSONException::class)
@@ -50,25 +64,44 @@ abstract class BasePreference : Serializable {
         name = getString(context, obj.optString(NAME))
         key = obj.getString(KEY)
         description = getString(context, obj.optString(DESCRIPTION, ""))
+        dependency = parseDependency(obj.optString(DEPENDENCY))
     }
 
     abstract fun load(preferences: SharedPreferences)
     abstract fun save(editor: SharedPreferences.Editor)
+    abstract fun copyOf(): BasePreference
 
-    open fun update(value: Int): Boolean {
+    /**
+     * @param dependency    Dependency from a dependant preference to be checked against the current
+     *                      value of this preference
+     * @return              true if the dependency condition passes, or dependency is null
+     */
+    open fun meetsDependency(dependency: Dependency?): Boolean {
+        return true
+    }
+
+    fun meetsDependency(preference: BasePreference?): Boolean {
+        return meetsDependency(preference?.dependency)
+    }
+
+    fun sameObject(other: Any?): Boolean {
+        if (other is BasePreference) {
+            return key == other.key
+        }
         return false
     }
 
-    open fun update(value: String?): Boolean {
-        return false
+    /**
+     * Used in DiffUtil callback - return false if the associated {@link ViewHolder}
+     * should be rebound
+     */
+    open fun sameContents(other: Any?): Boolean {
+        other as BasePreference
+        return name == other.name && description == other.description
     }
 
-    fun update(@NonNull value: Boolean): Boolean {
-        return false
-    }
-
-    open fun update(obj: Any?): Boolean {
-        return false
+    override fun equals(other: Any?): Boolean {
+        return sameObject(other) && sameContents(other)
     }
 
     override fun toString(): String {

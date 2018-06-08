@@ -8,8 +8,31 @@ import com.google.gson.annotations.SerializedName
 import org.json.JSONException
 import org.json.JSONObject
 
-class ListPreference @Throws(JSONException::class)
-constructor(context: Context, obj: JSONObject) : BasePreference(context, obj) {
+class ListPreference : BasePreference {
+
+    internal constructor(selectedValue: Int = 0) : super() {
+        this.selectedValue = selectedValue
+        displayListResourceId = 0
+    }
+
+    constructor(source: ListPreference) : super(source) {
+        selectedValue = source.selectedValue
+        selectedDisplay = source.selectedDisplay
+        displayListResourceId = source.displayListResourceId
+    }
+
+    @Throws(JSONException::class)
+    constructor(context: Context, obj: JSONObject) : super(context, obj) {
+        displayListResourceId = getResourceId(context, obj.optString(DISPLAY_LIST_ID, ""))
+        val selectedRaw = obj.optString(SELECTED_VALUE_ID, "0")
+        selectedValue = try {
+            Integer.valueOf(selectedRaw)
+        } catch (e: NumberFormatException) {
+            getInt(context, selectedRaw) // Defaults to zero
+        }
+        val display = context.resources.getStringArray(displayListResourceId)
+        selectedDisplay = display[selectedValue]
+    }
 
     companion object {
         const val TYPE = "list_single"
@@ -35,41 +58,20 @@ constructor(context: Context, obj: JSONObject) : BasePreference(context, obj) {
 
     @SerializedName("selected")
     var selectedValue: Int = 0
-        private set
 
     // Text that represents the selected item
     @SerializedName("selected_display")
     var selectedDisplay: String? = null
-        private set
 
     override val type: String
         get() = TYPE
 
+    override fun copyOf(): ListPreference {
+        return ListPreference(this)
+    }
+
     val displayKey: String
         get() = key + "_display"
-
-    init {
-
-        // This should point to a string array
-        displayListResourceId = getResourceId(context, obj.optString(DISPLAY_LIST_ID, ""))
-
-        // This should point to an integer array
-        //        mValuesListResourceId = Res.getResourceId(context, resources, obj.optString(VALUES_LIST_ID, ""));
-
-        // An integer, or the resource ID for an integer
-        val selectedRaw = obj.optString(SELECTED_VALUE_ID, "0")
-
-        selectedValue = try {
-            Integer.valueOf(selectedRaw)
-        } catch (e: NumberFormatException) {
-            getInt(context, selectedRaw) // Defaults to zero
-        }
-
-        //        mSelectedValue = Res.getInt(context, resources, obj.optString(SELECTED_VALUE_ID, ""));
-
-        val display = context.resources.getStringArray(displayListResourceId)
-        selectedDisplay = display[selectedValue]
-    }
 
     override fun load(preferences: SharedPreferences) {
         selectedValue = preferences.getInt(key, selectedValue)
@@ -83,29 +85,23 @@ constructor(context: Context, obj: JSONObject) : BasePreference(context, obj) {
         }
     }
 
-    override fun update(value: Int): Boolean {
-        super.update(value)
-        selectedValue = value
-        return true
-    }
-
-    override fun update(value: String?): Boolean {
-        super.update(value)
-        selectedDisplay = value
-        return true
-    }
-
     override fun meetsDependency(dependency: Dependency?): Boolean {
         if (dependency == null) return true
         return when (dependency.operator) {
-            "==" -> dependency.value.toInt() == selectedValue
-            "!=" -> dependency.value.toInt() != selectedValue
-            ">=" -> dependency.value.toInt() >= selectedValue
-            "<=" -> dependency.value.toInt() <= selectedValue
-            ">" -> dependency.value.toInt() > selectedValue
-            "<" -> dependency.value.toInt() < selectedValue
+            "==" -> selectedValue == dependency.value.toInt()
+            "!=" -> selectedValue != dependency.value.toInt()
+            ">=" -> selectedValue >= dependency.value.toInt()
+            "<=" -> selectedValue <= dependency.value.toInt()
+            ">" -> selectedValue > dependency.value.toInt()
+            "<" -> selectedValue < dependency.value.toInt()
             else -> super.meetsDependency(dependency)
         }
+    }
+
+    override fun sameContents(other: Any?): Boolean {
+        other as ListPreference
+        return selectedValue == other.selectedValue && selectedDisplay == other.selectedDisplay
+                && super.sameContents(other)
     }
 
     override fun toString(): String {
