@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.beatonma.lib.core.util.CollectionUtil;
+import org.beatonma.lib.core.kotlin.extensions.CollectionsKt;
 import org.beatonma.lib.load.Result;
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader;
 import org.beatonma.lib.log.Log;
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.ViewDataBinding;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -65,14 +66,12 @@ public class ListPreferenceActivity extends PopupActivity
         mListPreference = (ListPreference) extras.getSerializable(EXTRA_LIST_PREFERENCE);
     }
 
-    public void saveAndClose(final int value, final String name) {
-        mListPreference.update(value);
-        mListPreference.update(name);
+    public void saveAndClose(final int value, @Nullable final String name) {
+        mListPreference.setSelectedValue(value);
+        mListPreference.setSelectedDisplay(name);
 
         final SharedPreferences.Editor editor = getSharedPreferences(mListPreference.getPrefs(), MODE_PRIVATE).edit();
         mListPreference.save(editor);
-//        editor.putInt(mListPreference.getKey(), value);
-//        editor.putString(mListPreference.getDisplayKey(), name);
         editor.apply();
 
         final Intent intent = new Intent();
@@ -87,7 +86,7 @@ public class ListPreferenceActivity extends PopupActivity
     }
 
     @Override
-    protected void initLayout(final ViewDataBinding binding) {
+    protected void initLayout(@NonNull final ViewDataBinding binding) {
         mBinding = (ActivityListBinding) binding;
         RVUtil.setup(mBinding.recyclerview, mAdapter);
 
@@ -101,23 +100,20 @@ public class ListPreferenceActivity extends PopupActivity
 //        return mBinding;
 //    }
 
+    @NonNull
     @Override
-    public Loader<Result<List<ListItem>>> onCreateLoader(final int id, final Bundle args) {
-        switch (id) {
-            case LIST_LOADER:
-                return new PrefListLoader(this, mListPreference);
-        }
-        return null;
+    public Loader<Result<List<ListItem>>> onCreateLoader(final int id, @Nullable final Bundle args) {
+        return new PrefListLoader(this, mListPreference);
     }
 
     @Override
-    public void onLoadFinished(final Loader<Result<List<ListItem>>> loader,
-                               final Result<List<ListItem>> result) {
+    public void onLoadFinished(@NonNull final Loader<Result<List<ListItem>>> loader,
+                               @NonNull final Result<List<ListItem>> result) {
         switch (loader.getId()) {
             case LIST_LOADER:
                 if (result.isFailure()) {
                     Log.w(TAG, "List loading failed: %s",
-                            CollectionUtil.toString(result.getErrors()));
+                            CollectionsKt.toPrettyString(result.getErrors()));
                 }
                 mAdapter.diff(mItems, result.getData());
                 mItems = result.getData();
@@ -126,7 +122,7 @@ public class ListPreferenceActivity extends PopupActivity
     }
 
     @Override
-    public void onLoaderReset(final Loader<Result<List<ListItem>>> loader) {
+    public void onLoaderReset(@NonNull final Loader<Result<List<ListItem>>> loader) {
 
     }
 
@@ -139,6 +135,7 @@ public class ListPreferenceActivity extends PopupActivity
             this.preference = preference;
         }
 
+        @NonNull
         @Override
         public Result<List<ListItem>> loadInBackground() {
             final Result.Builder<List<ListItem>> result = Result.Companion.getBuilder(null);
@@ -180,7 +177,7 @@ public class ListPreferenceActivity extends PopupActivity
         }
 
         @Override
-        protected void onReleaseResources(final Result<List<ListItem>> data) {
+        protected void onReleaseResources(@Nullable final Result<List<ListItem>> data) {
 
         }
     }
