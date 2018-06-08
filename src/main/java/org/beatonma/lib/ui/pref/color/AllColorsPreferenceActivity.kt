@@ -16,7 +16,6 @@ import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.RVUtil
-import org.beatonma.lib.ui.recyclerview.SlideInItemAnimator
 
 
 class AllColorsPreferenceActivity : PopupActivity(),
@@ -48,7 +47,7 @@ class AllColorsPreferenceActivity : PopupActivity(),
         this.binding = binding as ActivityAllColorsBinding
         RVUtil.setup(binding.colors, colorAdapter,
                 GridLayoutManager(this, COLOR_GROUP_WIDTH))
-        binding.colors.itemAnimator = SlideInItemAnimator(3)
+//        binding.colors.itemAnimator = SlideInItemAnimator(3)
 
         patchSizeNormal = resources.getDimensionPixelSize(R.dimen.color_patch_small)
 //        patchSizeSelected = resources.getDimensionPixelSize(R.dimen.color_patch_selected)
