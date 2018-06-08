@@ -3,6 +3,7 @@ package org.beatonma.lib.ui.pref.core
 import android.content.Context
 import android.content.SharedPreferences
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.beatonma.lib.core.kotlin.extensions.clone
 import org.beatonma.lib.core.util.Sdk
-import org.beatonma.lib.log.Log
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.activity.ActivityBuilder
 import org.beatonma.lib.ui.pref.color.BasePatchViewHolder
@@ -46,6 +46,12 @@ class PreferenceAdapter @JvmOverloads constructor(
     private var mWeakPrefs: WeakReference<SharedPreferences>? = null
     var preferenceGroup: PreferenceGroup? = null
         private set
+
+    /**
+     * Copy of preferenceGroup.preferences that represents the currently displayed preferences.
+     * Used for diffing when 'live' preferenceGroup.preferences is updated
+     */
+    private var displayedPreferenceCache: MutableList<BasePreference>? = null
 
     /**
      * Layout must contain TextViews with the following IDs:
@@ -99,79 +105,57 @@ class PreferenceAdapter @JvmOverloads constructor(
     init {
         setEmptyViews(emptyViews ?: object : EmptyBaseRecyclerViewAdapter.EmptyViewsAdapter() {
             override fun getDataset(): Collection<*>? {
-                return if (preferenceGroup == null) null else preferenceGroup!!.preferences
+                return preferenceGroup?.displayablePreferences
             }
         })
     }
 
     override fun getItems(): List<*>? {
-        return if (preferenceGroup == null) null else preferenceGroup!!.preferences
+        return preferenceGroup?.displayablePreferences
+    }
+
+    private fun diff(newList: MutableList<BasePreference>?) {
+        diff(diffCallback(displayedPreferenceCache, newList), false)
+
+        // Update cache
+        displayedPreferenceCache = newList.clone { it.copyOf() }
     }
 
     fun setPreferences(context: Context, group: PreferenceGroup) {
         mWeakPrefs = WeakReference(
                 context.getSharedPreferences(group.name, Context.MODE_PRIVATE))
-        diff(if (preferenceGroup == null) null else preferenceGroup!!.preferences, group.preferences)
+
         preferenceGroup = group
+        diff(preferenceGroup?.displayablePreferences)
     }
 
-    fun notifyUpdate(key: String, value: String) {
-        val position = preferenceGroup!!.notifyUpdate(key, value)
-        if (position >= 0) {
-            notifyItemChanged(position)
-        } else {
-            for (item in preferenceGroup!!.preferences.withIndex()) {
-                val pref = item.value
-                if (pref is PreferenceContainer) {
-                    if (pref.notifyUpdate(key, value) >= 0) {
-                        notifyItemChanged(item.index)
-                    }
-                }
-            }
-            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%s", key, value)
-        }
+    fun notifyUpdate(pref: BasePreference): Boolean {
+        Log.d(TAG, "notifyUpdate($pref)")
+
+        val result = preferenceGroup?.notifyUpdate(pref) ?: -1 >= 0
+        if (result) diff(preferenceGroup?.displayablePreferences)
+        return result
     }
 
-    fun notifyUpdate(key: String, value: Int) {
-        val position = preferenceGroup!!.notifyUpdate(key, value)
-        if (position >= 0) {
-            notifyItemChanged(position)
-        } else {
-            for (item in preferenceGroup!!.preferences.withIndex()) {
-                val pref = item.value
-                if (pref is PreferenceContainer) {
-                    if (pref.notifyUpdate(key, value) >= 0) {
-                        notifyItemChanged(item.index)
-                    }
-                }
+    private fun diffCallback(old: MutableList<BasePreference>?,
+                             new: MutableList<BasePreference>?
+    ): DiffAdapter<BasePreference> {
+        return object : DiffAdapter<BasePreference>(old, new) {
+            override fun getOldListSize(): Int {
+                return oldList?.size ?: 1
             }
-            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%d", key, value)
-        }
-    }
 
-//    fun notifyUpdate(key: String, value: Boolean) {
-//        val position = preferenceGroup!!.notifyUpdate(key, value)
-//        if (position >= 0) {
-//            notifyItemChanged(position)
-//        } else {
-//            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%b", key, value)
-//        }
-//    }
-
-    fun notifyUpdate(key: String, value: Any) {
-        val position = preferenceGroup!!.notifyUpdate(key, value)
-        if (position >= 0) {
-            notifyItemChanged(position)
-        } else {
-            for (item in preferenceGroup!!.preferences.withIndex()) {
-                val pref = item.value
-                if (pref is PreferenceContainer) {
-                    if (pref.notifyUpdate(key, value) >= 0) {
-                        notifyItemChanged(item.index)
-                    }
-                }
+            override fun getNewListSize(): Int {
+                return newList?.size ?: 1
             }
-            Log.w(TAG, "notifyUpdate: key position not found: key=%s, value=%s", key, value)
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList?.get(oldItemPosition)?.sameObject(newList?.get(newItemPosition)) ?: false
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList?.get(oldItemPosition)?.sameContents(newList?.get(newItemPosition)) ?: false
+            }
         }
     }
 
@@ -180,7 +164,7 @@ class PreferenceAdapter @JvmOverloads constructor(
             return super.getItemViewType(position)
         }
 
-        val p = preferenceGroup!!.preferences[position]
+        val p = preferenceGroup!!.displayablePreferences[position]
         val type = p.type
         return when (type) {
             BooleanPreference.TYPE -> TYPE_BOOLEAN
@@ -197,34 +181,34 @@ class PreferenceAdapter @JvmOverloads constructor(
         when (viewType) {
             TYPE_BOOLEAN -> return object : SwitchPreferenceViewHolder(inflate(parent, switchLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.preferences[position] as BooleanPreference)
+                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as BooleanPreference)
                 }
             }
             TYPE_LIST_SINGLE -> return object : ListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.preferences[position] as ListPreference)
+                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ListPreference)
                 }
             }
             TYPE_COLOR_SINGLE -> return object : ColorPreferenceViewHolder(inflate(parent, colorSingleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.preferences[position] as ColorPreference)
+                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ColorPreference)
                 }
             }
-            TYPE_COLOR_GROUP -> return object: ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
+            TYPE_COLOR_GROUP -> return object : ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.preferences[position] as ColorPreferenceGroup)
+                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ColorPreferenceGroup)
                 }
             }
             0 -> return object : BasePreferenceViewHolder<BasePreference>(inflate(parent, simpleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.preferences[position])
+                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position])
                 }
             }
             else -> return super.onCreateViewHolder(parent, viewType)
         }
     }
 
-    open inner class SwitchPreferenceViewHolder internal constructor(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
+    open inner class SwitchPreferenceViewHolder(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
         private val mSwitch: CompoundButton = v.findViewById(R.id.checkable)
 
         override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: BooleanPreference) {
@@ -242,13 +226,14 @@ class PreferenceAdapter @JvmOverloads constructor(
                         else
                             preference.unselectedDescription)
                 save(preference)
+                notifyUpdate(preference)
             }
 
             itemView.setOnClickListener { _ -> mSwitch.toggle() }
         }
     }
 
-    open inner class ListPreferenceViewHolder internal constructor(v: View) : BasePreferenceViewHolder<ListPreference>(v) {
+    open inner class ListPreferenceViewHolder(v: View) : BasePreferenceViewHolder<ListPreference>(v) {
 
         override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ListPreference) {
             super.bind(weakPrefs, preference)
@@ -264,7 +249,7 @@ class PreferenceAdapter @JvmOverloads constructor(
         }
     }
 
-    open inner class ColorPreferenceViewHolder internal constructor(v: View) : BasePreferenceViewHolder<ColorPreference>(v) {
+    open inner class ColorPreferenceViewHolder(v: View) : BasePreferenceViewHolder<ColorPreference>(v) {
         private val patch: ColorPatchView = v.findViewById(R.id.colorpatch)
         private var firstDisplay = true    // We only want to animate on new views
 
@@ -296,13 +281,13 @@ class PreferenceAdapter @JvmOverloads constructor(
             }
         }
 
-        override fun bind(sharedPrefs: WeakReference<SharedPreferences>?, preference: ColorPreferenceGroup?) {
+        override fun bind(sharedPrefs: WeakReference<SharedPreferences>?, preference: ColorPreferenceGroup) {
             super.bind(sharedPrefs, preference)
-            colors.clone(preference!!.colors)
+            colors.clone(preference.colors)
             colorAdapter.notifyDataSetChanged()
         }
 
-        inner class MultiColorAdapter: BaseRecyclerViewAdapter() {
+        inner class MultiColorAdapter : BaseRecyclerViewAdapter() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
                 return PatchViewHolder(inflate(parent, R.layout.vh_pref_color_patch_large))
             }
