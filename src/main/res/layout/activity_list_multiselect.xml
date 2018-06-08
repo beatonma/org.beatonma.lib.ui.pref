@@ -19,7 +19,7 @@
             app:layout_constraintTop_toTopOf="parent"/>
 
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cancel_button"
             style="@style/Button.Flat"
             android:text="@string/dialog_cancel"
@@ -27,7 +27,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/ok_button"/>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/ok_button"
             style="@style/Button.Flat"
             android:text="@string/dialog_ok"

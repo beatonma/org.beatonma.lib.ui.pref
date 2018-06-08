@@ -24,7 +24,7 @@
     </HorizontalScrollView>
 
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
       android:layout_height="wrap_content"
       android:id="@+id/ok_button"
       style="@style/Button.Flat.Dialog"
