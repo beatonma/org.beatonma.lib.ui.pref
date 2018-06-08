@@ -51,7 +51,7 @@ class PreferenceAdapter @JvmOverloads constructor(
      * Copy of preferenceGroup.preferences that represents the currently displayed preferences.
      * Used for diffing when 'live' preferenceGroup.preferences is updated
      */
-    private var displayedPreferenceCache: MutableList<BasePreference>? = null
+    private var displayedPreferenceCache: List<BasePreference>? = null
 
     /**
      * Layout must contain TextViews with the following IDs:
@@ -118,7 +118,7 @@ class PreferenceAdapter @JvmOverloads constructor(
         diff(diffCallback(displayedPreferenceCache, newList), false)
 
         // Update cache
-        displayedPreferenceCache = newList.clone { it.copyOf() }
+        displayedPreferenceCache = newList?.map { it.copyOf() }
     }
 
     fun setPreferences(context: Context, group: PreferenceGroup) {
@@ -137,7 +137,7 @@ class PreferenceAdapter @JvmOverloads constructor(
         return result
     }
 
-    private fun diffCallback(old: MutableList<BasePreference>?,
+    private fun diffCallback(old: List<BasePreference>?,
                              new: MutableList<BasePreference>?
     ): DiffAdapter<BasePreference> {
         return object : DiffAdapter<BasePreference>(old, new) {
