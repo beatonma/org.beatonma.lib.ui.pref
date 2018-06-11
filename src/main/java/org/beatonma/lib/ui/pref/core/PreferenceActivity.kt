@@ -6,7 +6,7 @@ import androidx.fragment.app.transaction
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.activity.BaseActivity
 import org.beatonma.lib.ui.activity.databinding.RecyclerviewBinding
-import org.beatonma.lib.ui.recyclerview.RVUtil
+import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
 
 abstract class PreferenceActivity: BaseActivity() {
     companion object {
@@ -54,6 +54,6 @@ class SimplePreferenceFragmentImpl : PreferenceFragment() {
 
     override fun init(binding: ViewDataBinding) {
         binding as RecyclerviewBinding
-        RVUtil.setup(binding.recyclerview, adapter)
+        binding.recyclerview?.setup(adapter)
     }
 }
