@@ -15,8 +15,7 @@ import org.beatonma.lib.prefs.databinding.ActivityAllColorsBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
-import org.beatonma.lib.ui.recyclerview.RVUtil
-
+import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
 
 class AllColorsPreferenceActivity : PopupActivity(),
         LoaderManager.LoaderCallbacks<Result<MutableList<ColorItem>>> {
@@ -45,9 +44,8 @@ class AllColorsPreferenceActivity : PopupActivity(),
         setTitle(R.string.pref_color_choose)
 
         this.binding = binding as ActivityAllColorsBinding
-        RVUtil.setup(binding.colors, colorAdapter,
+        binding.colors.setup(colorAdapter,
                 GridLayoutManager(this, COLOR_GROUP_WIDTH))
-//        binding.colors.itemAnimator = SlideInItemAnimator(3)
 
         patchSizeNormal = resources.getDimensionPixelSize(R.dimen.color_patch_small)
 //        patchSizeSelected = resources.getDimensionPixelSize(R.dimen.color_patch_selected)
@@ -77,9 +75,8 @@ class AllColorsPreferenceActivity : PopupActivity(),
     }
 
     inner class ColorAdapter : EmptyBaseRecyclerViewAdapter() {
-        override fun getItems(): MutableList<ColorItem>? {
-            return colors
-        }
+        override val items: List<ColorItem>?
+            get() = colors
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
             return when (viewType) {
