@@ -27,7 +27,7 @@ abstract class PreferenceFragment : BaseFragment(),
     val adapter = buildAdapter()
     var weakContext: WeakReference<Context>? = null
 
-    abstract var preferenceDefinitions: Int
+    abstract val preferenceDefinitions: Int
 
     fun buildAdapter(): PreferenceAdapter {
         return PreferenceAdapter(this)
