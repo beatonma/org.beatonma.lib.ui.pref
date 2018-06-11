@@ -42,6 +42,9 @@ class PreferenceAdapter @JvmOverloads constructor(
         private const val TYPE_GROUP = 65
     }
 
+    override val items: List<*>?
+        get() = preferenceGroup?.displayablePreferences
+
     private val mWeakFragment: WeakReference<PreferenceFragment>? = if (fragmentContext == null) null else WeakReference(fragmentContext)
     private var mWeakPrefs: WeakReference<SharedPreferences>? = null
     var preferenceGroup: PreferenceGroup? = null
@@ -104,14 +107,9 @@ class PreferenceAdapter @JvmOverloads constructor(
 
     init {
         setEmptyViews(emptyViews ?: object : EmptyBaseRecyclerViewAdapter.EmptyViewsAdapter() {
-            override fun getDataset(): Collection<*>? {
-                return preferenceGroup?.displayablePreferences
-            }
+            override val dataset: Collection<*>?
+                get() = preferenceGroup?.displayablePreferences
         })
-    }
-
-    override fun getItems(): List<*>? {
-        return preferenceGroup?.displayablePreferences
     }
 
     private fun diff(newList: MutableList<BasePreference>?) {
@@ -150,11 +148,13 @@ class PreferenceAdapter @JvmOverloads constructor(
             }
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return oldList?.get(oldItemPosition)?.sameObject(newList?.get(newItemPosition)) ?: false
+                return oldList?.get(oldItemPosition)?.sameObject(newList?.get(newItemPosition))
+                        ?: false
             }
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return oldList?.get(oldItemPosition)?.sameContents(newList?.get(newItemPosition)) ?: false
+                return oldList?.get(oldItemPosition)?.sameContents(newList?.get(newItemPosition))
+                        ?: false
             }
         }
     }
