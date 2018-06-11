@@ -65,7 +65,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
         get() = preferences.isEmpty()
 
     @SerializedName("preferences")
-    private var preferences = mutableListOf<BasePreference>()
+    var preferences = mutableListOf<BasePreference>()
         private set(prefs) {
             field.clone(prefs)
 
