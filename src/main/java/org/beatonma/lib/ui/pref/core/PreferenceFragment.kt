@@ -24,17 +24,18 @@ abstract class PreferenceFragment : BaseFragment(),
         private const val LOADER_PREFS = 34659
     }
 
-    val adapter = buildAdapter()
+    lateinit var adapter: PreferenceAdapter
     var weakContext: WeakReference<Context>? = null
 
     abstract val preferenceDefinitions: Int
 
-    fun buildAdapter(): PreferenceAdapter {
+    open fun buildAdapter(): PreferenceAdapter {
         return PreferenceAdapter(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        adapter = buildAdapter()
         weakContext = WeakReference<Context>(context)
     }
 
