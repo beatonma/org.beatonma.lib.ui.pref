@@ -164,7 +164,7 @@ class PreferenceAdapter @JvmOverloads constructor(
             return super.getItemViewType(position)
         }
 
-        val p = preferenceGroup!!.displayablePreferences[position]
+        val p = preferenceGroup?.displayablePreferences?.get(position) ?: return super.getItemViewType(position)
         val type = p.type
         return when (type) {
             BooleanPreference.TYPE -> TYPE_BOOLEAN
@@ -211,8 +211,9 @@ class PreferenceAdapter @JvmOverloads constructor(
     open inner class SwitchPreferenceViewHolder(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
         private val mSwitch: CompoundButton = v.findViewById(R.id.checkable)
 
-        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: BooleanPreference) {
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: BooleanPreference?) {
             super.bind(weakPrefs, preference)
+            preference ?: return
             mSwitch.isChecked = preference.isChecked
 
             mSwitch.setOnCheckedChangeListener { _, checked ->
@@ -220,7 +221,7 @@ class PreferenceAdapter @JvmOverloads constructor(
                     TransitionManager.beginDelayedTransition(itemView as ViewGroup)
                 }
                 preference.isChecked = checked
-                setDescription(
+                updateDescription(
                         if (checked)
                             preference.selectedDescription
                         else
@@ -235,16 +236,17 @@ class PreferenceAdapter @JvmOverloads constructor(
 
     open inner class ListPreferenceViewHolder(v: View) : BasePreferenceViewHolder<ListPreference>(v) {
 
-        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ListPreference) {
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ListPreference?) {
             super.bind(weakPrefs, preference)
-            setDescription(preference.selectedDisplay)
+            preference ?: return
+            updateDescription(preference.selectedDisplay)
             itemView.setOnClickListener { v ->
-                ActivityBuilder.from(itemView.context)
-                        .to(ListPreferenceActivity::class.java)
-                        .putExtra(ListPreferenceActivity.EXTRA_LIST_PREFERENCE, preference)
-                        .forResult(mWeakFragment!!.get(), ListPreferenceActivity.REQUEST_CODE_UPDATE)
-                        .animationSource(v)
-                        .start()
+                ActivityBuilder(v,
+                        ListPreferenceActivity::class.java,
+                        fragment = mWeakFragment?.get(),
+                        requestCode = ListPreferenceActivity.REQUEST_CODE_UPDATE).apply {
+                    putExtra(ListPreferenceActivity.EXTRA_LIST_PREFERENCE, preference)
+                }.start()
             }
         }
     }
@@ -253,17 +255,17 @@ class PreferenceAdapter @JvmOverloads constructor(
         private val patch: ColorPatchView = v.findViewById(R.id.colorpatch)
         private var firstDisplay = true    // We only want to animate on new views
 
-        override fun bind(sharedPrefs: WeakReference<SharedPreferences>?, preference: ColorPreference) {
-            super.bind(sharedPrefs, preference)
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ColorPreference?) {
+            super.bind(weakPrefs, preference)
+            preference ?: return
             patch.color = preference.color
             firstDisplay = false
             itemView.setOnClickListener { v ->
-                ActivityBuilder.from(v.context)
-                        .to(SwatchColorPreferenceActivity::class.java)
-                        .putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
-                        .forResult(mWeakFragment!!.get(), SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE)
-                        .animationSource(v)
-                        .start()
+                ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
+                        fragment = mWeakFragment?.get(),
+                        requestCode = SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE).apply {
+                    putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
+                }.start()
             }
         }
     }
@@ -281,9 +283,9 @@ class PreferenceAdapter @JvmOverloads constructor(
             }
         }
 
-        override fun bind(sharedPrefs: WeakReference<SharedPreferences>?, preference: ColorPreferenceGroup) {
-            super.bind(sharedPrefs, preference)
-            colors.clone(preference.colors)
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ColorPreferenceGroup?) {
+            super.bind(weakPrefs, preference)
+            colors.clone(preference?.colors)
             colorAdapter.notifyDataSetChanged()
         }
 
@@ -302,12 +304,11 @@ class PreferenceAdapter @JvmOverloads constructor(
                     patch.color = preference.color
 
                     patch.setOnClickListener { v ->
-                        ActivityBuilder.from(v.context)
-                                .to(SwatchColorPreferenceActivity::class.java)
-                                .putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
-                                .forResult(mWeakFragment!!.get(), SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE)
-                                .animationSource(v)
-                                .start()
+                        ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
+                                fragment = mWeakFragment?.get(),
+                                requestCode = SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE).apply {
+                            putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
+                        }.start()
                     }
                 }
             }
