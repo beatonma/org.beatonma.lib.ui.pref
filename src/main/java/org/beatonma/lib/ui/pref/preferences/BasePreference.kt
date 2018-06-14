@@ -19,22 +19,22 @@ abstract class BasePreference : Serializable {
         private const val DEPENDENCY = "if"
     }
 
-    @SerializedName("prefs")
+    @SerializedName(PREFS)
     open var prefs: String? = null
 
-    @SerializedName("key")
+    @SerializedName(KEY)
     var key: String
 
-    @SerializedName("name")
+    @SerializedName(NAME)
     var name: String? = null
 
-    @SerializedName("description")
+    @SerializedName(DESCRIPTION)
     var description: String? = null
 
     /**
      * If set, this preference will only be displayed if the dependency rule is met
      */
-    @SerializedName("dependency")
+    @SerializedName(DEPENDENCY)
     var dependency: Dependency? = null
 
     /**
@@ -98,10 +98,6 @@ abstract class BasePreference : Serializable {
     open fun sameContents(other: Any?): Boolean {
         other as BasePreference
         return name == other.name && description == other.description
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return sameObject(other) && sameContents(other)
     }
 
     override fun toString(): String {
