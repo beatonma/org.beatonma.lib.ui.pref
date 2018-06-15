@@ -48,8 +48,8 @@ class SwatchColorPreferenceActivity : PopupActivity() {
         }
     }
 
-    override fun setState(savedState: Bundle?) {
-        super.setState(savedState)
+    override fun updateState(savedState: Bundle?) {
+        super.updateState(savedState)
     }
 
     override fun onBackPressed() {
