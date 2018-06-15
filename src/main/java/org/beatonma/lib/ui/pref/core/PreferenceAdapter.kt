@@ -3,7 +3,6 @@ package org.beatonma.lib.ui.pref.core
 import android.content.Context
 import android.content.SharedPreferences
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
@@ -18,6 +17,7 @@ import org.beatonma.lib.ui.pref.color.BasePatchViewHolder
 import org.beatonma.lib.ui.pref.color.ColorItemAnimator
 import org.beatonma.lib.ui.pref.color.ColorPatchView
 import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity
+import org.beatonma.lib.ui.pref.list.AppListPreferenceActivity
 import org.beatonma.lib.ui.pref.list.ListPreferenceActivity
 import org.beatonma.lib.ui.pref.preferences.*
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
@@ -25,28 +25,35 @@ import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import java.lang.ref.WeakReference
 
-class PreferenceAdapter @JvmOverloads constructor(
-        fragmentContext: PreferenceFragment? = null,
-        emptyViews: EmptyBaseRecyclerViewAdapter.EmptyViews? = null
-) : EmptyBaseRecyclerViewAdapter() {
+open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
+
+    constructor(fragmentContext: PreferenceFragment) : super() {
+        weakFragment = WeakReference(fragmentContext)
+    }
+
+    constructor(fragmentContext: PreferenceFragment,
+                nullLayoutID: Int) : super(nullLayoutID = nullLayoutID) {
+        weakFragment = WeakReference(fragmentContext)
+    }
 
     companion object {
-        private val TAG = "PreferenceAdapter"
+        private const val TAG = "PreferenceAdapter"
 
-        private const val TYPE_SIMPLE = 0
-        private const val TYPE_BOOLEAN = 1
-        private const val TYPE_LIST_SINGLE = 2
-        private const val TYPE_LIST_MULTI = 3
-        private const val TYPE_COLOR_SINGLE = 11
-        private const val TYPE_COLOR_GROUP = 12
-        private const val TYPE_GROUP = 65
+        const val TYPE_SIMPLE = 0
+        const val TYPE_BOOLEAN = 1
+        const val TYPE_LIST_SINGLE = 2
+        const val TYPE_LIST_MULTI = 3
+        const val TYPE_LIST_APPS = 4
+        const val TYPE_COLOR_SINGLE = 11
+        const val TYPE_COLOR_GROUP = 12
+        const val TYPE_GROUP = 65
     }
 
     override val items: List<*>?
         get() = preferenceGroup?.displayablePreferences
 
-    private val mWeakFragment: WeakReference<PreferenceFragment>? = if (fragmentContext == null) null else WeakReference(fragmentContext)
-    private var mWeakPrefs: WeakReference<SharedPreferences>? = null
+    private val weakFragment: WeakReference<PreferenceFragment>?
+    var weakPrefs: WeakReference<SharedPreferences>? = null
     var preferenceGroup: PreferenceGroup? = null
         private set
 
@@ -104,15 +111,15 @@ class PreferenceAdapter @JvmOverloads constructor(
      */
     val colorGroupLayout: Int
         get() = R.layout.vh_pref_color_group
+//
+//    init {
+//        setEmptyViews(emptyViews ?: object : EmptyBaseRecyclerViewAdapter.EmptyViewsAdapter() {
+//            override val dataset: Collection<*>?
+//                get() = preferenceGroup?.displayablePreferences
+//        })
+//    }
 
-    init {
-        setEmptyViews(emptyViews ?: object : EmptyBaseRecyclerViewAdapter.EmptyViewsAdapter() {
-            override val dataset: Collection<*>?
-                get() = preferenceGroup?.displayablePreferences
-        })
-    }
-
-    private fun diff(newList: MutableList<BasePreference>?) {
+    protected fun diff(newList: MutableList<BasePreference>?) {
         diff(diffCallback(displayedPreferenceCache, newList), false)
 
         // Update cache
@@ -120,15 +127,15 @@ class PreferenceAdapter @JvmOverloads constructor(
     }
 
     fun setPreferences(context: Context, group: PreferenceGroup) {
-        mWeakPrefs = WeakReference(
+        weakPrefs = WeakReference(
                 context.getSharedPreferences(group.name, Context.MODE_PRIVATE))
 
         preferenceGroup = group
         diff(preferenceGroup?.displayablePreferences)
     }
 
-    fun notifyUpdate(pref: BasePreference): Boolean {
-        Log.d(TAG, "notifyUpdate($pref)")
+    fun notifyUpdate(pref: BasePreference?): Boolean {
+        pref ?: return false
 
         val result = preferenceGroup?.notifyUpdate(pref) ?: -1 >= 0
         if (result) diff(preferenceGroup?.displayablePreferences)
@@ -137,8 +144,8 @@ class PreferenceAdapter @JvmOverloads constructor(
 
     private fun diffCallback(old: List<BasePreference>?,
                              new: MutableList<BasePreference>?
-    ): DiffAdapter<BasePreference> {
-        return object : DiffAdapter<BasePreference>(old, new) {
+    ): EmptyBaseRecyclerViewAdapter.DiffAdapter<BasePreference> {
+        return object : EmptyBaseRecyclerViewAdapter.DiffAdapter<BasePreference>(old, new) {
             override fun getOldListSize(): Int {
                 return oldList?.size ?: 1
             }
@@ -164,11 +171,13 @@ class PreferenceAdapter @JvmOverloads constructor(
             return super.getItemViewType(position)
         }
 
-        val p = preferenceGroup?.displayablePreferences?.get(position) ?: return super.getItemViewType(position)
+        val p = preferenceGroup?.displayablePreferences?.get(position)
+                ?: return super.getItemViewType(position)
         val type = p.type
         return when (type) {
             BooleanPreference.TYPE -> TYPE_BOOLEAN
             ListPreference.TYPE -> TYPE_LIST_SINGLE
+            AppListPreference.TYPE -> TYPE_LIST_APPS
             ColorPreference.TYPE -> TYPE_COLOR_SINGLE
             ColorPreferenceGroup.TYPE -> TYPE_COLOR_GROUP
             BasePreference.TYPE, SimplePreference.TYPE -> TYPE_SIMPLE
@@ -181,27 +190,32 @@ class PreferenceAdapter @JvmOverloads constructor(
         when (viewType) {
             TYPE_BOOLEAN -> return object : SwitchPreferenceViewHolder(inflate(parent, switchLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as BooleanPreference)
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as BooleanPreference)
                 }
             }
             TYPE_LIST_SINGLE -> return object : ListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ListPreference)
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ListPreference)
+                }
+            }
+            TYPE_LIST_APPS -> return object : AppListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
+                override fun bind(position: Int) {
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as AppListPreference)
                 }
             }
             TYPE_COLOR_SINGLE -> return object : ColorPreferenceViewHolder(inflate(parent, colorSingleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ColorPreference)
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreference)
                 }
             }
             TYPE_COLOR_GROUP -> return object : ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position] as ColorPreferenceGroup)
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreferenceGroup)
                 }
             }
             0 -> return object : BasePreferenceViewHolder<BasePreference>(inflate(parent, simpleLayout)) {
                 override fun bind(position: Int) {
-                    bind(mWeakPrefs, preferenceGroup!!.displayablePreferences[position])
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position))
                 }
             }
             else -> return super.onCreateViewHolder(parent, viewType)
@@ -243,9 +257,25 @@ class PreferenceAdapter @JvmOverloads constructor(
             itemView.setOnClickListener { v ->
                 ActivityBuilder(v,
                         ListPreferenceActivity::class.java,
-                        fragment = mWeakFragment?.get(),
+                        fragment = weakFragment?.get(),
                         requestCode = ListPreferenceActivity.REQUEST_CODE_UPDATE).apply {
                     putExtra(ListPreferenceActivity.EXTRA_LIST_PREFERENCE, preference)
+                }.start()
+            }
+        }
+    }
+
+    open inner class AppListPreferenceViewHolder(v: View) : BasePreferenceViewHolder<AppListPreference>(v) {
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: AppListPreference?) {
+            super.bind(weakPrefs, preference)
+            preference ?: return
+            updateDescription(preference.selectedAppName)
+            itemView.setOnClickListener { view ->
+                ActivityBuilder(view,
+                        AppListPreferenceActivity::class.java,
+                        fragment = weakFragment?.get(),
+                        requestCode = AppListPreferenceActivity.REQUEST_CODE_UPDATE).apply {
+                    putExtra(AppListPreferenceActivity.EXTRA_APP_LIST_PREFERENCE, preference)
                 }.start()
             }
         }
@@ -262,7 +292,7 @@ class PreferenceAdapter @JvmOverloads constructor(
             firstDisplay = false
             itemView.setOnClickListener { v ->
                 ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
-                        fragment = mWeakFragment?.get(),
+                        fragment = weakFragment?.get(),
                         requestCode = SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE).apply {
                     putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
                 }.start()
@@ -305,7 +335,7 @@ class PreferenceAdapter @JvmOverloads constructor(
 
                     patch.setOnClickListener { v ->
                         ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
-                                fragment = mWeakFragment?.get(),
+                                fragment = weakFragment?.get(),
                                 requestCode = SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE).apply {
                             putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
                         }.start()

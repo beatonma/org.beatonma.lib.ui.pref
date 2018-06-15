@@ -11,7 +11,9 @@ import androidx.loader.content.Loader
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.ui.activity.BaseFragment
 import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity
+import org.beatonma.lib.ui.pref.list.AppListPreferenceActivity
 import org.beatonma.lib.ui.pref.list.ListPreferenceActivity
+import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.pref.preferences.ColorPreference
 import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
@@ -51,22 +53,28 @@ abstract class PreferenceFragment : BaseFragment(),
         when (requestCode) {
             ListPreferenceActivity.REQUEST_CODE_UPDATE -> onListPreferenceUpdated(data)
             SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE -> onColorPreferenceUpdated(data)
+            AppListPreferenceActivity.REQUEST_CODE_UPDATE -> onAppListPreferenceUpdated(data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
     private fun onListPreferenceUpdated(intent: Intent?) {
-        val extras = intent?.extras
-        if (extras != null) {
-            val pref = extras.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE) as ListPreference
+        intent?.extras?.let {
+            val pref = it.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE) as ListPreference
             adapter.notifyUpdate(pref)
         }
     }
 
     private fun onColorPreferenceUpdated(intent: Intent?) {
-        val extras = intent?.extras
-        if (extras != null) {
-            val pref = extras.getSerializable(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE) as ColorPreference
+        intent?.extras?.let {
+            val pref = it.getSerializable(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE) as ColorPreference
+            adapter.notifyUpdate(pref)
+        }
+    }
+
+    private fun onAppListPreferenceUpdated(intent: Intent?) {
+        intent?.extras?.let {
+            val pref = it.getSerializable(AppListPreferenceActivity.EXTRA_APP_LIST_PREFERENCE) as AppListPreference
             adapter.notifyUpdate(pref)
         }
     }

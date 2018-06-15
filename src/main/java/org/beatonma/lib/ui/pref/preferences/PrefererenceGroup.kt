@@ -254,6 +254,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
             return when (type) {
                 BooleanPreference.TYPE -> BooleanPreference(context, json)
                 ListPreference.TYPE -> ListPreference(context, json)
+                AppListPreference.TYPE -> AppListPreference(context, json)
                 ColorPreference.TYPE -> ColorPreference(context, json)
                 ColorPreferenceGroup.TYPE -> ColorPreferenceGroup(context, json)
                 SimplePreference.TYPE, "" -> SimplePreference(context, json)
