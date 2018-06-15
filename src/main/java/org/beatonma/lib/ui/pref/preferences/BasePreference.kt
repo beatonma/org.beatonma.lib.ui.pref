@@ -2,7 +2,6 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.google.gson.annotations.SerializedName
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.Serializable
@@ -19,22 +18,15 @@ abstract class BasePreference : Serializable {
         private const val DEPENDENCY = "if"
     }
 
-    @SerializedName(PREFS)
     open var prefs: String? = null
-
-    @SerializedName(KEY)
     var key: String
-
-    @SerializedName(NAME)
     var name: String? = null
-
-    @SerializedName(DESCRIPTION)
     var description: String? = null
 
     /**
      * If set, this preference will only be displayed if the dependency rule is met
      */
-    @SerializedName(DEPENDENCY)
+//    @SerializedName(DEPENDENCY)
     var dependency: Dependency? = null
 
     /**
