@@ -15,7 +15,7 @@ abstract class BasePreferenceViewHolder<T : BasePreference>(v: View) : BaseViewH
     private var mWeakPrefs: WeakReference<SharedPreferences>? = null
 
     private val title: TextView = itemView.findViewById(R.id.title)
-    private val description: TextView = itemView.findViewById(R.id.description)
+    private val description: TextView? = itemView.findViewById(R.id.description)
 
     override fun bind(position: Int) {
 
@@ -44,12 +44,12 @@ abstract class BasePreferenceViewHolder<T : BasePreference>(v: View) : BaseViewH
     }
 
     fun updateDescription(@Nullable text: String?) {
-        description.text = text
-        description.hideIfEmpty()
+        description?.text = text
+        description?.hideIfEmpty()
     }
 
     fun updateDescription(resID: Int) {
-        description.setText(resID)
-        description.hideIfEmpty()
+        description?.setText(resID)
+        description?.hideIfEmpty()
     }
 }
