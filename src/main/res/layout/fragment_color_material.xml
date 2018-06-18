@@ -9,6 +9,7 @@
       android:layout_width="@dimen/palette_container_width"
       android:layout_height="wrap_content"
       android:minHeight="@dimen/palette_container_height"
+      app:layout_constrainedHeight="true"
       app:layout_constraintHeight_min="@dimen/palette_container_height"
       app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
