@@ -7,6 +7,9 @@
       android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
       android:theme="@style/Beatonma.AppTheme.Floating"/>
     <activity
+      android:name="org.beatonma.lib.ui.pref.list.AppListPreferenceActivity"
+      android:theme="@style/Beatonma.AppTheme.Floating"/>
+    <activity
       android:name="org.beatonma.lib.ui.pref.color.AllColorsPreferenceActivity"
       android:theme="@style/Beatonma.AppTheme.Floating"/>
     <activity
