@@ -46,6 +46,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         const val TYPE_LIST_APPS = 4
         const val TYPE_COLOR_SINGLE = 11
         const val TYPE_COLOR_GROUP = 12
+        const val TYPE_SECTION = 61
         const val TYPE_GROUP = 65
     }
 
@@ -67,28 +68,26 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain TextViews with the following IDs:
      * - 'title'
      * - 'description'
+     */
+    open val simpleLayout: Int = R.layout.vh_pref_simple
+
+    /**
+     * Layout must contain TextViews with the following IDs:
+     * - 'title'
+     * - 'description'
      *
      * Layout must contain a [CompoundButton] (or subclass) view with ID:
      * - 'checkable'
      */
-    val switchLayout: Int
-        get() = R.layout.vh_pref_switch
+    open val switchLayout: Int = R.layout.vh_pref_switch
 
     /**
      * Layout must contain TextViews with the following IDs:
      * - 'title'
      * - 'description'
      */
-    val listSingleLayout: Int
+    open val listSingleLayout: Int
         get() = simpleLayout
-
-    /**
-     * Layout must contain TextViews with the following IDs:
-     * - 'title'
-     * - 'description'
-     */
-    val simpleLayout: Int
-        get() = R.layout.vh_pref_simple
 
     /**
      * Layout must contain TextViews with the following IDs:
@@ -98,8 +97,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain a ColorPatch with ID:
      * - 'color'
      */
-    val colorSingleLayout: Int
-        get() = R.layout.vh_pref_color_single
+    open val colorSingleLayout: Int = R.layout.vh_pref_color_single
 
     /**
      * Layout must contain TextViews with the following IDs:
@@ -109,15 +107,9 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain a [RecyclerView] with ID:
      * - 'colors'
      */
-    val colorGroupLayout: Int
-        get() = R.layout.vh_pref_color_group
-//
-//    init {
-//        setEmptyViews(emptyViews ?: object : EmptyBaseRecyclerViewAdapter.EmptyViewsAdapter() {
-//            override val dataset: Collection<*>?
-//                get() = preferenceGroup?.displayablePreferences
-//        })
-//    }
+    open val colorGroupLayout: Int = R.layout.vh_pref_color_group
+
+    open val sectionSeparatorLayout: Int = R.layout.vh_pref_section_separator
 
     protected fun diff(newList: MutableList<BasePreference>?) {
         diff(diffCallback(displayedPreferenceCache, newList), false)
@@ -181,6 +173,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             ColorPreference.TYPE -> TYPE_COLOR_SINGLE
             ColorPreferenceGroup.TYPE -> TYPE_COLOR_GROUP
             BasePreference.TYPE, SimplePreference.TYPE -> TYPE_SIMPLE
+            SectionSeparator.TYPE -> TYPE_SECTION
             else -> super.getItemViewType(position)
         }
     }
@@ -213,6 +206,11 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreferenceGroup)
                 }
             }
+            TYPE_SECTION -> return object : SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout)) {
+                override fun bind(position: Int) {
+                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as SectionSeparator)
+                }
+            }
             0 -> return object : BasePreferenceViewHolder<BasePreference>(inflate(parent, simpleLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position))
@@ -221,6 +219,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             else -> return super.onCreateViewHolder(parent, viewType)
         }
     }
+
+    open inner class SectionSeparatorViewHolder(v: View) : BasePreferenceViewHolder<SectionSeparator>(v)
 
     open inner class SwitchPreferenceViewHolder(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
         private val mSwitch: CompoundButton = v.findViewById(R.id.checkable)

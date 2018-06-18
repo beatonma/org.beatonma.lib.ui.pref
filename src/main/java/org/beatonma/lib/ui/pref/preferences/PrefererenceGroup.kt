@@ -258,6 +258,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
                 ColorPreference.TYPE -> ColorPreference(context, json)
                 ColorPreferenceGroup.TYPE -> ColorPreferenceGroup(context, json)
                 SimplePreference.TYPE, "" -> SimplePreference(context, json)
+                SectionSeparator.TYPE -> SectionSeparator(context, json)
                 else -> null
             }
         }
