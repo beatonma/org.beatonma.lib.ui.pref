@@ -1,6 +1,8 @@
 <resources>
   <string name="app_name">prefs</string>
 
+  <string name="pref_app_choose">Choose an app</string>
+
   <string name="pref_color_choose">Choose a color</string>
   <string name="pref_color_custom">Custom</string>
   <string name="pref_color_preset">Preset</string>
