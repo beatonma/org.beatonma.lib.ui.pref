@@ -6,6 +6,9 @@ import java.util.regex.Pattern
 data class Dependency(val key: String, val operator: String, val value: String,
                       var passed: Boolean = true) : Serializable
 
+/**
+ * TODO This should be able to read @resources in the value position
+ */
 internal fun parseDependency(dependencyDefinition: String?): Dependency? {
     if (dependencyDefinition == null) return null
 

@@ -50,9 +50,7 @@ abstract class BasePreference : Serializable {
     }
 
     @Throws(JSONException::class)
-    constructor(context: Context,
-                obj: JSONObject) {
-
+    constructor(context: Context, obj: JSONObject) {
         name = getString(context, obj.optString(NAME))
         key = obj.getString(KEY)
         description = getString(context, obj.optString(DESCRIPTION, ""))
