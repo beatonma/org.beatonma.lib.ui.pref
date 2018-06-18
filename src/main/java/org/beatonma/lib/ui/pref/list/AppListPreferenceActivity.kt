@@ -36,7 +36,7 @@ class App(manager: PackageManager, activityInfo: ActivityInfo, var selected: Boo
     }
 
     override fun toString(): String {
-        return "Package: '$packageName', Activity: '$activityName'"
+        return "Activity: '$activityName'"
     }
 }
 
