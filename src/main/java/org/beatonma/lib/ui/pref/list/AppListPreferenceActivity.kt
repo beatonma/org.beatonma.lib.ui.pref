@@ -48,7 +48,7 @@ open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCall
         private const val APP_LIST_LOADER = 237
     }
 
-    override val layoutId: Int = R.layout.activity_list
+    override val contentLayoutID: Int = R.layout.activity_list
 
     private lateinit var preference: AppListPreference
     private lateinit var binding: ActivityListBinding
@@ -61,7 +61,7 @@ open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCall
         preference = extras?.getSerializable(EXTRA_APP_LIST_PREFERENCE) as AppListPreference
     }
 
-    override fun initLayout(binding: ViewDataBinding) {
+    override fun initContentLayout(binding: ViewDataBinding) {
         this.binding = binding as ActivityListBinding
         setTitle(R.string.pref_app_choose)
         adapter = buildAdapter()

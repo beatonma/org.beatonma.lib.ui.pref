@@ -24,7 +24,7 @@ class AllColorsPreferenceActivity : PopupActivity(),
         private const val COLOR_GROUP_WIDTH = 13
     }
 
-    override val layoutId: Int = R.layout.activity_all_colors
+    override val contentLayoutID: Int = R.layout.activity_all_colors
 
     private var patchSizeNormal = 0
 //    private var patchSizeSelected = 0
@@ -40,7 +40,7 @@ class AllColorsPreferenceActivity : PopupActivity(),
         return ColorAdapter()
     }
 
-    override fun initLayout(binding: ViewDataBinding) {
+    override fun initContentLayout(binding: ViewDataBinding) {
         setTitle(R.string.pref_color_choose)
 
         this.binding = binding as ActivityAllColorsBinding

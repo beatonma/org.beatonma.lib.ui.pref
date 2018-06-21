@@ -34,7 +34,7 @@ class CustomColorFragment : BaseFragment() {
         const val EXTRA_TRANSITION_NAME = "extra_transition_name"
     }
 
-    override val layoutId: Int = R.layout.fragment_color_custom
+    override val layoutID: Int = R.layout.fragment_color_custom
 
     lateinit var binding: FragmentColorCustomBinding
     lateinit var viewModel: ColorspaceViewModel

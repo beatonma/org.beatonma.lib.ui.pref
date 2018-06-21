@@ -24,6 +24,9 @@ import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
 import java.util.*
 
+
+private const val TAG = "ListPreferenceActivity"
+
 open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbacks<Result<List<ListItem>>> {
 
     companion object {
@@ -39,7 +42,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
     private lateinit var adapter: ListAdapter
     private var listItems: List<ListItem>? = null
 
-    override val layoutId: Int
+    override val contentLayoutID: Int
         get() = R.layout.activity_list
 
     open fun buildAdapter(): ListAdapter {
@@ -65,7 +68,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
         close()
     }
 
-    override fun initLayout(binding: ViewDataBinding) {
+    override fun initContentLayout(binding: ViewDataBinding) {
         adapter = buildAdapter()
         mBinding = binding as ActivityListBinding
         binding.recyclerview.setup(adapter)
@@ -85,7 +88,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
         when (loader.id) {
             LIST_LOADER -> {
                 if (result.isFailure) {
-                    Log.w(PopupActivity.TAG, "List loading failed: %s",
+                    Log.w(TAG, "List loading failed: %s",
                             result.errors.toPrettyString())
                 }
                 adapter.diff(listItems, result.data)

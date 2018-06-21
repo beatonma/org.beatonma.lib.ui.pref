@@ -1,6 +1,5 @@
 package org.beatonma.lib.ui.pref.core
 
-import android.os.Bundle
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.transaction
 import org.beatonma.lib.prefs.R
@@ -15,7 +14,7 @@ abstract class PreferenceActivity: BaseActivity() {
     /**
      * Layout resource file for this activity
      */
-    open val layoutId: Int = R.layout.activity_preferences
+    override val layoutID: Int = R.layout.activity_preferences
 
     /**
      * ID of the fragment container in the layout
@@ -27,10 +26,7 @@ abstract class PreferenceActivity: BaseActivity() {
      */
     abstract val definitionsId: Int
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setLayout(layoutId)
-
+    override fun initLayout(binding: ViewDataBinding) {
         val fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
                 ?: SimplePreferenceFragmentImpl.newInstance(definitionsId)
         supportFragmentManager.transaction {
@@ -41,7 +37,7 @@ abstract class PreferenceActivity: BaseActivity() {
 
 class SimplePreferenceFragmentImpl : PreferenceFragment() {
     override var preferenceDefinitions: Int = 0
-    override val layoutId: Int
+    override val layoutID: Int
         get() = R.layout.recyclerview
 
     companion object {
@@ -54,6 +50,6 @@ class SimplePreferenceFragmentImpl : PreferenceFragment() {
 
     override fun init(binding: ViewDataBinding) {
         binding as RecyclerviewBinding
-        binding.recyclerview?.setup(adapter)
+        binding.recyclerview.setup(adapter)
     }
 }

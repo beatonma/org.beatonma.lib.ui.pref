@@ -19,7 +19,7 @@ import org.beatonma.lib.ui.pref.preferences.ColorPreference
 
 class SwatchColorPreferenceActivity : PopupActivity() {
 
-    override val layoutId: Int = R.layout.activity_color
+    override val contentLayoutID: Int = R.layout.activity_color
 
     private var binding: ActivityColorBinding? = null
     private lateinit var viewModel: ColorPreferenceViewModel
@@ -29,13 +29,13 @@ class SwatchColorPreferenceActivity : PopupActivity() {
         const val REQUEST_CODE_UPDATE = 378
     }
 
-    override fun onPreCreate() {
-        super.onPreCreate()
+    override fun onPreLayout() {
+        super.onPreLayout()
         viewModel = ViewModelProviders.of(this).get(ColorPreferenceViewModel::class.java)
         viewModel.colorPreference.observe(this, Observer { save(it) })
     }
 
-    override fun initLayout(binding: ViewDataBinding) {
+    override fun initContentLayout(binding: ViewDataBinding) {
         setTitle(R.string.pref_color_choose)
 
         this.binding = binding as ActivityColorBinding

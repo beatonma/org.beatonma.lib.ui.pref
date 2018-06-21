@@ -31,7 +31,7 @@ class MaterialColorsFragment : BaseFragment() {
         private const val VIEW_LEVEL_COLORS = 1
     }
 
-    override val layoutId: Int = R.layout.fragment_color_material
+    override val layoutID: Int = R.layout.fragment_color_material
 
     lateinit var prefViewModel: ColorPreferenceViewModel
     lateinit var swatchViewModel: MaterialColorsViewModel
