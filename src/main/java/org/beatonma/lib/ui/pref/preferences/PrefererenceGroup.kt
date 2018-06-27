@@ -2,11 +2,9 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.annotation.NonNull
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 import org.beatonma.lib.core.kotlin.extensions.clone
-import org.beatonma.lib.log.Log
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -52,19 +50,16 @@ internal interface PreferenceContainer {
 
 class PreferenceGroup : BasePreference, PreferenceContainer {
 
-    @SerializedName("keymap")
     private val keyMap = HashMap<String, Int>()
 
     /**
      * key-to-key map. Displaying of first preference depends on the value of the second
      */
-    @SerializedName("dependencies")
     private val dependencies = HashMap<String, String>()
 
     val isEmpty: Boolean
         get() = preferences.isEmpty()
 
-    @SerializedName("preferences")
     var preferences = mutableListOf<BasePreference>()
         private set(prefs) {
             field.clone(prefs)
@@ -193,14 +188,6 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
         return false
     }
 
-    override fun toString(): String {
-        return Gson()
-                .newBuilder()
-                .setPrettyPrinting()
-                .create()
-                .toJson(this)
-    }
-
     override fun copyOf(): PreferenceGroup {
         return PreferenceGroup(this)
     }
@@ -281,7 +268,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
 
                 return writer.toString()
             } catch (e: IOException) {
-                Log.e(TAG, "Unable to read JSON resource id=%d: %s", resourceId, e)
+                Log.e(TAG, "Unable to read JSON resource id=$resourceId: $e")
             }
 
             return null

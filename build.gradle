@@ -22,11 +22,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
     implementation "androidx.recyclerview:recyclerview:$versions.androidx"
     implementation "com.google.android.material:material:$versions.androidx"
-    implementation "com.google.code.gson:gson:$versions.gson"
 
     api project(":modules:ui:style")
     api project(":modules:ui:recyclerview")
     api project(":modules:ui:activity")
     api project(":modules:load")
-    api project(":modules:log")
 }

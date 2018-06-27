@@ -2,7 +2,6 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.google.gson.annotations.SerializedName
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -30,13 +29,10 @@ class ColorPreference : BasePreference {
         const val SWATCH_POSITION = "swatch_position"
     }
 
-    @SerializedName(COLOR)
     var color: Int = 0
 
-    @SerializedName(SWATCH)
     var swatch: Int
 
-    @SerializedName(SWATCH_POSITION)
     var swatchPosition: Int
 
     override val type: String

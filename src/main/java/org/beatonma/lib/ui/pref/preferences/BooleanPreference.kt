@@ -2,7 +2,6 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.google.gson.annotations.SerializedName
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -26,13 +25,10 @@ class BooleanPreference : BasePreference {
         const val TYPE = "boolean"
     }
 
-    @SerializedName("checked")
     var isChecked: Boolean = false
 
-    @SerializedName("description_selected")
     private var mSelectedDescription: String? = null
 
-    @SerializedName("description_unselected")
     private var mUnselectedDescription: String? = null
 
     override val type: String

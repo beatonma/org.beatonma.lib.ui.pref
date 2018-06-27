@@ -2,7 +2,6 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.google.gson.annotations.SerializedName
 import org.beatonma.lib.core.kotlin.extensions.clone
 import org.json.JSONException
 import org.json.JSONObject
@@ -16,7 +15,6 @@ class ColorPreferenceGroup : BasePreference, PreferenceContainer {
         const val CHILD_COLORS = "colors"
     }
 
-    @SerializedName(CHILD_COLORS)
     val colors: MutableList<ColorPreference> = mutableListOf()
     val keyMap = mutableMapOf<String, Int>()
 
