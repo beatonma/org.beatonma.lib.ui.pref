@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
@@ -13,7 +14,6 @@ import androidx.loader.content.Loader
 import org.beatonma.lib.core.kotlin.extensions.toPrettyString
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
-import org.beatonma.lib.log.Log
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.ActivityListBinding
 import org.beatonma.lib.prefs.databinding.VhListItemSingleBinding
@@ -88,8 +88,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
         when (loader.id) {
             LIST_LOADER -> {
                 if (result.isFailure) {
-                    Log.w(TAG, "List loading failed: %s",
-                            result.errors.toPrettyString())
+                    Log.w(TAG, "List loading failed: ${result.errors.toPrettyString()}")
                 }
                 adapter.diff(listItems, result.data)
                 listItems = result.data
