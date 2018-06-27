@@ -1,17 +1,16 @@
-org.beatonma.lib:load:0.7.2
-org.beatonma.lib:log:0.7.2
+org.beatonma.lib:load:0.8.1
 
-org.beatonma.lib:style:0.7.2
-org.beatonma.lib:recyclerview:0.7.2
-org.beatonma.lib:activity:0.7.2
+org.beatonma.lib:style:0.8.1
+org.beatonma.lib:recyclerview:0.8.1
+org.beatonma.lib:activity:0.8.1
 
 androidx.constraintlayout:constraintlayout:1.1.2
 
 androidx.core:core-ktx:1.0.0-alpha3
 
-androidx.databinding:databinding-common:3.2.0-alpha18
-androidx.databinding:databinding-runtime:3.2.0-alpha18
-androidx.databinding:databinding-adapters:3.2.0-alpha18
+androidx.databinding:databinding-common:3.2.0-beta01
+androidx.databinding:databinding-runtime:3.2.0-beta01
+androidx.databinding:databinding-adapters:3.2.0-beta01
 
 androidx.fragment:fragment-ktx:1.0.0-alpha3
 
@@ -20,7 +19,5 @@ androidx.lifecycle:lifecycle-extensions:2.0.0-alpha1
 androidx.recyclerview:recyclerview:1.0.0-alpha3
 
 com.google.android.material:material:1.0.0-alpha3
-
-com.google.code.gson:gson:2.8.4
 
 org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.50
