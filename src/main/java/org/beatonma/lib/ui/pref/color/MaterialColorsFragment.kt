@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import androidx.core.view.ViewCompat
-import androidx.core.view.doOnPreDraw
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProviders
@@ -22,6 +21,7 @@ import org.beatonma.lib.prefs.databinding.FragmentColorMaterialBinding
 import org.beatonma.lib.ui.activity.BaseFragment
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
+import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
 
 class MaterialColorsFragment : BaseFragment() {
 
@@ -74,11 +74,11 @@ class MaterialColorsFragment : BaseFragment() {
     override fun init(binding: ViewDataBinding) {
         this.binding = binding as FragmentColorMaterialBinding
 
-        binding.recyclerview.apply {
-            adapter = colorsAdapter
-            layoutManager = GridLayoutManager(context, 4)
+        binding.recyclerview.setup(
+            adapter = colorsAdapter,
+            layoutManager = GridLayoutManager(context, 4),
             itemAnimator = ColorItemAnimator(gridWidth = 4)
-        }
+        )
 
         getColorActivity()?.apply {
             onCustomActionClick(
@@ -93,11 +93,6 @@ class MaterialColorsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        postponeEnterTransition()
-
-        (view.parent as? ViewGroup)?.doOnPreDraw {
-            startPostponedEnterTransition()
-        }
 
         savedInstanceState?.run {
             level = getInt("level", VIEW_LEVEL_SWATCHES)
