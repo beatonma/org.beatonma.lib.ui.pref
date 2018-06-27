@@ -10,7 +10,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
-import org.beatonma.lib.ui.recyclerview.BaseItemAnimator
+import org.beatonma.lib.ui.recyclerview.itemanimator.BaseItemAnimator
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 
 /**
