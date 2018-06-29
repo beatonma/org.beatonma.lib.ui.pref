@@ -2,7 +2,7 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import org.beatonma.lib.core.kotlin.extensions.clone
+import org.beatonma.lib.util.kotlin.extensions.clone
 import org.json.JSONException
 import org.json.JSONObject
 

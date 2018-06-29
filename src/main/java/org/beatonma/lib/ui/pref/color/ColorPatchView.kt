@@ -12,15 +12,14 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.ColorInt
-import org.beatonma.lib.core.kotlin.extensions.boolean
-import org.beatonma.lib.core.kotlin.extensions.color
-import org.beatonma.lib.core.kotlin.extensions.dimen
-import org.beatonma.lib.core.util.Sdk
-import org.beatonma.lib.core.util.textColorFor
-import org.beatonma.lib.core.util.toHsv
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.style.Interpolate
-
+import org.beatonma.lib.util.Sdk
+import org.beatonma.lib.util.kotlin.extensions.boolean
+import org.beatonma.lib.util.kotlin.extensions.color
+import org.beatonma.lib.util.kotlin.extensions.dimen
+import org.beatonma.lib.util.textColorFor
+import org.beatonma.lib.util.toHsv
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class ColorPatchView @JvmOverloads constructor(
@@ -283,7 +282,9 @@ class ColorPatchView @JvmOverloads constructor(
 
     private fun selectionColorFor(color: Int): Int {
 //        val originalHsv = toHsv(color)
-        val selectionHsv = toHsv(textColorFor(context, color))
+        val selectionHsv = toHsv(textColorFor(context, color,
+                darkTextResId = R.color.TextPrimaryDark,
+                lightTextResId = R.color.TextPrimaryLight))
 //        if (originalHsv[1] > 0F) {
 //            // If color has a saturation value (i.e. is not grey)
 //            // then apply its hue to selection color

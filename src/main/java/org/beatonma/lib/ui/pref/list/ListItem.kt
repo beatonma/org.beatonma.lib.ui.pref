@@ -2,7 +2,7 @@ package org.beatonma.lib.ui.pref.list
 
 import android.view.View
 import androidx.databinding.BindingAdapter
-import org.beatonma.lib.core.util.Sdk
+import org.beatonma.lib.util.Sdk
 import java.io.Serializable
 import java.util.*
 

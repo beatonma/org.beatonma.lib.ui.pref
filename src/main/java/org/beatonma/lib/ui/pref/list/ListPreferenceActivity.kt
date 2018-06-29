@@ -11,7 +11,6 @@ import androidx.annotation.NonNull
 import androidx.databinding.ViewDataBinding
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import org.beatonma.lib.core.kotlin.extensions.toPrettyString
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.prefs.R
@@ -22,6 +21,7 @@ import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.util.kotlin.extensions.toPrettyString
 import java.util.*
 
 

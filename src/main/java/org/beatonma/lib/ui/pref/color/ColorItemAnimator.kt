@@ -8,10 +8,10 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
-import org.beatonma.lib.ui.recyclerview.itemanimator.BaseItemAnimator
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
+import org.beatonma.lib.ui.recyclerview.itemanimator.BaseItemAnimator
+import org.beatonma.lib.util.Sdk
 
 /**
  * Implementation assumes the associated RecyclerView uses a GridLayoutManager with an adapter

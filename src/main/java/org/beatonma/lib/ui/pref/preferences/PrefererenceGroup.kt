@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.NonNull
-import org.beatonma.lib.core.kotlin.extensions.clone
+import org.beatonma.lib.util.kotlin.extensions.clone
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject

@@ -9,8 +9,6 @@ import android.widget.CompoundButton
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.beatonma.lib.core.kotlin.extensions.clone
-import org.beatonma.lib.core.util.Sdk
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.activity.ActivityBuilder
 import org.beatonma.lib.ui.pref.color.BasePatchViewHolder
@@ -23,6 +21,8 @@ import org.beatonma.lib.ui.pref.preferences.*
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
+import org.beatonma.lib.util.Sdk
+import org.beatonma.lib.util.kotlin.extensions.clone
 import java.lang.ref.WeakReference
 
 open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {

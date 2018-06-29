@@ -18,12 +18,12 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.transition.*
 import androidx.transition.Visibility.MODE_IN
 import com.google.android.material.tabs.TabLayout
-import org.beatonma.lib.core.kotlin.extensions.dp
-import org.beatonma.lib.core.util.Sdk
-import org.beatonma.lib.core.util.toHsv
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.FragmentColorCustomBinding
 import org.beatonma.lib.ui.activity.BaseFragment
+import org.beatonma.lib.util.Sdk
+import org.beatonma.lib.util.kotlin.extensions.dp
+import org.beatonma.lib.util.toHsv
 
 class CustomColorFragment : BaseFragment() {
     companion object {

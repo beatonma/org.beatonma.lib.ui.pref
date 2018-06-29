@@ -12,9 +12,6 @@ import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
-import org.beatonma.lib.core.kotlin.extensions.autotag
-import org.beatonma.lib.core.kotlin.extensions.toPrettyString
-import org.beatonma.lib.core.kotlin.extensions.toast
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.prefs.R
@@ -25,6 +22,9 @@ import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.util.kotlin.extensions.autotag
+import org.beatonma.lib.util.kotlin.extensions.toPrettyString
+import org.beatonma.lib.util.kotlin.extensions.toast
 
 class App(manager: PackageManager, activityInfo: ActivityInfo, var selected: Boolean = false) {
     val packageName: String = activityInfo.packageName
