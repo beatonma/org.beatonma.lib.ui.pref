@@ -1,16 +1,16 @@
-org.beatonma.lib:load:0.8.1
+org.beatonma.lib:load:0.9.7
 
-org.beatonma.lib:style:0.8.1
-org.beatonma.lib:recyclerview:0.8.1
-org.beatonma.lib:activity:0.8.1
+org.beatonma.lib:style:0.9.7
+org.beatonma.lib:recyclerview:0.9.7
+org.beatonma.lib:activity:0.9.7
 
 androidx.constraintlayout:constraintlayout:1.1.2
 
 androidx.core:core-ktx:1.0.0-alpha3
 
-androidx.databinding:databinding-common:3.2.0-beta01
-androidx.databinding:databinding-runtime:3.2.0-beta01
-androidx.databinding:databinding-adapters:3.2.0-beta01
+androidx.databinding:databinding-common:3.3.0-alpha02
+androidx.databinding:databinding-runtime:3.3.0-alpha02
+androidx.databinding:databinding-adapters:3.3.0-alpha02
 
 androidx.fragment:fragment-ktx:1.0.0-alpha3
 
