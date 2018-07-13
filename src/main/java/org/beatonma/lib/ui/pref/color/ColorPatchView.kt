@@ -11,32 +11,29 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.animation.OvershootInterpolator
+import android.widget.ImageView
 import androidx.annotation.ColorInt
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.style.Interpolate
 import org.beatonma.lib.util.Sdk
-import org.beatonma.lib.util.kotlin.extensions.boolean
-import org.beatonma.lib.util.kotlin.extensions.color
-import org.beatonma.lib.util.kotlin.extensions.dimen
+import org.beatonma.lib.util.kotlin.extensions.*
 import org.beatonma.lib.util.textColorFor
 import org.beatonma.lib.util.toHsv
+
+
+private const val CHOSEN_ANIM_DURATION = 450L
+private const val CHOSEN_THICKNESS_DIP = 3F
+private const val CHOSEN_INDENT_DIP = 1.5F
+private const val CHOSEN_OPACITY = 100   // 0-255
+private const val CHOSEN_PADDING = 0.75F // Multiplier of default view padding
+                                         // View size is increased by reducing padding
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class ColorPatchView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = R.attr.ColorPatchStyle
-) : View(context, attrs, defStyleAttr) {
-
-    companion object {
-        private const val TAG = "ColorPatchView"
-        private const val CHOSEN_ANIM_DURATION = 450L
-        private const val CHOSEN_THICKNESS_DIP = 3F
-        private const val CHOSEN_INDENT_DIP = 1.5F
-        private const val CHOSEN_OPACITY = 100  // 0-255
-        private const val CHOSEN_PADDING = 0.75F // Multiplier of default view padding
-        // View size is increased by reducing padding
-    }
+) : ImageView(context, attrs, defStyleAttr) {
 
     //    private val fill = FillAnimation()
     private val cornerRadius: Float
@@ -93,6 +90,10 @@ class ColorPatchView @JvmOverloads constructor(
                 }
             }
         }
+
+        context.drawableCompat(R.drawable.ic_transparency)?.let {
+            setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -108,8 +109,7 @@ class ColorPatchView @JvmOverloads constructor(
                 w - paddingRight,
                 h - paddingBottom)
 
-        val inset = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, CHOSEN_INDENT_DIP, resources.displayMetrics)
+        val inset = context.dp(CHOSEN_INDENT_DIP)
 
         chosenAnimBounds.set(outlineBounds)
         chosenAnimBounds.inset(inset, inset)
@@ -138,6 +138,8 @@ class ColorPatchView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (canvas == null) return
+
+        canvas.drawColor(color)
 
 //        fill.onDraw(canvas)
         if (drawChosen(canvas)) {
