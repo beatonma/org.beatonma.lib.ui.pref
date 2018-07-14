@@ -1,6 +1,5 @@
 package org.beatonma.lib.ui.pref.color
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -12,17 +11,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.ActivityColorBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.ColorPreference
-
 
 class SwatchColorPreferenceActivity : PopupActivity() {
 
     override val contentLayoutID: Int = R.layout.activity_color
 
-    private var binding: ActivityColorBinding? = null
-    private lateinit var viewModel: ColorPreferenceViewModel
+    internal lateinit var viewModel: ColorPreferenceViewModel
 
     companion object {
         const val EXTRA_COLOR_PREFERENCE = "extra_color_preference"
@@ -38,23 +34,19 @@ class SwatchColorPreferenceActivity : PopupActivity() {
     override fun initContentLayout(binding: ViewDataBinding) {
         setTitle(R.string.pref_color_choose)
 
-        this.binding = binding as ActivityColorBinding
-
-        if (viewModel.colorPreference.value?.swatch ?: 0 < 0) {
-            customiseColor(viewModel.colorPreference.value!!.color)
-        }
-        else {
+        if (viewModel.colorPreference.value?.color?.swatch ?: 0 < 0) {
+            customiseColor(viewModel.colorPreference.value?.color?.color)
+        } else {
             showMaterialColors()
         }
     }
 
-    override fun loadState(savedState: Bundle?) {
-        super.loadState(savedState)
-    }
+//    override fun loadState(savedState: Bundle?) {
+//        super.loadState(savedState)
+//    }
 
     override fun onBackPressed() {
-        supportFragmentManager.findFragmentByTag(MaterialColorsFragment.TAG)?.let {
-            it as MaterialColorsFragment
+        (supportFragmentManager.findFragmentByTag(MaterialColorsFragment.TAG) as? MaterialColorsFragment)?.let {
             if (it.onBackPressed()) {
                 // If fragment consumes the event then stop here
                 return
@@ -79,21 +71,23 @@ class SwatchColorPreferenceActivity : PopupActivity() {
         }
     }
 
-    fun customiseColor(color: Int, sharedView: View? = null) {
+    fun customiseColor(color: Int?, sharedView: View? = null) {
         val transitionName = if (sharedView != null) ViewCompat.getTransitionName(sharedView) else null
         val fragment: CustomColorFragment =
                 supportFragmentManager.findFragmentByTag(CustomColorFragment.TAG) as? CustomColorFragment
-                ?: CustomColorFragment()
-        fragment.updateArgs(color, transitionName)
+                        ?: CustomColorFragment()
+        color?.let {
+            fragment.updateArgs(color, transitionName, viewModel.colorPreference.value?.alphaEnabled)
+        }
 
         prepareResize()
         supportFragmentManager.transaction {
             replace(R.id.fragment_container, fragment, CustomColorFragment.TAG)
             setReorderingAllowed(true)
             if (transitionName != null) {
-                addSharedElement(
-                        sharedView!!,
-                        transitionName)
+                sharedView?.let {
+                    addSharedElement(it, transitionName)
+                }
 
                 // If we are customising a template color, allow the user to return to it easily
                 addToBackStack(CustomColorFragment.TAG)
