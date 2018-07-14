@@ -12,11 +12,36 @@
       android:id="@+id/preview"
       android:layout_width="@dimen/color_custom_preview_size"
       android:layout_height="@dimen/color_custom_preview_size"
+      android:focusable="true"
+      android:focusableInTouchMode="true"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:patch_cornerRadius="@dimen/card_corner_radius"
       tools:background="@color/Accent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/hashsign"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="#"
+      android:textColor="@color/TextSecondary"
+      app:layout_constraintBaseline_toBaselineOf="@+id/hex"
+      app:layout_constraintEnd_toStartOf="@+id/hex"/>
+
+    <androidx.appcompat.widget.AppCompatEditText
+      android:id="@+id/hex"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:backgroundTint="@color/Transparent"
+      android:defaultFocusHighlightEnabled="false"
+      android:minWidth="@dimen/button_min_width"
+      android:textColor="@color/TextPrimary"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/preview"
+      app:layout_constraintWidth_min="@dimen/button_min_width"
+      tools:text="FF00FF00"/>
 
     <!-- fake tabs with no viewpager - they just change the function of the seekbars below -->
     <com.google.android.material.tabs.TabLayout
@@ -27,7 +52,7 @@
       android:clipChildren="false"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/preview"
+      app:layout_constraintTop_toBottomOf="@+id/hex"
       app:tabGravity="center"
       app:tabIndicatorFullWidth="false"
       app:tabMode="fixed"
@@ -118,7 +143,7 @@
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:minHeight="@dimen/min_touch_target_size"
-      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/seekbar4"
       app:layout_constraintEnd_toStartOf="@+id/value3"
       app:layout_constraintHeight_min="@dimen/min_touch_target_size"
       app:layout_constraintStart_toEndOf="@+id/label3"
@@ -132,6 +157,39 @@
       app:layout_constraintStart_toEndOf="@+id/seekbar3"
       app:layout_constraintTop_toTopOf="@+id/seekbar3"
       tools:text="value3"/>
+
+
+    <TextView
+      android:id="@+id/label4"
+      style="@style/Text.Primary.Label"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar4"
+      app:layout_constraintEnd_toStartOf="@+id/seekbar4"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/seekbar4"
+      tools:text="label4"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+      android:id="@+id/seekbar4"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:minHeight="@dimen/min_touch_target_size"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/value4"
+      app:layout_constraintHeight_min="@dimen/min_touch_target_size"
+      app:layout_constraintStart_toEndOf="@+id/label4"
+      app:layout_constraintTop_toBottomOf="@+id/seekbar3"/>
+
+    <TextView
+      android:id="@+id/value4"
+      style="@style/Text.Primary.Label"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="@+id/seekbar4"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/seekbar4"
+      app:layout_constraintTop_toTopOf="@+id/seekbar4"
+      tools:text="value4"/>
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
