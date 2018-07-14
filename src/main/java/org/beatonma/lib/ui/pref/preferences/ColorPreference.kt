@@ -4,54 +4,80 @@ import android.content.Context
 import android.content.SharedPreferences
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.Serializable
+
+const val COLOR = "color"
+const val SWATCH = "swatch"
+const val SWATCH_POSITION = "swatch_position"
+const val ALPHA_ENABLED = "alpha_enabled"
 
 class ColorPreference : BasePreference {
 
-    constructor(source: ColorPreference): super(source) {
-        color = source.color
-        swatch = source.swatch
-        swatchPosition = source.swatchPosition
+    constructor(source: ColorPreference) : super(source) {
+        color.clone(source.color)
+        alphaEnabled = source.alphaEnabled
     }
 
     @Throws(JSONException::class)
     constructor(context: Context, obj: JSONObject) : super(context, obj) {
-        color = getInt(context, obj.optString(COLOR, "0"))
-        swatch = getInt(context, obj.optString(SWATCH, "-1"))
-        swatchPosition = getInt(context, obj.optString(SWATCH_POSITION, "-1"))
+        color.color = getInt(context, obj.optString(COLOR, "0"))
+        color.swatch = getInt(context, obj.optString(SWATCH, "-1"))
+        color.swatchPosition = getInt(context, obj.optString(SWATCH_POSITION, "-1"))
+        alphaEnabled = getBoolean(context, obj.optString(ALPHA_ENABLED, "false"))
     }
 
     companion object {
         private const val TAG = "ColorPreference"
 
         const val TYPE = "color"
-        const val COLOR = "color"
-        const val SWATCH = "swatch"
-        const val SWATCH_POSITION = "swatch_position"
     }
 
-    var color: Int = 0
-
-    var swatch: Int
-
-    var swatchPosition: Int
+    val color: ColorItem = ColorItem(0)
+    val alphaEnabled: Boolean
 
     override val type: String
         get() = TYPE
 
     override fun load(preferences: SharedPreferences) {
-        color = preferences.getInt(key, color)
-        swatch = preferences.getInt("${key}_$SWATCH", -1)
-        swatchPosition = preferences.getInt("${key}_$SWATCH_POSITION", -1)
+        color.load(preferences, key)
     }
 
     override fun save(editor: SharedPreferences.Editor) {
-        editor.putInt(key, color)
-        editor.putInt("${key}_$SWATCH", swatch)
-        editor.putInt("${key}_$SWATCH_POSITION", swatchPosition)
+        color.save(editor, key)
     }
 
     override fun copyOf(): BasePreference {
         return ColorPreference(this)
+    }
+
+    fun update(color: Int, swatch: Int = -1, swatchPosition: Int = -1) {
+        this.color.color = color
+        this.color.swatch = swatch
+        this.color.swatchPosition = swatchPosition
+    }
+
+    override fun sameContents(other: Any?): Boolean {
+        other as ColorPreference
+        return color == other.color
+                && alphaEnabled == other.alphaEnabled
+                && super.sameContents(other)
+    }
+
+    override fun toString(): String {
+        return "ColorPreference(color=$color)"
+    }
+}
+
+data class ColorItem(var color: Int, var swatch: Int = -1, var swatchPosition: Int = -1) : Serializable {
+    fun clear() {
+        swatch = -1
+        swatchPosition = -1
+    }
+
+    fun clone(other: ColorItem) {
+        this.color = other.color
+        this.swatch = other.swatch
+        this.swatchPosition = other.swatchPosition
     }
 
     fun update(color: Int, swatch: Int = -1, swatchPosition: Int = -1) {
@@ -60,15 +86,15 @@ class ColorPreference : BasePreference {
         this.swatchPosition = swatchPosition
     }
 
-    override fun sameContents(other: Any?): Boolean {
-        other as ColorPreference
-        return color == other.color
-                && swatch == other.swatch
-                && swatchPosition == other.swatchPosition
-                && super.sameContents(other)
+    fun load(preferences: SharedPreferences, key: String) {
+        color = preferences.getInt(key, color)
+        swatch = preferences.getInt("${key}_$SWATCH", -1)
+        swatchPosition = preferences.getInt("${key}_$SWATCH_POSITION", -1)
     }
 
-    override fun toString(): String {
-        return "ColorPreference(color=$color, swatch=$swatch. swatchPosition=$swatchPosition)"
+    fun save(editor: SharedPreferences.Editor, key: String) {
+        editor.putInt(key, color)
+        editor.putInt("${key}_$SWATCH", swatch)
+        editor.putInt("${key}_$SWATCH_POSITION", swatchPosition)
     }
 }
