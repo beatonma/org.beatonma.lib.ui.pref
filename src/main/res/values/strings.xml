@@ -18,5 +18,7 @@
   <string name="rgb_green_short">G</string>
   <string name="rgb_blue_short">B</string>
 
+  <string name="alpha_short">A</string>
+
   <string name="transition_color_preview">transition_color_preview</string>
 </resources>
