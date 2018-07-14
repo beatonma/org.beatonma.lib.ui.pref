@@ -18,17 +18,19 @@ import androidx.transition.Visibility.MODE_IN
 import org.beatonma.lib.prefs.R
 import org.beatonma.lib.prefs.databinding.FragmentColorMaterialBinding
 import org.beatonma.lib.ui.activity.BaseFragment
+import org.beatonma.lib.ui.pref.preferences.ColorItem
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
 import org.beatonma.lib.util.kotlin.extensions.clone
 
+private const val VIEW_LEVEL_SWATCHES = 0
+private const val VIEW_LEVEL_COLORS = 1
+
 class MaterialColorsFragment : BaseFragment() {
 
     companion object {
         const val TAG = "MaterialColorsFrag"
-        private const val VIEW_LEVEL_SWATCHES = 0
-        private const val VIEW_LEVEL_COLORS = 1
     }
 
     override val layoutID: Int = R.layout.fragment_color_material
@@ -48,8 +50,6 @@ class MaterialColorsFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        prefViewModel = ViewModelProviders.of(activity!!).get(ColorPreferenceViewModel::class.java)
-        swatchViewModel = ViewModelProviders.of(this).get(MaterialColorsViewModel::class.java)
 
         val fade = Fade().apply {
             mode = MODE_IN
@@ -75,16 +75,16 @@ class MaterialColorsFragment : BaseFragment() {
         this.binding = binding as FragmentColorMaterialBinding
 
         binding.recyclerview.setup(
-            adapter = colorsAdapter,
-            layoutManager = GridLayoutManager(context, 4),
-            itemAnimator = ColorItemAnimator(gridWidth = 4)
+                adapter = colorsAdapter,
+                layoutManager = GridLayoutManager(context, 4),
+                itemAnimator = ColorItemAnimator(gridWidth = 4)
         )
 
         getColorActivity()?.apply {
             onCustomActionClick(
                     R.string.pref_color_custom,
                     View.OnClickListener {
-                        customiseColor(prefViewModel.colorPreference.value?.color ?: 0x000000)
+                        customiseColor(prefViewModel.colorPreference.value?.color?.color ?: 0x000000)
                     }
             )
             onPositiveClick()
@@ -93,6 +93,10 @@ class MaterialColorsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.let {
+            prefViewModel = ViewModelProviders.of(it).get(ColorPreferenceViewModel::class.java)
+        }
+        swatchViewModel = ViewModelProviders.of(this).get(MaterialColorsViewModel::class.java)
 
         savedInstanceState?.run {
             level = getInt("level", VIEW_LEVEL_SWATCHES)
@@ -115,7 +119,7 @@ class MaterialColorsFragment : BaseFragment() {
     }
 
     private fun getColorItemAnimator(): ColorItemAnimator? {
-        return binding?.recyclerview?.itemAnimator as ColorItemAnimator
+        return binding?.recyclerview?.itemAnimator as? ColorItemAnimator
     }
 
     fun onBackPressed(): Boolean {
@@ -138,7 +142,7 @@ class MaterialColorsFragment : BaseFragment() {
     }
 
     private fun getColorActivity(): SwatchColorPreferenceActivity? {
-        return activity as SwatchColorPreferenceActivity
+        return activity as? SwatchColorPreferenceActivity
     }
 
     inner class PatchAdapter(val callback: ColorSelectedCallback) : BaseRecyclerViewAdapter() {
@@ -168,14 +172,14 @@ class MaterialColorsFragment : BaseFragment() {
                 val colorPref = prefViewModel.colorPreference.value
                 when (level) {
                     VIEW_LEVEL_SWATCHES -> {
-                        patch.choose(position == colorPref?.swatch, true)
+                        patch.choose(position == colorPref?.color?.swatch, true)
                         patch.setOnClickListener { showSwatch(position) }
                     }
                     VIEW_LEVEL_COLORS -> {
                         patch.chosen = false
                         patch.choose(
-                                openSwatch == colorPref?.swatch
-                                        && position == colorPref.swatchPosition,
+                                openSwatch == colorPref?.color?.swatch
+                                        && position == colorPref.color.swatchPosition,
                                 true)
 
                         patch.setOnClickListener { selectColor(patch, position) }
@@ -230,7 +234,7 @@ class MaterialColorsFragment : BaseFragment() {
     }
 }
 
-class MaterialColorsViewModel(context: Application) : AndroidViewModel(context) {
+class MaterialColorsViewModel(application: Application) : AndroidViewModel(application) {
     val swatches: List<Swatch>
 
     init {
@@ -255,15 +259,14 @@ class MaterialColorsViewModel(context: Application) : AndroidViewModel(context) 
                 R.array.material_brown,
                 R.array.material_grey
         )
-        swatches = MutableList(defs.size) {
-            val swatchDef: IntArray = context.resources.getIntArray(defs[it])
-            val colors: MutableList<ColorItem> = MutableList(swatchDef.size) { id ->
+        swatches = List(defs.size) {
+            val swatchDef: IntArray = getApplication<Application>().resources.getIntArray(defs[it])
+            val colors: List<ColorItem> = List(swatchDef.size) { id ->
                 ColorItem(swatchDef[id])
             }
-            val s = Swatch(colors, colors[5])
-            s
+            Swatch(colors, colors[5])
         }
     }
 }
 
-data class Swatch(val colors: MutableList<ColorItem>, val canonical: ColorItem)
+data class Swatch(val colors: List<ColorItem>, val canonical: ColorItem)
