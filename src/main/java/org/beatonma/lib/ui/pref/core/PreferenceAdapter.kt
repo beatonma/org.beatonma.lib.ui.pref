@@ -288,7 +288,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ColorPreference?) {
             super.bind(weakPrefs, preference)
             preference ?: return
-            patch.color = preference.color
+            patch.color = preference.color.color
             firstDisplay = false
             itemView.setOnClickListener { v ->
                 ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
@@ -331,7 +331,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             inner class PatchViewHolder(v: View) : BasePatchViewHolder(v) {
                 override fun bind(position: Int) {
                     val preference = colors[position]
-                    patch.color = preference.color
+                    patch.color = preference.color.color
 
                     patch.setOnClickListener { v ->
                         ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
