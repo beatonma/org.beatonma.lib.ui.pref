@@ -18,6 +18,11 @@ internal fun getString(context: Context,
     return if (resId == 0) text else context.resources.getString(resId)
 }
 
+internal fun getBoolean(context: Context,
+                        text: String?): Boolean {
+    val resId = getResourceId(context, text)
+    return if (resId == 0) text?.toBoolean() ?: false else context.resources.getBoolean(resId)
+}
 
 
 internal fun getInt(context: Context,
