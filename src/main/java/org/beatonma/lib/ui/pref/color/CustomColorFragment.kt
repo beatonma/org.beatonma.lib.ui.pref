@@ -186,9 +186,13 @@ class CustomColorFragment : BaseFragment() {
         binding.hex.filters = arrayOf(
                 // Accept [0-9a-fA-F]*, ignore anything else
                 InputFilter { source, start, end, dest, dstart, dend ->
+                    val builder = StringBuilder()
                     source.forEach {
                         if (!hexPattern.matcher(it.toString()).matches()) {
                             return@InputFilter ""
+                        }
+                        else {
+                            builder.append(it.toUpperCase())
                         }
                     }
 
@@ -206,7 +210,7 @@ class CustomColorFragment : BaseFragment() {
                         Log.d(autotag, "Unable to parse color from empty string")
                     }
 
-                    null
+                    builder.toString()
                 },
                 // Show/hide alpha part of hexadecimal
                 InputFilter.LengthFilter(if (show) 8 else 6))
@@ -248,8 +252,13 @@ class CustomColorFragment : BaseFragment() {
                 hex.tag = TAG_NO_UPDATE  // Temporarily disable input listener
                 clear()
 
-                // If alpha editing is disabled, remove the alpha component from hex string
-                append(if (alphaEnabled) comps.hex else comps.hex.substring(2))
+                if (alphaEnabled) {
+                    append(comps.hex)
+                } else {
+                    // If alpha editing is disabled, remove the alpha component from hex string
+                    if (comps.hex.length == 8) append(comps.hex.substring(2))
+                }
+//                append(if (alphaEnabled) comps.hex else comps.hex.substring(2))
                 hex.tag = null
             }
             if (viewModel.colorspace.value == Colorspace.HSV) {
