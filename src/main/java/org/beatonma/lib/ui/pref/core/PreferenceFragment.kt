@@ -3,7 +3,6 @@ package org.beatonma.lib.ui.pref.core
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.loader.app.LoaderManager
@@ -20,8 +19,7 @@ import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
 import java.lang.ref.WeakReference
 
 abstract class PreferenceFragment : BaseFragment(),
-        LoaderManager.LoaderCallbacks<Result<PreferenceGroup>>,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        LoaderManager.LoaderCallbacks<Result<PreferenceGroup>> {
     companion object {
         private const val LOADER_PREFS = 34659
     }
@@ -80,7 +78,8 @@ abstract class PreferenceFragment : BaseFragment(),
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Result<PreferenceGroup>> {
-        return PreferenceLoader(context!!, preferenceDefinitions)
+        return context?.let { PreferenceLoader(it, preferenceDefinitions) }
+                ?: throw IllegalStateException() // Context should never be null when this is called
     }
 
     override fun onLoadFinished(loader: Loader<Result<PreferenceGroup>>, result: Result<PreferenceGroup>) {
@@ -95,10 +94,6 @@ abstract class PreferenceFragment : BaseFragment(),
     }
 
     override fun onLoaderReset(loader: Loader<Result<PreferenceGroup>>) {
-
-    }
-
-    override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
 
     }
 }
