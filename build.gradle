@@ -1,27 +1,10 @@
-/**
- * Gradle/Maven/Artifactory setup tutorial: http://jeroenmols.com/blog/2015/08/06/artifactory/
- *
- * Quick look:
- * - Deploy with 'gradlew assembleRelease artifactoryPublish'
- *
- *
- * Variables are defined in the root gradle.properties
- * Secured variables are in the system user %HOME%/.gradle/gradle.properties
- */
-
-apply plugin: 'com.android.library'
-
-android {
-
-}
-
 dependencies {
-    implementation "androidx.constraintlayout:constraintlayout:$versions.constraint"
-    implementation "androidx.core:core-ktx:$versions.androidx"
-    implementation "androidx.fragment:fragment-ktx:$versions.androidx"
-    implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
-    implementation "androidx.recyclerview:recyclerview:$versions.androidx"
-    implementation "com.google.android.material:material:$versions.androidx"
+    implementation "$module_dependencies.google.constraint"
+    implementation "$module_dependencies.google.ktx.core"
+    implementation "$module_dependencies.google.ktx.fragment"
+    implementation "$module_dependencies.google.lifecycle.extensions"
+    implementation "$module_dependencies.google.material"
+    implementation "$module_dependencies.google.recyclerview"
 
     api project(":modules:ui:style")
     api project(":modules:ui:recyclerview")
