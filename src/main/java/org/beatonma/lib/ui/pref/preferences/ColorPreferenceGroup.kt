@@ -6,16 +6,16 @@ import org.beatonma.lib.util.kotlin.extensions.clone
 import org.json.JSONException
 import org.json.JSONObject
 
+const val CHILD_COLORS = "colors"
 class ColorPreferenceGroup : BasePreference, PreferenceContainer {
 
     companion object {
         private const val TAG = "ColorPreference"
 
         const val TYPE = "color_group"
-        const val CHILD_COLORS = "colors"
     }
 
-    val colors: MutableList<ColorPreference> = mutableListOf()
+    val colors = mutableListOf<ColorPreference>()
     val keyMap = mutableMapOf<String, Int>()
 
     constructor(source: ColorPreferenceGroup): super(source) {
@@ -25,8 +25,10 @@ class ColorPreferenceGroup : BasePreference, PreferenceContainer {
 
     @Throws(JSONException::class)
     constructor(context: Context, obj: JSONObject) : super(context, obj) {
+        // If alpha_enabled is enabled on the ColorPreferenceGroup then apply it to all children
+        val alpha = getBoolean(context, obj.optString(ALPHA_ENABLED, "false"))
         obj.optJSONArray(CHILD_COLORS).forEachObj {
-            colors.add(ColorPreference(context, it))
+            colors.add(ColorPreference(context, it).apply { if (alpha) alphaEnabled = alpha })
             for (i in colors.indices) {
                 keyMap[colors[i].key] = i
             }

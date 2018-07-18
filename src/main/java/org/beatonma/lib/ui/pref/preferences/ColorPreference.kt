@@ -33,7 +33,7 @@ class ColorPreference : BasePreference {
     }
 
     val color: ColorItem = ColorItem(0)
-    val alphaEnabled: Boolean
+    var alphaEnabled: Boolean
 
     override val type: String
         get() = TYPE
