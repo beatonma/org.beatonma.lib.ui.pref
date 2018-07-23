@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 
+@Deprecated
 public class PrefUtils {
     private final static String DEFAULT_PREFS = "prefs";
 
