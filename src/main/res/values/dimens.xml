@@ -7,7 +7,7 @@
   <dimen name="color_patch_small">64dp</dimen>
 
   <!-- Use in a top-level 'preview' context -->
-  <dimen name="color_patch_large">88dp</dimen>
+  <dimen name="color_patch_large">72dp</dimen>
 
   <dimen name="color_custom_preview_size">112dp</dimen>
 </resources>
