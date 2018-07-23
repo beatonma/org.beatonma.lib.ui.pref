@@ -1,8 +1,11 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.beatonma.lib.prefs">
+  package="org.beatonma.lib.ui.pref">
 
   <application>
+    <activity
+        android:name="org.beatonma.lib.ui.pref.color.MinimalActivity"
+        android:exported="true"/>
     <activity
       android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
       android:exported="true"/>

@@ -1,6 +1,6 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.beatonma.lib.prefs">
+  package="org.beatonma.lib.ui.pref">
 
   <application>
     <activity
