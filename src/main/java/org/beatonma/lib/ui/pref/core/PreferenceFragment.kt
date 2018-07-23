@@ -18,11 +18,9 @@ import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
 import java.lang.ref.WeakReference
 
+private const val LOADER_PREFS = 34659
 abstract class PreferenceFragment : BaseFragment(),
         LoaderManager.LoaderCallbacks<Result<PreferenceGroup>> {
-    companion object {
-        private const val LOADER_PREFS = 34659
-    }
 
     lateinit var adapter: PreferenceAdapter
     var weakContext: WeakReference<Context>? = null
@@ -41,6 +39,7 @@ abstract class PreferenceFragment : BaseFragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        adapter.onRestoreInstanceState(savedInstanceState)
         LoaderManager.getInstance(this).initLoader(LOADER_PREFS, null, this)
     }
 
@@ -95,5 +94,10 @@ abstract class PreferenceFragment : BaseFragment(),
 
     override fun onLoaderReset(loader: Loader<Result<PreferenceGroup>>) {
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        adapter.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
     }
 }

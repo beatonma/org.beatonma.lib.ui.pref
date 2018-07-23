@@ -2,6 +2,7 @@ package org.beatonma.lib.ui.pref.core
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,8 @@ import android.widget.CompoundButton
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.beatonma.lib.prefs.R
 import org.beatonma.lib.ui.activity.ActivityBuilder
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.color.BasePatchViewHolder
 import org.beatonma.lib.ui.pref.color.ColorItemAnimator
 import org.beatonma.lib.ui.pref.color.ColorPatchView
@@ -37,8 +38,6 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     }
 
     companion object {
-        private const val TAG = "PreferenceAdapter"
-
         const val TYPE_SIMPLE = 0
         const val TYPE_BOOLEAN = 1
         const val TYPE_LIST_SINGLE = 2
@@ -132,6 +131,21 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         val result = preferenceGroup?.notifyUpdate(pref) ?: -1 >= 0
         if (result) diff(preferenceGroup?.displayablePreferences)
         return result
+    }
+
+    fun onSaveInstanceState(outState: Bundle) {
+        outState.putSerializable("preference_group", preferenceGroup)
+    }
+
+    /**
+     * Return true if a non-null PreferenceGroup was retrieved from the bundle
+     */
+    fun onRestoreInstanceState(savedState: Bundle?): Boolean {
+        if (savedState != null) {
+            preferenceGroup = savedState.getSerializable("preference_group") as? PreferenceGroup ?: return false
+            return true
+        }
+        return false
     }
 
     private fun diffCallback(old: List<BasePreference>?,
