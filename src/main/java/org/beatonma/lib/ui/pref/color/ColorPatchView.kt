@@ -13,7 +13,7 @@ import android.view.ViewOutlineProvider
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import androidx.annotation.ColorInt
-import org.beatonma.lib.prefs.R
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.style.Interpolate
 import org.beatonma.lib.util.Sdk
 import org.beatonma.lib.util.kotlin.extensions.*

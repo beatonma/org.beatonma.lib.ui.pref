@@ -14,9 +14,9 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
-import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.ActivityListBinding
-import org.beatonma.lib.prefs.databinding.VhAppListItemSingleBinding
+import org.beatonma.lib.ui.pref.R
+import org.beatonma.lib.ui.pref.databinding.ActivityListBinding
+import org.beatonma.lib.ui.pref.databinding.VhAppListItemSingleBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder

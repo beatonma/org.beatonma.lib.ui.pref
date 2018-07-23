@@ -2,7 +2,7 @@ package org.beatonma.lib.ui.pref.core
 
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.transaction
-import org.beatonma.lib.prefs.R
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.activity.BaseActivity
 import org.beatonma.lib.ui.activity.databinding.RecyclerviewBinding
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup

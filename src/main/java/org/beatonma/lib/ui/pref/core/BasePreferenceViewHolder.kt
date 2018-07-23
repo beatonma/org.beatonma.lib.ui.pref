@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.Nullable
-import org.beatonma.lib.prefs.R
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.preferences.BasePreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.util.kotlin.extensions.hideIfEmpty

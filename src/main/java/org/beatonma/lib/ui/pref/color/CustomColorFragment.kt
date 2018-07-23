@@ -21,8 +21,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.transition.*
 import androidx.transition.Visibility.MODE_IN
 import com.google.android.material.tabs.TabLayout
-import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.FragmentColorCustomBinding
+import org.beatonma.lib.ui.pref.R
+import org.beatonma.lib.ui.pref.databinding.FragmentColorCustomBinding
 import org.beatonma.lib.ui.activity.BaseFragment
 import org.beatonma.lib.ui.style.Interpolate
 import org.beatonma.lib.util.Sdk

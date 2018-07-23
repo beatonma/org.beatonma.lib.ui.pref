@@ -10,9 +10,10 @@ import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
-import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.ActivityAllColorsBinding
+import org.beatonma.lib.ui.pref.R
+import org.beatonma.lib.ui.pref.databinding.ActivityAllColorsBinding
 import org.beatonma.lib.ui.activity.popup.PopupActivity
+import org.beatonma.lib.ui.pref.preferences.ColorItem
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
@@ -91,8 +92,8 @@ class AllColorsPreferenceActivity : PopupActivity(),
         private val patch: ColorPatchView = view.findViewById(R.id.colorpatch)
 
         override fun bind(position: Int) {
-            val color = colors!![position]
-            patch.color = color.color
+            val color = colors?.get(position)
+            patch.color = color?.color ?: 0x000000
         }
     }
 
@@ -131,8 +132,8 @@ class AllColorsPreferenceActivity : PopupActivity(),
                     val isColor = index < shades.size
                     colors.add(
                             ColorItem(
-                                    if (isColor) shades[index] else 0x00000000,
-                                    selectable = isColor))
+                                    if (isColor) shades[index] else 0x00000000))
+//                                    selectable = isColor))
                 }
             }
 

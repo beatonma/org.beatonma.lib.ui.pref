@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
-import org.beatonma.lib.prefs.R
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.ColorPreference
 
