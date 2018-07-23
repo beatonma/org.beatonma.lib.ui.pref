@@ -4,9 +4,6 @@
 
   <application>
     <activity
-        android:name="org.beatonma.lib.ui.pref.color.MinimalActivity"
-        android:exported="true"/>
-    <activity
       android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
       android:exported="true"/>
     <activity
