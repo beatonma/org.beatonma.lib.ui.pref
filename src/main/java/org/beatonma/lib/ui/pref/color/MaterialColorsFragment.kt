@@ -15,9 +15,9 @@ import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionSet
 import androidx.transition.Visibility.MODE_IN
-import org.beatonma.lib.prefs.R
-import org.beatonma.lib.prefs.databinding.FragmentColorMaterialBinding
 import org.beatonma.lib.ui.activity.BaseFragment
+import org.beatonma.lib.ui.pref.R
+import org.beatonma.lib.ui.pref.databinding.FragmentColorMaterialBinding
 import org.beatonma.lib.ui.pref.preferences.ColorItem
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
@@ -38,7 +38,7 @@ class MaterialColorsFragment : BaseFragment() {
     lateinit var prefViewModel: ColorPreferenceViewModel
     lateinit var swatchViewModel: MaterialColorsViewModel
 
-    private var binding: FragmentColorMaterialBinding? = null
+    private lateinit var binding: FragmentColorMaterialBinding
 
     private val colorsAdapter: PatchAdapter = createAdapter()
 
@@ -119,7 +119,7 @@ class MaterialColorsFragment : BaseFragment() {
     }
 
     private fun getColorItemAnimator(): ColorItemAnimator? {
-        return binding?.recyclerview?.itemAnimator as? ColorItemAnimator
+        return binding.recyclerview.itemAnimator as? ColorItemAnimator
     }
 
     fun onBackPressed(): Boolean {
