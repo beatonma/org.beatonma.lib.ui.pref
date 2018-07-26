@@ -21,24 +21,24 @@ import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.style.Views
 import org.beatonma.lib.util.kotlin.extensions.toPrettyString
 import java.util.*
 
-
 private const val TAG = "ListPreferenceActivity"
+private const val LIST_LOADER = 91
 
-open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbacks<Result<List<ListItem>>> {
+open class ListPreferenceActivity : PopupActivity(),
+        LoaderManager.LoaderCallbacks<Result<List<ListItem>>> {
 
     companion object {
         const val EXTRA_LIST_PREFERENCE = "extra_list_preference"
         const val REQUEST_CODE_UPDATE = 936
-
-        private const val LIST_LOADER = 91
     }
 
     private lateinit var mListPreference: ListPreference
 
-    private lateinit var mBinding: ActivityListBinding
+    private lateinit var activityBinding: ActivityListBinding
     private lateinit var adapter: ListAdapter
     private var listItems: List<ListItem>? = null
 
@@ -60,7 +60,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
 
         val editor = getSharedPreferences(mListPreference.prefs, Context.MODE_PRIVATE).edit()
         mListPreference.save(editor)
-        editor.apply()
+        editor.commit()
 
         val intent = Intent()
         intent.putExtra(EXTRA_LIST_PREFERENCE, mListPreference)
@@ -70,7 +70,7 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
 
     override fun initContentLayout(binding: ViewDataBinding) {
         adapter = buildAdapter()
-        mBinding = binding as ActivityListBinding
+        activityBinding = binding as ActivityListBinding
         binding.recyclerview.setup(adapter)
 
         setTitle(mListPreference.name)
@@ -100,7 +100,11 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
 
     }
 
-    class PrefListLoader internal constructor(context: Context, private val preference: ListPreference) : SupportBaseAsyncTaskLoader<List<ListItem>>(context) {
+    class PrefListLoader
+    internal constructor(
+            context: Context,
+            private val preference: ListPreference
+    ) : SupportBaseAsyncTaskLoader<List<ListItem>>(context) {
 
         override fun loadInBackground(): Result<List<ListItem>> {
             val result = Result.getBuilder<List<ListItem>>(null)
@@ -142,8 +146,8 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
     }
 
     open inner class ListAdapter : EmptyBaseRecyclerViewAdapter {
-        constructor(): super()
-        constructor(nullLayoutID: Int): super(nullLayoutID = nullLayoutID)
+        constructor() : super()
+        constructor(nullLayoutID: Int) : super(nullLayoutID = nullLayoutID)
 
         override val items: List<ListItem>?
             get() = listItems
@@ -156,26 +160,30 @@ open class ListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbac
         }
 
         private inner class ItemViewHolder(v: View) : BaseViewHolder(v) {
-            internal val binding: VhListItemSingleBinding = VhListItemSingleBinding.bind(v)
+            internal val itemBinding: VhListItemSingleBinding = VhListItemSingleBinding.bind(v)
 
             override fun bind(position: Int) {
                 val item = items?.get(position) ?: return
-                binding.item = item
+
+                itemBinding.radioButton.isChecked = item.checked
+                itemBinding.text.text = item.text
+                itemBinding.description.text = item.description
+                Views.hideIfEmpty(itemBinding.text, itemBinding.description)
 
                 val clickListener = View.OnClickListener {
                     val adapterPosition = adapterPosition
                     for (i in 0 until adapter.itemCount) {
-                        val holder = mBinding.recyclerview
+                        val holder = activityBinding.recyclerview
                                 .findViewHolderForAdapterPosition(i) as? ItemViewHolder
                                 ?: return@OnClickListener
-                        holder.binding.radioButton.isChecked = i == adapterPosition
+                        holder.itemBinding.radioButton.isChecked = i == adapterPosition
                     }
 
                     saveAndClose(item)
                 }
 
                 itemView.setOnClickListener(clickListener)
-                binding.radioButton.setOnClickListener(clickListener)
+                itemBinding.radioButton.setOnClickListener(clickListener)
             }
         }
     }

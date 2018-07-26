@@ -14,14 +14,15 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
+import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.databinding.ActivityListBinding
 import org.beatonma.lib.ui.pref.databinding.VhAppListItemSingleBinding
-import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.style.Views
 import org.beatonma.lib.util.kotlin.extensions.autotag
 import org.beatonma.lib.util.kotlin.extensions.toPrettyString
 import org.beatonma.lib.util.kotlin.extensions.toast
@@ -128,7 +129,12 @@ open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCall
 
             override fun bind(position: Int) {
                 val app = items?.get(position) ?: return
-                appBinding.app = app
+
+                appBinding.radioButton.isChecked = app.selected
+                appBinding.text.text = app.niceName
+                appBinding.description.text = app.packageName
+
+                Views.hideIfEmpty(appBinding.text, appBinding.description)
 
                 val clickListener = View.OnClickListener {
                     for (i in 0 until adapter.itemCount) {
