@@ -1,6 +1,7 @@
 package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
+import android.graphics.Color
 import java.util.regex.Pattern
 
 /**
@@ -34,6 +35,25 @@ internal fun getInt(context: Context,
             Integer.valueOf(text)
         } catch (e: Exception) {
             0
+        }
+    } else {
+        context.resources.getInteger(resId)
+    }
+}
+
+
+internal fun getColor(context: Context,
+                      text: String): Int {
+    val resId = getResourceId(context, text)
+    return if (resId == 0) {
+        try {
+            Color.parseColor(text)
+        } catch (e: Exception) {
+            try {
+                Integer.valueOf(text)
+            } catch (e: Exception) {
+                0
+            }
         }
     } else {
         context.resources.getInteger(resId)
