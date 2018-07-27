@@ -2,20 +2,22 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.provider.Contacts.SettingsColumns.KEY
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.Serializable
+
+
+internal const val PREFS = "prefs"
+internal const val KEY = "key"
+internal const val NAME = "name"
+internal const val DESCRIPTION = "description"
+internal const val DEPENDENCY = "if"
 
 abstract class BasePreference : Serializable {
 
     companion object {
         const val TYPE = "base"
-
-        private const val PREFS = "prefs"
-        private const val KEY = "key"
-        private const val NAME = "name"
-        private const val DESCRIPTION = "description"
-        private const val DEPENDENCY = "if"
     }
 
     open var prefs: String? = null
@@ -26,7 +28,6 @@ abstract class BasePreference : Serializable {
     /**
      * If set, this preference will only be displayed if the dependency rule is met
      */
-//    @SerializedName(DEPENDENCY)
     var dependency: Dependency? = null
 
     /**
@@ -82,7 +83,7 @@ abstract class BasePreference : Serializable {
     }
 
     /**
-     * Used in DiffUtil callback - return false if the associated {@link ViewHolder}
+     * Used in [DiffUtil] callback - return false if the associated [ViewHolder]
      * should be rebound
      */
     open fun sameContents(other: Any?): Boolean {
