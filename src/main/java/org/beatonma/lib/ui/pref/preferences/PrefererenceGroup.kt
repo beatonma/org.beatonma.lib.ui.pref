@@ -152,7 +152,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
     }
 
     /**
-     * Refresh which preferences are displayed based on any {@link Dependency} relationships
+     * Refresh which preferences are displayed based on any [Dependency] relationships
      */
     fun updateDependencies() {
         Log.d(TAG, "dependencies: $dependencies")
