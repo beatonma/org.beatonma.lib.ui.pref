@@ -20,7 +20,7 @@ class ColorPreference : BasePreference {
 
     @Throws(JSONException::class)
     constructor(context: Context, obj: JSONObject) : super(context, obj) {
-        color.color = getInt(context, obj.optString(COLOR, "0"))
+        color.color = getColor(context, obj.optString(COLOR, "0"))
         color.swatch = getInt(context, obj.optString(SWATCH, "-1"))
         color.swatchPosition = getInt(context, obj.optString(SWATCH_POSITION, "-1"))
         alphaEnabled = getBoolean(context, obj.optString(ALPHA_ENABLED, "false"))
