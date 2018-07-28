@@ -9,14 +9,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.ViewDataBinding
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
+import androidx.recyclerview.widget.RecyclerView
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
-import org.beatonma.lib.ui.activity.popup.PopupActivity
+import org.beatonma.lib.ui.activity.popup.RecyclerViewPopupActivity
 import org.beatonma.lib.ui.pref.R
-import org.beatonma.lib.ui.pref.databinding.ActivityListBinding
 import org.beatonma.lib.ui.pref.databinding.VhAppListItemSingleBinding
 import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
@@ -41,7 +40,8 @@ class App(manager: PackageManager, activityInfo: ActivityInfo, var selected: Boo
     }
 }
 
-open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCallbacks<Result<List<App>>> {
+open class AppListPreferenceActivity : RecyclerViewPopupActivity(),
+        LoaderManager.LoaderCallbacks<Result<List<App>>> {
     companion object {
         const val EXTRA_APP_LIST_PREFERENCE = "extra_app_list_preference"
         const val REQUEST_CODE_UPDATE = 762
@@ -49,10 +49,10 @@ open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCall
         private const val APP_LIST_LOADER = 237
     }
 
-    override val contentLayoutID: Int = R.layout.activity_list
+//    override val contentLayoutID: Int = R.layout.activity_list
 
     private lateinit var preference: AppListPreference
-    private lateinit var binding: ActivityListBinding
+//    private lateinit var binding: ActivityListBinding
     private lateinit var adapter: AppListAdapter
 
     private var apps: List<App>? = null
@@ -62,11 +62,20 @@ open class AppListPreferenceActivity : PopupActivity(), LoaderManager.LoaderCall
         preference = extras?.getSerializable(EXTRA_APP_LIST_PREFERENCE) as AppListPreference
     }
 
-    override fun initContentLayout(binding: ViewDataBinding) {
-        this.binding = binding as ActivityListBinding
+//    override fun initContentLayout(binding: ViewDataBinding) {
+//        this.binding = binding as ActivityListBinding
+//        setTitle(R.string.pref_app_choose)
+//        adapter = buildAdapter()
+//        binding.recyclerview.setup(adapter)
+//
+//        LoaderManager.getInstance(this).initLoader(APP_LIST_LOADER, null, this)
+//    }
+
+
+    override fun setup(recyclerView: RecyclerView) {
         setTitle(R.string.pref_app_choose)
         adapter = buildAdapter()
-        binding.recyclerview.setup(adapter)
+        recyclerView.setup(adapter)
 
         LoaderManager.getInstance(this).initLoader(APP_LIST_LOADER, null, this)
     }
