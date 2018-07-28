@@ -1,14 +1,15 @@
-package org.beatonma.lib.ui.pref
+package org.beatonma.lib.ui.pref.preferences
 
-import org.beatonma.lib.ui.pref.preferences.*
+import androidx.test.filters.SmallTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 /**
- * Tests for preference {@link Dependency} relationships
+ * Tests for preference [Dependency] relationships
  */
-class PreferenceDependencyTests {
+@SmallTest
+class DependencyTests {
     @Test
     fun parseDependencyTest() {
         // Test simple case with == operator
