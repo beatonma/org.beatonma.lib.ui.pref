@@ -11,6 +11,8 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.filters.MediumTest
+import org.beatonma.lib.testing.espresso.ViewHeightAtLeast
+import org.beatonma.lib.testing.espresso.ViewHeightAtMost
 import org.beatonma.lib.testing.espresso.ViewHeightIs
 import org.beatonma.lib.testing.espresso.click
 import org.beatonma.lib.testing.kotlin.extensions.ActivityTest
@@ -56,6 +58,9 @@ private const val LONG_LIST_PREFERENCE = """
 class ListPreferenceActivityTestSuite
 
 abstract class ListPreferenceActivityTest : ActivityTest<ListPreferenceActivity>() {
+    internal val itemHeight: Int = targetResources.getDimensionPixelSize(R.dimen.item_height_single)
+    internal val maxHeight: Int = targetResources.getDimensionPixelSize(R.dimen.popup_content_max_height)
+
     @Test
     fun clickOnItem_shouldClosePopup() {
         onView(withId(R.id.recyclerview))
@@ -67,6 +72,18 @@ abstract class ListPreferenceActivityTest : ActivityTest<ListPreferenceActivity>
     @Test
     fun clickOnItem_shouldSaveItemToPreferences() {
         TODO("Check that selecting an item correctly updates SharedPreferences")
+    }
+
+    @Test
+    fun list_showsAtLeastThreeItems() {
+        onView(withId(R.id.recyclerview))
+                .check(matches(ViewHeightAtLeast(itemHeight * 3)))
+    }
+
+    @Test
+    fun list_doesNotExceed_maxHeight() {
+        onView(withId(R.id.recyclerview))
+                .check(matches(ViewHeightAtMost(maxHeight)))
     }
 }
 
@@ -82,7 +99,7 @@ class SmallListPreferenceActivityTest : ListPreferenceActivityTest() {
     @Test
     fun withSmallList_recyclerViewIsCorrectSize() {
         onView(withId(R.id.recyclerview))
-                .check(matches(ViewHeightIs(48 * 3)))
+                .check(matches(ViewHeightIs(itemHeight * 3)))
     }
 
     @Test
@@ -100,7 +117,7 @@ class LargeListPreferenceActivityTest : ListPreferenceActivityTest() {
                         InstrumentationRegistry.getContext(),
                         JSONObject(LONG_LIST_PREFERENCE)))
     }
-    private val maxHeight: Int = targetResources.getDimensionPixelSize(R.dimen.popup_content_max_height)
+//    private val maxHeight: Int = targetResources.getDimensionPixelSize(R.dimen.popup_content_max_height)
 
     @Test
     fun withLargeList_recyclerViewIsLimitedToMaxSize() {
