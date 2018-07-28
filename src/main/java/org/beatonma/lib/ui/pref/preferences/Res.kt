@@ -2,6 +2,7 @@ package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.graphics.Color
+import org.beatonma.lib.util.kotlin.extensions.colorCompat
 import java.util.regex.Pattern
 
 /**
@@ -26,6 +27,10 @@ internal fun getBoolean(context: Context,
 }
 
 
+/**
+ * If the text represents a @resource, return the value of that resource
+ * else try to parse an integer value
+ */
 internal fun getInt(context: Context,
                     text: String): Int {
     val resId = getResourceId(context, text)
@@ -41,13 +46,16 @@ internal fun getInt(context: Context,
     }
 }
 
-
+/**
+ * If the text represents a @resource, return the value of that resource
+ * else try to parse a color value. Supports integers or hex codes.
+ */
 internal fun getColor(context: Context,
                       text: String): Int {
     val resId = getResourceId(context, text)
     return if (resId == 0) {
         try {
-            Color.parseColor(text)
+            Color.parseColor(if (text.startsWith("#")) text else "#$text")
         } catch (e: Exception) {
             try {
                 Integer.valueOf(text)
@@ -56,7 +64,7 @@ internal fun getColor(context: Context,
             }
         }
     } else {
-        context.resources.getInteger(resId)
+        context.colorCompat(resId)
     }
 }
 
@@ -73,7 +81,7 @@ internal fun getStringArray(context: Context,
 }
 
 internal fun getResourceId(context: Context, key: String?): Int {
-    val pattern = Pattern.compile("@(\\w+)/(.*)")
+    val pattern = Pattern.compile("@(\\w+)/(.+)")
     val m = pattern.matcher(key)
     if (m.matches()) {
         val resType = m.group(1)
@@ -85,4 +93,3 @@ internal fun getResourceId(context: Context, key: String?): Int {
     }
     return 0
 }
-//}
