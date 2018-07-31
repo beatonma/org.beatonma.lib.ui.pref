@@ -1,0 +1,87 @@
+{
+  "type": "group",
+  "prefs": "example_prefs",
+  "preinit": true,
+  "items": [
+    {
+      "name": "Apps",
+      "key": "choose_app",
+      "type": "list_apps",
+      "description": "Choose an app"
+    },
+    {
+      "name": "@string/app_name",
+      "key": "bool_switch",
+      "type": "boolean",
+      "if": "list_single_short==1",
+      "description": "default description",
+      "selected_description": "selected description",
+      "unselected_description": "unselected description",
+      "checked": true
+    },
+    {
+      "name": "single color",
+      "description": "a single color",
+      "key": "single_color",
+      "if": "list_single_long>3",
+      "type": "color",
+      "color": "@color/Accent"
+    },
+    {
+      "name": "single color",
+      "key": "single_color_2",
+      "if": "list_single_long>3",
+      "type": "color",
+      "color": "@color/Accent"
+    },
+    {
+      "name": "color group",
+      "description": "Make a theme!",
+      "key": "color_group_1",
+      "type": "color_group",
+      "alpha_enabled": "true",
+      "colors": [
+        {
+          "key": "multi_color_1",
+          "color": "@color/Accent"
+        },
+        {
+          "key": "multi_color_2",
+          "color": "@color/TextPrimary",
+          "alpha_enabled": "true"
+        },
+        {
+          "key": "multi_color_3",
+          "color": "#ff0000",
+          "swatch": 0,
+          "swatchPosition": 4
+        },
+        {
+          "key": "multi_color_4",
+          "color": "-0xff00ff00",
+          "swatch": 4,
+          "swatchPosition": 4
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "name": "This is a section title",
+      "key": "section_title"
+    },
+    {
+      "name": "list pref",
+      "description": "This is a list description",
+      "key": "list_single_short",
+      "type": "list_single",
+      "items": "@array/string_array_example_short"
+    },
+    {
+      "name": "long list pref",
+      "description": "This is a list description",
+      "key": "list_single_long",
+      "type": "list_single",
+      "items": "@array/string_array_example_long"
+    }
+  ]
+}
