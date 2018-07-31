@@ -85,16 +85,12 @@ class ParcelableTest {
         val fromParcel: BooleanPreference = original.createCopyViaParcel()
 
         fromParcel.run {
-            // assertBaseValues() // removed because description changes depending on check state
-
-            key.assertEquals(TEST_KEY)
-            prefs.assertEquals(TEST_PREFS)
-            name.assertEquals(TEST_NAME)
+            assertBaseValues(original)
 
             isChecked.assertEquals(testIsChecked)
             selectedDescription.assertEquals(TEST_BOOLEAN_SELECTED_DESCRIPTION)
             unselectedDescription.assertEquals(TEST_BOOLEAN_UNSELECTED_DESCRIPTION)
-            description.assertEquals(TEST_BOOLEAN_SELECTED_DESCRIPTION)
+            contextDescription.assertEquals(TEST_BOOLEAN_SELECTED_DESCRIPTION)
 
             sameObject(original).assertTrue()
             sameContents(original).assertTrue()
