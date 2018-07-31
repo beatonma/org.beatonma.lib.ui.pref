@@ -7,6 +7,8 @@ import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
+import android.widget.TextView
+import androidx.annotation.CallSuper
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,7 @@ import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
 import org.beatonma.lib.util.Sdk
 import org.beatonma.lib.util.kotlin.extensions.clone
+import org.beatonma.lib.util.kotlin.extensions.hideIfEmpty
 import java.lang.ref.WeakReference
 
 const val PREFERENCE_TYPE_SIMPLE = 0
@@ -42,8 +45,10 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         weakFragment = WeakReference(fragmentContext)
     }
 
-    constructor(fragmentContext: PreferenceFragment,
-                nullLayoutID: Int) : super(nullLayoutID = nullLayoutID) {
+    constructor(
+            fragmentContext: PreferenceFragment,
+            nullLayoutID: Int
+    ) : super(nullLayoutID = nullLayoutID) {
         weakFragment = WeakReference(fragmentContext)
     }
 
@@ -132,17 +137,14 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     }
 
     fun onSaveInstanceState(outState: Bundle) {
-//        outState.putSerializable("preference_group", preferenceGroup)
         outState.putParcelable("preference_group", preferenceGroup)
     }
-
 
     /**
      * Return true if a non-null PreferenceGroup was retrieved from the bundle
      */
     fun onRestoreInstanceState(savedState: Bundle?): Boolean {
         if (savedState != null) {
-//            preferenceGroup = savedState.getSerializable("preference_group") as? PreferenceGroup ?: return false
             preferenceGroup = savedState.getParcelable("preference_group") ?: return false
             return true
         }
@@ -195,46 +197,19 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
 
     @NonNull
     override fun onCreateViewHolder(@NonNull parent: ViewGroup, viewType: Int): BaseViewHolder {
-        when (viewType) {
-            PREFERENCE_TYPE_BOOLEAN -> return object : SwitchPreferenceViewHolder(inflate(parent, switchLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as BooleanPreference)
-                }
-            }
-            PREFERENCE_TYPE_LIST_SINGLE -> return object : ListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ListPreference)
-                }
-            }
-            PREFERENCE_TYPE_LIST_APPS -> return object : AppListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as AppListPreference)
-                }
-            }
-            PREFERENCE_TYPE_COLOR_SINGLE -> return object : ColorPreferenceViewHolder(inflate(parent, colorSingleLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreference)
-                }
-            }
-            PREFERENCE_TYPE_COLOR_GROUP -> return object : ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreferenceGroup)
-                }
-            }
-            PREFERENCE_TYPE_SECTION -> return object : SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as SectionSeparator)
-                }
-            }
-            0 -> return object : BasePreferenceViewHolder<BasePreference>(inflate(parent, simpleLayout)) {
-                override fun bind(position: Int) {
-                    bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position))
-                }
-            }
-            else -> return super.onCreateViewHolder(parent, viewType)
+        return when (viewType) {
+            PREFERENCE_TYPE_BOOLEAN -> SwitchPreferenceViewHolder(inflate(parent, switchLayout))
+            PREFERENCE_TYPE_LIST_SINGLE -> ListPreferenceViewHolder(inflate(parent, listSingleLayout))
+            PREFERENCE_TYPE_LIST_APPS -> AppListPreferenceViewHolder(inflate(parent, listSingleLayout))
+            PREFERENCE_TYPE_COLOR_SINGLE -> ColorPreferenceViewHolder(inflate(parent, colorSingleLayout))
+            PREFERENCE_TYPE_COLOR_GROUP -> ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout))
+            PREFERENCE_TYPE_SECTION -> SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout))
+            0 -> SimplePreferenceViewHolder(inflate(parent, simpleLayout))
+            else -> super.onCreateViewHolder(parent, viewType)
         }
     }
 
+    open inner class SimplePreferenceViewHolder(v: View) : BasePreferenceViewHolder<SimplePreference>(v)
     open inner class SectionSeparatorViewHolder(v: View) : BasePreferenceViewHolder<SectionSeparator>(v)
 
     open inner class SwitchPreferenceViewHolder(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
@@ -355,4 +330,49 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             }
         }
     }
+
+    abstract inner class BasePreferenceViewHolder<T : BasePreference>(v: View) : BaseViewHolder(v) {
+        private var mWeakPrefs: WeakReference<SharedPreferences>? = null
+
+        private val title: TextView = itemView.findViewById(R.id.title)
+        private val description: TextView? = itemView.findViewById(R.id.description)
+
+        @Suppress("UNCHECKED_CAST")
+        override fun bind(position: Int) {
+            bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as? T)
+        }
+
+        @CallSuper
+        open fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: T?) {
+            mWeakPrefs = weakPrefs
+            updateTitle(preference?.name)
+            updateDescription(preference?.contextDescription)
+        }
+
+        fun save(preference: T) {
+            mWeakPrefs?.get()?.edit()?.let {editor ->
+                preference.save(editor)
+                editor.apply()
+            }
+        }
+
+        fun updateTitle(text: String?) {
+            title.text = text
+        }
+
+        fun updateTitle(resID: Int) {
+            title.setText(resID)
+        }
+
+        fun updateDescription(text: String?) {
+            description?.text = text
+            description?.hideIfEmpty()
+        }
+
+        fun updateDescription(resID: Int) {
+            description?.setText(resID)
+            description?.hideIfEmpty()
+        }
+    }
+
 }
