@@ -28,4 +28,4 @@ See class comments in `org.beatonma.lib.ui.pref.preferences` for full details on
 available parameters. See `example_preferences.json` for an example.
 
 ### Real examples
-This library is used in IO18 Clock
+This library is used in IO18 Clock for Android (not yet released)
