@@ -26,6 +26,16 @@ import org.beatonma.lib.util.Sdk
 import org.beatonma.lib.util.kotlin.extensions.clone
 import java.lang.ref.WeakReference
 
+const val PREFERENCE_TYPE_SIMPLE = 0
+const val PREFERENCE_TYPE_BOOLEAN = 1
+const val PREFERENCE_TYPE_LIST_SINGLE = 2
+const val PREFERENCE_TYPE_LIST_MULTI = 3   // Not yet implemented
+const val PREFERENCE_TYPE_LIST_APPS = 4
+const val PREFERENCE_TYPE_COLOR_SINGLE = 11
+const val PREFERENCE_TYPE_COLOR_GROUP = 12
+const val PREFERENCE_TYPE_SECTION = 61
+const val PREFERENCE_TYPE_GROUP = 65       // Not yet implemented
+
 open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
 
     constructor(fragmentContext: PreferenceFragment) : super() {
@@ -35,18 +45,6 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     constructor(fragmentContext: PreferenceFragment,
                 nullLayoutID: Int) : super(nullLayoutID = nullLayoutID) {
         weakFragment = WeakReference(fragmentContext)
-    }
-
-    companion object {
-        const val TYPE_SIMPLE = 0
-        const val TYPE_BOOLEAN = 1
-        const val TYPE_LIST_SINGLE = 2
-        const val TYPE_LIST_MULTI = 3
-        const val TYPE_LIST_APPS = 4
-        const val TYPE_COLOR_SINGLE = 11
-        const val TYPE_COLOR_GROUP = 12
-        const val TYPE_SECTION = 61
-        const val TYPE_GROUP = 65
     }
 
     override val items: List<*>?
@@ -134,15 +132,18 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     }
 
     fun onSaveInstanceState(outState: Bundle) {
-        outState.putSerializable("preference_group", preferenceGroup)
+//        outState.putSerializable("preference_group", preferenceGroup)
+        outState.putParcelable("preference_group", preferenceGroup)
     }
+
 
     /**
      * Return true if a non-null PreferenceGroup was retrieved from the bundle
      */
     fun onRestoreInstanceState(savedState: Bundle?): Boolean {
         if (savedState != null) {
-            preferenceGroup = savedState.getSerializable("preference_group") as? PreferenceGroup ?: return false
+//            preferenceGroup = savedState.getSerializable("preference_group") as? PreferenceGroup ?: return false
+            preferenceGroup = savedState.getParcelable("preference_group") ?: return false
             return true
         }
         return false
@@ -181,13 +182,13 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
                 ?: return super.getItemViewType(position)
         val type = p.type
         return when (type) {
-            BooleanPreference.TYPE -> TYPE_BOOLEAN
-            ListPreference.TYPE -> TYPE_LIST_SINGLE
-            AppListPreference.TYPE -> TYPE_LIST_APPS
-            ColorPreference.TYPE -> TYPE_COLOR_SINGLE
-            ColorPreferenceGroup.TYPE -> TYPE_COLOR_GROUP
-            BasePreference.TYPE, SimplePreference.TYPE -> TYPE_SIMPLE
-            SectionSeparator.TYPE -> TYPE_SECTION
+            BooleanPreference.TYPE -> PREFERENCE_TYPE_BOOLEAN
+            ListPreference.TYPE -> PREFERENCE_TYPE_LIST_SINGLE
+            AppListPreference.TYPE -> PREFERENCE_TYPE_LIST_APPS
+            ColorPreference.TYPE -> PREFERENCE_TYPE_COLOR_SINGLE
+            ColorPreferenceGroup.TYPE -> PREFERENCE_TYPE_COLOR_GROUP
+            BasePreference.TYPE, SimplePreference.TYPE -> PREFERENCE_TYPE_SIMPLE
+            SectionSeparator.TYPE -> PREFERENCE_TYPE_SECTION
             else -> super.getItemViewType(position)
         }
     }
@@ -195,32 +196,32 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     @NonNull
     override fun onCreateViewHolder(@NonNull parent: ViewGroup, viewType: Int): BaseViewHolder {
         when (viewType) {
-            TYPE_BOOLEAN -> return object : SwitchPreferenceViewHolder(inflate(parent, switchLayout)) {
+            PREFERENCE_TYPE_BOOLEAN -> return object : SwitchPreferenceViewHolder(inflate(parent, switchLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as BooleanPreference)
                 }
             }
-            TYPE_LIST_SINGLE -> return object : ListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
+            PREFERENCE_TYPE_LIST_SINGLE -> return object : ListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ListPreference)
                 }
             }
-            TYPE_LIST_APPS -> return object : AppListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
+            PREFERENCE_TYPE_LIST_APPS -> return object : AppListPreferenceViewHolder(inflate(parent, listSingleLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as AppListPreference)
                 }
             }
-            TYPE_COLOR_SINGLE -> return object : ColorPreferenceViewHolder(inflate(parent, colorSingleLayout)) {
+            PREFERENCE_TYPE_COLOR_SINGLE -> return object : ColorPreferenceViewHolder(inflate(parent, colorSingleLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreference)
                 }
             }
-            TYPE_COLOR_GROUP -> return object : ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
+            PREFERENCE_TYPE_COLOR_GROUP -> return object : ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as ColorPreferenceGroup)
                 }
             }
-            TYPE_SECTION -> return object : SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout)) {
+            PREFERENCE_TYPE_SECTION -> return object : SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout)) {
                 override fun bind(position: Int) {
                     bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as SectionSeparator)
                 }
@@ -237,28 +238,24 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     open inner class SectionSeparatorViewHolder(v: View) : BasePreferenceViewHolder<SectionSeparator>(v)
 
     open inner class SwitchPreferenceViewHolder(v: View) : BasePreferenceViewHolder<BooleanPreference>(v) {
-        private val mSwitch: CompoundButton = v.findViewById(R.id.checkable)
+        private val switch: CompoundButton = v.findViewById(R.id.checkable)
 
         override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: BooleanPreference?) {
             super.bind(weakPrefs, preference)
             preference ?: return
-            mSwitch.isChecked = preference.isChecked
+            switch.isChecked = preference.isChecked
 
-            mSwitch.setOnCheckedChangeListener { _, checked ->
+            switch.setOnCheckedChangeListener { _, checked ->
                 if (Sdk.isKitkat) {
                     TransitionManager.beginDelayedTransition(itemView as ViewGroup)
                 }
                 preference.isChecked = checked
-                updateDescription(
-                        if (checked)
-                            preference.selectedDescription
-                        else
-                            preference.unselectedDescription)
+                updateDescription(preference.contextDescription)
                 save(preference)
                 notifyUpdate(preference)
             }
 
-            itemView.setOnClickListener { _ -> mSwitch.toggle() }
+            itemView.setOnClickListener { _ -> switch.toggle() }
         }
     }
 
