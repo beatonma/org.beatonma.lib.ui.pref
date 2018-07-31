@@ -10,8 +10,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
-import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.activity.popup.PopupActivity
+import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.preferences.ColorPreference
 
 class SwatchColorPreferenceActivity : PopupActivity() {
@@ -57,8 +57,7 @@ class SwatchColorPreferenceActivity : PopupActivity() {
 
     override fun initExtras(extras: Bundle?) {
         super.initExtras(extras)
-        viewModel.colorPreference.value =
-                extras?.getSerializable(EXTRA_COLOR_PREFERENCE) as? ColorPreference?
+        viewModel.colorPreference.value = extras?.getParcelable(EXTRA_COLOR_PREFERENCE)
     }
 
     fun showMaterialColors() {
