@@ -117,7 +117,6 @@ class LargeListPreferenceActivityTest : ListPreferenceActivityTest() {
                         InstrumentationRegistry.getContext(),
                         JSONObject(LONG_LIST_PREFERENCE)))
     }
-//    private val maxHeight: Int = targetResources.getDimensionPixelSize(R.dimen.popup_content_max_height)
 
     @Test
     fun withLargeList_recyclerViewIsLimitedToMaxSize() {
