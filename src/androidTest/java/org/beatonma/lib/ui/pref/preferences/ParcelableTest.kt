@@ -2,14 +2,13 @@
 
 package org.beatonma.lib.ui.pref.preferences
 
-import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import androidx.test.filters.MediumTest
 import org.beatonma.lib.testing.catchAll
+import org.beatonma.lib.testing.createCopyViaParcel
 import org.beatonma.lib.testing.kotlin.extensions.assertions.assertEquals
 import org.beatonma.lib.testing.kotlin.extensions.assertions.assertTrue
-import org.junit.Assert.assertFalse
 import org.junit.Test
 import java.lang.reflect.InvocationTargetException
 
@@ -45,7 +44,6 @@ val testColors: ArrayList<ColorPreference>
 
 
 /**
- * TODO Mock Parcelable and move to test dir
  * For each BasePreference subclass, ensure that [parcelizing][Parcelable] does not cause data loss.
  */
 @MediumTest
@@ -257,24 +255,24 @@ private fun testSectionSeparator(key: String = TEST_KEY) =
         SectionSeparator().applyBaseValues(key = key)
 
 
-/**
- * [Parcelize][Parcelable] the given object and return a new instance by unpacking the parcel
- */
-@Suppress("UNCHECKED_CAST")
-internal fun <T : Parcelable> T.createCopyViaParcel(): T {
-    val parcel = Parcel.obtain()
-    writeToParcel(parcel, describeContents())
-    parcel.setDataPosition(0)
-
-    // Get CREATOR from static val
-    val creator = this::class.java.declaredFields.find {
-        it.name == "CREATOR"
-    }?.get(null) as Parcelable.Creator<T>
-
-    return creator.createFromParcel(parcel).apply {
-        assertFalse(this@apply === this@createCopyViaParcel)
-    }
-}
+///**
+// * [Parcelize][Parcelable] the given object and return a new instance by unpacking the parcel
+// */
+//@Suppress("UNCHECKED_CAST")
+//internal fun <T : Parcelable> T.createCopyViaParcel(): T {
+//    val parcel = Parcel.obtain()
+//    writeToParcel(parcel, describeContents())
+//    parcel.setDataPosition(0)
+//
+//    // Get CREATOR from static val
+//    val creator = this::class.java.declaredFields.find {
+//        it.name == "CREATOR"
+//    }?.get(null) as Parcelable.Creator<T>
+//
+//    return creator.createFromParcel(parcel).apply {
+//        assertFalse(this@apply === this@createCopyViaParcel)
+//    }
+//}
 
 /**
  * Set default values for the fields in [BasePreference] that are used by all subclasses
