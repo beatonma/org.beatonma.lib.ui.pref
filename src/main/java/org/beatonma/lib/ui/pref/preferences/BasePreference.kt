@@ -1,11 +1,60 @@
+/**
+ * JSON formatting requirements:
+ *
+ * ...
+ * // [PreferenceGroup] items list
+ * "items": [
+ *   {
+ *    "key": "key_name",        // string, required
+ *                              // Key for storing this item in [SharedPreferences]
+ *
+ *    "type": "boolean",        // string, required
+ *                              // The type of this Preference. Must exactly
+ *                              // match the value of the TYPE field of the
+ *                              // Preference class. See [childFromJson] for a
+ *                              // complete listing of available classes.
+ *
+ *    "name": "",               // string, optional but expected, default null
+ *                              // UI display name for this item
+ *
+ *    "description": "",        // string, optional, default null
+ *                              // UI description of what this preference does
+ *
+ *    "if": "some_pref == 0"    // string, optional, default null
+ *                              // An expression which controls whether this
+ *                              // preference is displayed or not, based on the
+ *                              // chosen value of another preference.
+ *                              //
+ *                              // Each preference subclass is responsible
+ *                              // for defining exactly how these are applied
+ *                              // by overriding [meetsDependency] but typically
+ *                              // accept expressions of the form:
+ *                              //   <preference_key> <operator> <preference value>
+ *                              //
+ *                              // See [parseDependency] for details on which
+ *                              // operators are available
+ *
+ *   },
+ *   ...
+ *   // other item definitions
+ * ]
+ *
+ * Values may be literal values (String, Int, Boolean...)
+ * or resource references (@string/name, @boolean/name, @color/red...) passed
+ * as strings.
+ *
+ * Subclasses may add their own parameters on top of those those detailed above.
+ */
 package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.Contacts.SettingsColumns.KEY
+import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.annotation.CallSuper
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.Serializable
 
 
 internal const val PREFS = "prefs"
@@ -14,16 +63,19 @@ internal const val NAME = "name"
 internal const val DESCRIPTION = "description"
 internal const val DEPENDENCY = "if"
 
-abstract class BasePreference : Serializable {
+abstract class BasePreference : Parcelable {
 
-    companion object {
-        const val TYPE = "base"
-    }
 
-    open var prefs: String? = null
-    var key: String
+    var prefs: String? = null
+        set(value) {
+            field = value
+            onPrefNameChanged(value)
+        }
+    var key: String = ""
     var name: String? = null
     var description: String? = null
+    open val contextDescription: String?
+        get() = description
 
     /**
      * If set, this preference will only be displayed if the dependency rule is met
@@ -58,7 +110,31 @@ abstract class BasePreference : Serializable {
         dependency = parseDependency(obj.optString(DEPENDENCY))
     }
 
-    abstract fun load(preferences: SharedPreferences)
+    /**
+     * Restore from Parcelable
+     */
+    constructor(bundle: Bundle?) {
+        bundle?.run {
+            name = getString(NAME)
+            prefs = getString(PREFS)
+            key = getString(KEY)
+            description = getString(DESCRIPTION)
+            dependency = getParcelable(DEPENDENCY)
+        }
+    }
+
+    @CallSuper
+    open fun toBundle(bundle: Bundle = Bundle()): Bundle {
+        return bundle.apply {
+            putString(NAME, name)
+            putString(PREFS, prefs)
+            putString(KEY, key)
+            putString(DESCRIPTION, description)
+            putParcelable(DEPENDENCY, dependency)
+        }
+    }
+
+    abstract fun load(sharedPreferences: SharedPreferences)
     abstract fun save(editor: SharedPreferences.Editor)
     abstract fun copyOf(): BasePreference
 
@@ -71,8 +147,18 @@ abstract class BasePreference : Serializable {
         return true
     }
 
+    /**
+     * Convenience for meetsDependency(dependency)
+     */
     fun meetsDependency(preference: BasePreference?): Boolean {
         return meetsDependency(preference?.dependency)
+    }
+
+    /**
+     * Called when value of [prefs] is changed
+     */
+    protected open fun onPrefNameChanged(value: String?) {
+
     }
 
     fun sameObject(other: Any?): Boolean {
@@ -88,13 +174,37 @@ abstract class BasePreference : Serializable {
      */
     open fun sameContents(other: Any?): Boolean {
         other as BasePreference
-        return name == other.name && description == other.description
+        return key == other.key && name == other.name && description == other.description
     }
 
     override fun toString(): String {
-        return "BasePreference{" +
-                "mKey='" + key + '\''.toString() +
-                ", mName='" + name + '\''.toString() +
-                '}'.toString()
+        return "BasePreference{key='$key', name='$name'}"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        other as? BasePreference ?: return false
+        return sameObject(other) && sameContents(other)
+    }
+
+    override fun writeToParcel(parcel: Parcel?, flags: Int) {
+        parcel?.writeBundle(toBundle())
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun hashCode(): Int {
+        var result = prefs?.hashCode() ?: 0
+        result = 31 * result + key.hashCode()
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (description?.hashCode() ?: 0)
+        result = 31 * result + (dependency?.hashCode() ?: 0)
+        result = 31 * result + type.hashCode()
+        return result
+    }
+
+    companion object {
+        const val TYPE = "base"
     }
 }
