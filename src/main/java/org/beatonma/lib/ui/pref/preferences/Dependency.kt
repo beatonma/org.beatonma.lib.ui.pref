@@ -1,10 +1,16 @@
 package org.beatonma.lib.ui.pref.preferences
 
-import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import java.util.regex.Pattern
 
-data class Dependency(val key: String, val operator: String, val value: String,
-                      var passed: Boolean = true) : Serializable
+@Parcelize
+data class Dependency(
+        val key: String,
+        val operator: String,
+        val value: String,
+        var passed: Boolean = true
+) : Parcelable
 
 /**
  * TODO This should be able to read @resources in the value position
