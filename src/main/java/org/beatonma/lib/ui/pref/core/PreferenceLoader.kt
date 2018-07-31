@@ -4,17 +4,21 @@ import android.content.Context
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.ui.pref.preferences.PreferenceGroup
+import org.beatonma.lib.ui.pref.preferences.buildPreferencesFromJson
 
 /**
  * Asynchronously parse a preferences JSON file and return a PreferenceGroup instance
  */
-class PreferenceLoader(context: Context, private val mResourceID: Int) : SupportBaseAsyncTaskLoader<PreferenceGroup>(context) {
+class PreferenceLoader(
+        context: Context,
+        private val mResourceID: Int
+) : SupportBaseAsyncTaskLoader<PreferenceGroup>(context) {
 
     override fun loadInBackground(): Result<PreferenceGroup> {
         val result = Result.getBuilder<PreferenceGroup>()
         val prefs: PreferenceGroup
         try {
-            prefs = PreferenceGroup.fromJson(context, mResourceID)
+            prefs = buildPreferencesFromJson(context, mResourceID)
         } catch (e: Exception) {
             result.failure(e)
             return result
