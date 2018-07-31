@@ -57,21 +57,21 @@ abstract class PreferenceFragment : BaseFragment(),
 
     private fun onListPreferenceUpdated(intent: Intent?) {
         intent?.extras?.let {
-            val pref = it.getSerializable(ListPreferenceActivity.EXTRA_LIST_PREFERENCE) as ListPreference
+            val pref = it.getParcelable<ListPreference>(ListPreferenceActivity.EXTRA_LIST_PREFERENCE)
             adapter.notifyUpdate(pref)
         }
     }
 
     private fun onColorPreferenceUpdated(intent: Intent?) {
         intent?.extras?.let {
-            val pref = it.getSerializable(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE) as ColorPreference
+            val pref = it.getParcelable<ColorPreference>(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE)
             adapter.notifyUpdate(pref)
         }
     }
 
     private fun onAppListPreferenceUpdated(intent: Intent?) {
         intent?.extras?.let {
-            val pref = it.getSerializable(AppListPreferenceActivity.EXTRA_APP_LIST_PREFERENCE) as AppListPreference
+            val pref = it.getParcelable<AppListPreference>(AppListPreferenceActivity.EXTRA_APP_LIST_PREFERENCE)
             adapter.notifyUpdate(pref)
         }
     }
