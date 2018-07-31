@@ -25,7 +25,7 @@ abstract class BasePreferenceViewHolder<T : BasePreference>(v: View) : BaseViewH
     open fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: T?) {
         mWeakPrefs = weakPrefs
         updateTitle(preference?.name)
-        updateDescription(preference?.description)
+        updateDescription(preference?.contextDescription)
     }
 
     fun save(preference: T) {
