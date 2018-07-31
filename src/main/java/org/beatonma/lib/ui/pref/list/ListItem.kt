@@ -1,14 +1,17 @@
 package org.beatonma.lib.ui.pref.list
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import org.beatonma.lib.util.Sdk
-import java.io.Serializable
 import java.util.*
 
-class ListItem : Serializable {
-    var text: String? = null
-    var description: String? = null
-    var value: Int = 0
-    var checked: Boolean = false
+@Parcelize
+data class ListItem(
+        var text: String? = null,
+        var description: String? = null,
+        var value: Int = 0,
+        var checked: Boolean = false
+) : Parcelable {
 
     companion object {
         val comparator by lazy {

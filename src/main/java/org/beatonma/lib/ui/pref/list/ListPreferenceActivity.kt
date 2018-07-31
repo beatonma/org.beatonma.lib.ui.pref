@@ -52,7 +52,9 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
 
     override fun initExtras(extras: Bundle?) {
         super.initExtras(extras)
-        mListPreference = extras?.getSerializable(EXTRA_LIST_PREFERENCE) as ListPreference
+        extras?.getParcelable<ListPreference>(EXTRA_LIST_PREFERENCE)?.let {
+            mListPreference = it
+        }
     }
 
     fun saveAndClose(item: ListItem) {

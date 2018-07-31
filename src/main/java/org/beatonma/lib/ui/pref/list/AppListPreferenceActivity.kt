@@ -59,7 +59,9 @@ open class AppListPreferenceActivity : RecyclerViewPopupActivity(),
 
     override fun initExtras(extras: Bundle?) {
         super.initExtras(extras)
-        preference = extras?.getSerializable(EXTRA_APP_LIST_PREFERENCE) as AppListPreference
+        extras?.getParcelable<AppListPreference>(EXTRA_APP_LIST_PREFERENCE)?.let {
+            preference = it
+        }
     }
 
 //    override fun initContentLayout(binding: ViewDataBinding) {
