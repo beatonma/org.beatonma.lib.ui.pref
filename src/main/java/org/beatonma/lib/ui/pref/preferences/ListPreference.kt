@@ -69,8 +69,7 @@ open class ListPreference : BasePreference {
     constructor(context: Context, obj: JSONObject) : super(context, obj) {
         displayListResourceId = getResourceId(context, obj.optString(DISPLAY_LIST_ID, "0"))
         selectedValue = getInt(context, obj.optString(SELECTED_VALUE_ID, "0"))
-        val display = context.resources.getStringArray(displayListResourceId)
-        selectedDisplay = display[selectedValue]
+        updateDisplayValue(context)
     }
 
     constructor(bundle: Bundle?): super(bundle) {
@@ -103,6 +102,14 @@ open class ListPreference : BasePreference {
             putInt(key, selectedValue)
             putString(displayKey, selectedDisplay)
         }
+    }
+
+    /**
+     * Refresh the displayed value of this preference
+     */
+    fun updateDisplayValue(context: Context) {
+        val display = context.resources.getStringArray(displayListResourceId)
+        selectedDisplay = display[selectedValue]
     }
 
     override fun meetsDependency(dependency: Dependency?): Boolean {
