@@ -56,7 +56,6 @@ import androidx.annotation.CallSuper
 import org.json.JSONException
 import org.json.JSONObject
 
-
 internal const val PREFS = "prefs"
 internal const val KEY = "key"
 internal const val NAME = "name"
@@ -64,7 +63,6 @@ internal const val DESCRIPTION = "description"
 internal const val DEPENDENCY = "if"
 
 abstract class BasePreference : Parcelable {
-
 
     var prefs: String? = null
         set(value) {
