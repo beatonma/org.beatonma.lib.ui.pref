@@ -59,7 +59,7 @@ class PreferenceGroup : BasePreference, PreferenceContainer {
     @Suppress("UNCHECKED_CAST")
     constructor(bundle: Bundle?) : super(bundle) {
         bundle?.run {
-            preferences = getParcelableArrayList(PREFERENCES)
+            preferences = getParcelableArrayList(PREFERENCES) ?: ArrayList()
             updateDependencies()
         }
     }
