@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Item.Padded.Double">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="Title"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Text.Primary"/>
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="Description"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Text.Secondary"/>
+
+        <androidx.constraintlayout.widget.helper.Layer
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:constraint_referenced_ids="seekbar,seekbar_max,seekbar_min" />
+
+        <TextView
+            android:id="@+id/seekbar_min"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/description"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="min"/>
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/button_min_height"
+            app:layout_constraintStart_toEndOf="@+id/seekbar_min"
+            app:layout_constraintEnd_toStartOf="@+id/seekbar_max"
+            app:layout_constraintTop_toBottomOf="@+id/description" />
+
+        <TextView
+            android:id="@+id/seekbar_max"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/description"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="max"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekbar_value"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/seekbar"
+            tools:text="val"
+            style="@style/Text.Primary"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
