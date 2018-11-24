@@ -8,14 +8,12 @@ import androidx.test.filters.SmallTest
 import org.beatonma.lib.testing.kotlin.extensions.assertions.assertEquals
 import org.beatonma.lib.testing.kotlin.extensions.assertions.assertTrue
 import org.beatonma.lib.testing.kotlin.extensions.mock
-import org.beatonma.lib.testing.kotlin.extensions.whenever
+import org.beatonma.lib.testing.mocks.mockedSharedPreferences
+import org.beatonma.lib.testing.mocks.mockedSharedPreferencesEditor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
-import org.mockito.Matchers.anyBoolean
-import org.mockito.Matchers.anyInt
-import org.mockito.Matchers.anyString
 
 private const val VALID_KEY = "valid_key"
 private const val UNKNOWN_KEY = "invalid_key"
@@ -33,23 +31,12 @@ private const val RESOURCE_ID_VALUE = 43
 class SharedPreferencesTestSuite
 
 private val fakePrefs = HashMap<String, Any?>()
-private val sharedPreferences = mock<SharedPreferences>().apply {
-    whenever(getBoolean(anyString(), anyBoolean())).then { BOOLEAN_VALUE }
-    whenever(getInt(anyString(), anyInt())).then { INT_VALUE }
-    whenever(getString(anyString(), anyString())).then { STRING_VALUE }
-}
-
-private val editor = mock<SharedPreferences.Editor>().apply {
-    whenever(putBoolean(anyString(), anyBoolean())).then {
-        fakePrefs.put(it.arguments[0] as String, it.arguments[1])
-    }
-    whenever(putString(anyString(), anyString())).then {
-        fakePrefs.put(it.arguments[0] as String, it.arguments[1])
-    }
-    whenever(putInt(anyString(), anyInt())).then {
-        fakePrefs.put(it.arguments[0] as String, it.arguments[1])
-    }
-}
+private val sharedPreferences = mockedSharedPreferences(
+        intValue = INT_VALUE,
+        booleanValue = BOOLEAN_VALUE,
+        stringValue = STRING_VALUE
+)
+private val editor = mockedSharedPreferencesEditor(fakePrefs)
 
 /**
  * Ensure that saving a [preference][BasePreference] updates the corresponding
