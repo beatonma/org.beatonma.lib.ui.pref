@@ -1,19 +1,18 @@
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.beatonma.lib.ui.pref">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.beatonma.lib.ui.pref">
 
-  <application>
-    <activity
-      android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
-      android:theme="@style/Beatonma.AppTheme.Floating"/>
-    <activity
-      android:name="org.beatonma.lib.ui.pref.list.AppListPreferenceActivity"
-      android:theme="@style/Beatonma.AppTheme.Floating"/>
-    <activity
-      android:name="org.beatonma.lib.ui.pref.color.AllColorsPreferenceActivity"
-      android:theme="@style/Beatonma.AppTheme.Floating"/>
-    <activity
-      android:name="org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity"
-      android:theme="@style/Beatonma.AppTheme.Floating"/>
-  </application>
+    <application>
+        <activity
+            android:name="org.beatonma.lib.ui.pref.list.ListPreferenceActivity"
+            android:theme="@style/Beatonma.AppTheme.Floating" />
+        <activity
+            android:name="org.beatonma.lib.ui.pref.list.AppListPreferenceActivity"
+            android:theme="@style/Beatonma.AppTheme.Floating" />
+        <activity
+            android:name="org.beatonma.lib.ui.pref.color.AllColorsPreferenceActivity"
+            android:theme="@style/Beatonma.AppTheme.Floating" />
+        <activity
+            android:name="org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivity"
+            android:theme="@style/Beatonma.AppTheme.Floating" />
+    </application>
 </manifest>
