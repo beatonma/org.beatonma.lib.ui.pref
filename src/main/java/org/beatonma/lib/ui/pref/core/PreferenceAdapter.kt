@@ -7,6 +7,7 @@ import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.NonNull
@@ -34,28 +35,18 @@ const val PREFERENCE_TYPE_BOOLEAN = 1
 const val PREFERENCE_TYPE_LIST_SINGLE = 2
 const val PREFERENCE_TYPE_LIST_MULTI = 3   // Not yet implemented
 const val PREFERENCE_TYPE_LIST_APPS = 4
+const val PREFERENCE_TYPE_SEEKBAR_INT = 5
+const val PREFERENCE_TYPE_SEEKBAR_FLOAT = 6
 const val PREFERENCE_TYPE_COLOR_SINGLE = 11
 const val PREFERENCE_TYPE_COLOR_GROUP = 12
 const val PREFERENCE_TYPE_SECTION = 61
 const val PREFERENCE_TYPE_GROUP = 65       // Not yet implemented
 
 open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
-
-    constructor(fragmentContext: PreferenceFragment) : super() {
-        weakFragment = WeakReference(fragmentContext)
-    }
-
-    constructor(
-            fragmentContext: PreferenceFragment,
-            nullLayoutID: Int
-    ) : super(nullLayoutID = nullLayoutID) {
-        weakFragment = WeakReference(fragmentContext)
-    }
-
     override val items: List<*>?
         get() = preferenceGroup?.displayablePreferences
 
-    private val weakFragment: WeakReference<PreferenceFragment>?
+    private val weakFragment: WeakReference<BasePreferenceFragment>?
     var weakPrefs: WeakReference<SharedPreferences>? = null
     var preferenceGroup: PreferenceGroup? = null
         private set
@@ -82,6 +73,19 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * - 'checkable'
      */
     open val switchLayout: Int = R.layout.vh_pref_switch
+
+    /**
+     * Layout must contain a [SeekBar] with ID:
+     * - 'seekbar'
+     * Layout must contain TextViews with the following IDs:
+     * - 'title'
+     * - 'description'
+     * - 'value'
+    //     * - 'min'
+    //     * - 'max'
+     */
+    open val seekbarIntLayout: Int = R.layout.vh_pref_seekbar
+    open val seekbarFloatLayout: Int = R.layout.vh_pref_seekbar
 
     /**
      * Layout must contain TextViews with the following IDs:
@@ -113,6 +117,20 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
 
     open val sectionSeparatorLayout: Int = R.layout.vh_pref_section_separator
 
+    /**
+     * Constructors
+     */
+    constructor(fragmentContext: BasePreferenceFragment) : super() {
+        weakFragment = WeakReference(fragmentContext)
+    }
+
+    constructor(
+            fragmentContext: BasePreferenceFragment,
+            nullLayoutID: Int
+    ) : super(nullLayoutID = nullLayoutID) {
+        weakFragment = WeakReference(fragmentContext)
+    }
+
     protected fun diff(newList: MutableList<BasePreference>?) {
         diff(diffCallback(displayedPreferenceCache, newList), false)
 
@@ -120,7 +138,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         displayedPreferenceCache = newList?.map { it.copyOf() }
     }
 
-    fun setPreferences(context: Context, group: PreferenceGroup) {
+    fun setPreferences(context: Context, group: PreferenceGroup?) {
+        group ?: return
         weakPrefs = WeakReference(
                 context.getSharedPreferences(group.name, Context.MODE_PRIVATE))
 
@@ -191,6 +210,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             ColorPreferenceGroup.TYPE -> PREFERENCE_TYPE_COLOR_GROUP
             BasePreference.TYPE, SimplePreference.TYPE -> PREFERENCE_TYPE_SIMPLE
             SectionSeparator.TYPE -> PREFERENCE_TYPE_SECTION
+            IntSeekbarPreference.TYPE -> PREFERENCE_TYPE_SEEKBAR_INT
+            FloatSeekbarPreference.TYPE -> PREFERENCE_TYPE_SEEKBAR_FLOAT
             else -> super.getItemViewType(position)
         }
     }
@@ -204,6 +225,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             PREFERENCE_TYPE_COLOR_SINGLE -> ColorPreferenceViewHolder(inflate(parent, colorSingleLayout))
             PREFERENCE_TYPE_COLOR_GROUP -> ColorGroupPreferenceViewHolder(inflate(parent, colorGroupLayout))
             PREFERENCE_TYPE_SECTION -> SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout))
+            PREFERENCE_TYPE_SEEKBAR_INT -> SeekbarIntViewHolder(inflate(parent, seekbarIntLayout))
+            PREFERENCE_TYPE_SEEKBAR_FLOAT -> SeekbarFloatViewHolder(inflate(parent, seekbarFloatLayout))
             0 -> SimplePreferenceViewHolder(inflate(parent, simpleLayout))
             else -> super.onCreateViewHolder(parent, viewType)
         }
@@ -230,7 +253,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
                 notifyUpdate(preference)
             }
 
-            itemView.setOnClickListener { _ -> switch.toggle() }
+            itemView.setOnClickListener { switch.toggle() }
         }
     }
 
@@ -240,8 +263,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             super.bind(weakPrefs, preference)
             preference ?: return
             updateDescription(preference.selectedDisplay)
-            itemView.setOnClickListener { v ->
-                ActivityBuilder(v,
+            itemView.setOnClickListener { view ->
+                ActivityBuilder(view,
                         ListPreferenceActivity::class.java,
                         fragment = weakFragment?.get(),
                         requestCode = ListPreferenceActivity.REQUEST_CODE_UPDATE).apply {
@@ -267,8 +290,8 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         }
     }
 
-    open inner class ColorPreferenceViewHolder(v: View) : BasePreferenceViewHolder<ColorPreference>(v) {
-        private val patch: ColorPatchView = v.findViewById(R.id.colorpatch)
+    open inner class ColorPreferenceViewHolder(view: View) : BasePreferenceViewHolder<ColorPreference>(view) {
+        private val patch: ColorPatchView = view.findViewById(R.id.colorpatch)
         private var firstDisplay = true    // We only want to animate on new views
 
         override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: ColorPreference?) {
@@ -286,12 +309,12 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         }
     }
 
-    open inner class ColorGroupPreferenceViewHolder(v: View) : BasePreferenceViewHolder<ColorPreferenceGroup>(v) {
+    open inner class ColorGroupPreferenceViewHolder(view: View) : BasePreferenceViewHolder<ColorPreferenceGroup>(view) {
         val colorAdapter = MultiColorAdapter()
         val colors = mutableListOf<ColorPreference>()
 
         init {
-            v.findViewById<RecyclerView>(R.id.colors)?.apply {
+            view.findViewById<RecyclerView>(R.id.colors)?.apply {
                 adapter = colorAdapter
                 itemAnimator = ColorItemAnimator(4)
                 layoutManager = LinearLayoutManager(
@@ -314,13 +337,13 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
                 return colors.size
             }
 
-            inner class PatchViewHolder(v: View) : BasePatchViewHolder(v) {
+            inner class PatchViewHolder(view: View) : BasePatchViewHolder(view) {
                 override fun bind(position: Int) {
                     val preference = colors[position]
                     patch.color = preference.color.color
 
-                    patch.setOnClickListener { v ->
-                        ActivityBuilder(v, SwatchColorPreferenceActivity::class.java,
+                    patch.setOnClickListener { view ->
+                        ActivityBuilder(view, SwatchColorPreferenceActivity::class.java,
                                 fragment = weakFragment?.get(),
                                 requestCode = SwatchColorPreferenceActivity.REQUEST_CODE_UPDATE).apply {
                             putExtra(SwatchColorPreferenceActivity.EXTRA_COLOR_PREFERENCE, preference)
@@ -331,7 +354,36 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         }
     }
 
-    abstract inner class BasePreferenceViewHolder<T : BasePreference>(v: View) : BaseViewHolder(v) {
+    abstract inner class SeekbarViewHolder<N : Number>(view: View) : BasePreferenceViewHolder<SeekbarPreference<N>>(view) {
+        val seekbar: SeekBar = view.findViewById(R.id.seekbar)
+        val valueText: TextView = view.findViewById(R.id.seekbar_value)
+
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: SeekbarPreference<N>?) {
+            super.bind(weakPrefs, preference)
+            preference ?: return
+
+            preference.params.let { params ->
+                valueText.text = "${params.value}"
+                seekbar.max = params.stepCount
+                seekbar.progress = params.selectedStep
+                seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        params.selectedStep = progress
+                        valueText.text = "${params.value}"
+                        this@SeekbarViewHolder.save(preference)
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                })
+            }
+        }
+    }
+
+    open inner class SeekbarIntViewHolder(view: View) : SeekbarViewHolder<Int>(view)
+    open inner class SeekbarFloatViewHolder(view: View) : SeekbarViewHolder<Float>(view)
+
+    abstract inner class BasePreferenceViewHolder<T : BasePreference>(view: View) : BaseViewHolder(view) {
         private var mWeakPrefs: WeakReference<SharedPreferences>? = null
 
         private val title: TextView = itemView.findViewById(R.id.title)
@@ -350,7 +402,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         }
 
         fun save(preference: T) {
-            mWeakPrefs?.get()?.edit()?.let {editor ->
+            mWeakPrefs?.get()?.edit()?.let { editor ->
                 preference.save(editor)
                 editor.apply()
             }
@@ -374,5 +426,4 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             description?.hideIfEmpty()
         }
     }
-
 }
