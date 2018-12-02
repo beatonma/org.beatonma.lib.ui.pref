@@ -1,7 +1,7 @@
 package org.beatonma.lib.ui.pref.preferences
 
 import androidx.test.filters.MediumTest
-import org.beatonma.lib.testing.espresso.setSeekBarProgress
+import org.beatonma.lib.testing.espresso.action.setSeekBarProgress
 import org.beatonma.lib.testing.kotlin.extensions.ActivityTest
 import org.beatonma.lib.testing.kotlin.extensions.ViewWithID
 import org.beatonma.lib.testing.kotlin.extensions.testRule
@@ -44,7 +44,7 @@ class SeekbarPreferenceActivityTestSuite
  * UI interaction helper class. Tests should use this (via robot {...}) - they should not touch
  * the UI directly.
  */
-private class SeekbarRobot {
+internal class SeekbarRobot {
     fun selectStep(step: Int) {
         ViewWithID(R.id.seekbar).perform { setSeekBarProgress(step) }
     }
@@ -53,14 +53,15 @@ private class SeekbarRobot {
         ViewWithID(R.id.seekbar_value).hasText(valueString)
     }
 }
-private fun SeekbarPreferenceActivityTest.robot(func: SeekbarRobot.() -> Any?) = SeekbarRobot().apply {
-    func()
 
-    // Clear preferences after executing each robot {...} block
-    rule.activity.clearPreferences()
+abstract class SeekbarPreferenceActivityTest : ActivityTest<TestPreferenceActivity>() {
+    internal fun robot(func: SeekbarRobot.() -> Any?) =  SeekbarRobot().apply {
+        func()
+
+        // Clear preferences after executing each robot {...} block
+        rule.activity.clearPreferences()
+    }
 }
-
-abstract class SeekbarPreferenceActivityTest : ActivityTest<TestPreferenceActivity>()
 
 @MediumTest
 class IntSeekbarPreferenceActivityTest : SeekbarPreferenceActivityTest() {
