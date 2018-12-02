@@ -21,9 +21,9 @@ class SeekbarUnitTestSuite
 class IntSeekbarParamsTest {
     @Test
     fun params_stepCount_isCorrect() {
-        IntSeekbarParams(KEY, min = 0, max = 10, stepSize = 1).stepCount.assertEquals(11)
-        IntSeekbarParams(KEY, min = 0, max = 10, stepSize = 2).stepCount.assertEquals(6)
-        IntSeekbarParams(KEY, min = 0, max = 9, stepSize = 3).stepCount.assertEquals(4)
+        IntSeekbarParams(KEY, min = 0, max = 10, stepSize = 1).stepCount.assertEquals(10)
+        IntSeekbarParams(KEY, min = 0, max = 10, stepSize = 2).stepCount.assertEquals(5)
+        IntSeekbarParams(KEY, min = 0, max = 9, stepSize = 3).stepCount.assertEquals(3)
     }
 
     @Test
@@ -55,7 +55,7 @@ class IntSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(11, "stepCount")
+            stepCount.assertEquals(10, "stepCount")
             value.assertEquals(0, "value")
         }
     }
@@ -66,7 +66,7 @@ class IntSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(9, "stepCount")
+            stepCount.assertEquals(8, "stepCount")
             value.assertEquals(2, "value")
         }
     }
@@ -77,7 +77,7 @@ class IntSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(13, "stepCount")
+            stepCount.assertEquals(12, "stepCount")
             value.assertEquals(-2, "value")
         }
     }
@@ -88,7 +88,7 @@ class IntSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(10, "stepCount")
+            stepCount.assertEquals(9, "stepCount")
             value.assertEquals(-10, "value")
         }
     }
@@ -100,8 +100,17 @@ class IntSeekbarParamsTest {
         params.run {
             selectedStep = 3
 
-            stepCount.assertEquals(21, "stepCount")
+            stepCount.assertEquals(20, "stepCount")
             value.assertEquals(-7)
+        }
+    }
+
+    @Test
+    fun params_withDefaultValue_hasCorrectValue() {
+        val params = IntSeekbarParams(KEY, max=10, defaultValue = 6)
+        params.run {
+            selectedStep.assertEquals(6)
+            value.assertEquals(6)
         }
     }
 
@@ -127,10 +136,10 @@ class IntSeekbarParamsTest {
 class FloatSeekbarParamsTest {
     @Test
     fun params_stepCount_isCorrect() {
-        FloatSeekbarParams(KEY, min = 0F, max = 1F, stepSize = 1F).stepCount.assertEquals(2)
-        FloatSeekbarParams(KEY, min = 0F, max = 1F, stepSize = .5F).stepCount.assertEquals(3)
-        FloatSeekbarParams(KEY, min = 0F, max = 4.5F, stepSize = .25F).stepCount.assertEquals(19)
-        FloatSeekbarParams(KEY, min = 3F, max = 7.5F, stepSize = .5F).stepCount.assertEquals(10)
+        FloatSeekbarParams(KEY, min = 0F, max = 1F, stepSize = 1F).stepCount.assertEquals(1)
+        FloatSeekbarParams(KEY, min = 0F, max = 1F, stepSize = .5F).stepCount.assertEquals(2)
+        FloatSeekbarParams(KEY, min = 0F, max = 4.5F, stepSize = .25F).stepCount.assertEquals(18)
+        FloatSeekbarParams(KEY, min = 3F, max = 7.5F, stepSize = .5F).stepCount.assertEquals(9)
     }
 
     @Test
@@ -165,7 +174,7 @@ class FloatSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(11, "stepCount")
+            stepCount.assertEquals(10, "stepCount")
             value.assertEquals(0F, "value")
         }
     }
@@ -176,7 +185,7 @@ class FloatSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(9, "stepCount")
+            stepCount.assertEquals(8, "stepCount")
             value.assertEquals(2F, "value")
         }
     }
@@ -187,7 +196,7 @@ class FloatSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(13, "stepCount")
+            stepCount.assertEquals(12, "stepCount")
             value.assertEquals(-2F, "value")
         }
     }
@@ -198,7 +207,7 @@ class FloatSeekbarParamsTest {
 
         params.run {
             selectedStep.assertEquals(0, "selectedStep")
-            stepCount.assertEquals(10, "stepCount")
+            stepCount.assertEquals(9, "stepCount")
             value.assertEquals(-10F, "value")
         }
     }
@@ -210,8 +219,17 @@ class FloatSeekbarParamsTest {
         params.run {
             selectedStep = 3
 
-            stepCount.assertEquals(5, "stepCount") // TODO: FAILS
+            stepCount.assertEquals(4, "stepCount")
             value.assertEquals(0.75F, "value")
+        }
+    }
+
+    @Test
+    fun params_withDefaultValue_hasCorrectValue() {
+        val params = FloatSeekbarParams(KEY, max=10F, defaultValue = 6F)
+        params.run {
+            selectedStep.assertEquals(6)
+            value.assertEquals(6F)
         }
     }
 
