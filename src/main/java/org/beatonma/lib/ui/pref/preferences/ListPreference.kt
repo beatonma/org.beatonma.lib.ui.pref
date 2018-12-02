@@ -114,19 +114,20 @@ open class ListPreference : BasePreference {
 
     override fun meetsDependency(dependency: Dependency?): Boolean {
         dependency ?: return true
+        val value = dependency.value.toInt()
         return when (dependency.operator) {
-            "==" -> selectedValue == dependency.value.toInt()
-            "!=" -> selectedValue != dependency.value.toInt()
-            ">=" -> selectedValue >= dependency.value.toInt()
-            "<=" -> selectedValue <= dependency.value.toInt()
-            ">" -> selectedValue > dependency.value.toInt()
-            "<" -> selectedValue < dependency.value.toInt()
+            "==" -> selectedValue == value
+            "!=" -> selectedValue != value
+            ">=" -> selectedValue >= value
+            "<=" -> selectedValue <= value
+            ">" -> selectedValue > value
+            "<" -> selectedValue < value
             else -> super.meetsDependency(dependency)
         }
     }
 
     override fun sameContents(other: Any?): Boolean {
-        other as? ListPreference ?: return false
+        if (other !is ListPreference) return false
         return selectedValue == other.selectedValue && selectedDisplay == other.selectedDisplay
                 && super.sameContents(other)
     }
