@@ -14,14 +14,18 @@ import java.util.regex.Pattern
  * If the text represents a @resource, return the value of that resource
  * else return the given text
  */
-internal fun getString(context: Context,
-                       text: String?): String? {
+internal fun getString(
+        context: Context,
+        text: String?
+): String? {
     val resId = getResourceId(context, text)
     return if (resId == 0) text else context.resources.getString(resId)
 }
 
-internal fun getBoolean(context: Context,
-                        text: String?): Boolean {
+internal fun getBoolean(
+        context: Context,
+        text: String?
+): Boolean {
     val resId = getResourceId(context, text)
     return if (resId == 0) text?.toBoolean() ?: false else context.resources.getBoolean(resId)
 }
@@ -31,8 +35,10 @@ internal fun getBoolean(context: Context,
  * If the text represents a @resource, return the value of that resource
  * else try to parse an integer value
  */
-internal fun getInt(context: Context,
-                    text: String): Int {
+internal fun getInt(
+        context: Context,
+        text: String
+): Int {
     val resId = getResourceId(context, text)
 
     return if (resId == 0) {
@@ -46,12 +52,31 @@ internal fun getInt(context: Context,
     }
 }
 
+internal fun getFloat(
+        context: Context,
+        text: String
+): Float {
+    val resId = getResourceId(context, text)
+
+    return if (resId == 0) {
+        try {
+            text.toFloat()
+        } catch (e: Exception) {
+            0F
+        }
+    } else {
+        context.resources.getFraction(resId, 1, 1)
+    }
+}
+
 /**
  * If the text represents a @resource, return the value of that resource
  * else try to parse a color value. Supports integers or hex codes.
  */
-internal fun getColor(context: Context,
-                      text: String): Int {
+internal fun getColor(
+        context: Context,
+        text: String
+): Int {
     val resId = getResourceId(context, text)
     return if (resId == 0) {
         try {
@@ -68,14 +93,18 @@ internal fun getColor(context: Context,
     }
 }
 
-internal fun getIntArray(context: Context,
-                         text: String): IntArray? {
+internal fun getIntArray(
+        context: Context,
+        text: String
+): IntArray? {
     val resId = getResourceId(context, text)
     return if (resId == 0) null else context.resources.getIntArray(resId)
 }
 
-internal fun getStringArray(context: Context,
-                            text: String): Array<String>? {
+internal fun getStringArray(
+        context: Context,
+        text: String
+): Array<String>? {
     val resId = getResourceId(context, text)
     return if (resId == 0) null else context.resources.getStringArray(resId)
 }
