@@ -11,14 +11,14 @@ import org.beatonma.lib.ui.pref.preferences.buildPreferencesFromJson
  */
 class PreferenceLoader(
         context: Context,
-        private val mResourceID: Int
+        private val resourceID: Int
 ) : SupportBaseAsyncTaskLoader<PreferenceGroup>(context) {
 
     override fun loadInBackground(): Result<PreferenceGroup> {
         val result = Result.getBuilder<PreferenceGroup>()
         val prefs: PreferenceGroup
         try {
-            prefs = buildPreferencesFromJson(context, mResourceID)
+            prefs = buildPreferencesFromJson(context, resourceID)
         } catch (e: Exception) {
             result.failure(e)
             return result
