@@ -1,8 +1,8 @@
 /**
- * Use [buildPreferencesFromJson] to construct a PreferenceGroup from JSON
+ * Use [buildPreferencesFromJson] to construct a [PreferenceGroup] from JSON
  * definitions source text.
  *
- * The PreferenceGroup may contain any number of children (which must
+ * The [PreferenceGroup] may contain any number of children (which must
  * each extend [BasePreference]).
  *
  * The expected format of the JSON definitions is as follow:
@@ -80,7 +80,7 @@ internal fun buildPreferencesFromJson(context: Context, rawText: String?): Prefe
     val group = PreferenceGroup()
     if (rawText == null) {
         Log.e(TAG, "buildPreferencesFromJson received null text!")
-        return@buildPreferencesFromJson group
+        return group
     }
     val preferences = ArrayList<BasePreference>()
 
@@ -122,10 +122,16 @@ private fun childFromJson(
     val type = json.optString(PREFERENCE_TYPE, "")
     return when (type) {
         BooleanPreference.TYPE -> BooleanPreference(context, json)
+
         ListPreference.TYPE -> ListPreference(context, json)
         AppListPreference.TYPE -> AppListPreference(context, json)
+
+        IntSeekbarPreference.TYPE -> IntSeekbarPreference(context, json)
+        FloatSeekbarPreference.TYPE -> FloatSeekbarPreference(context, json)
+
         ColorPreference.TYPE -> ColorPreference(context, json)
         ColorPreferenceGroup.TYPE -> ColorPreferenceGroup(context, json)
+
         SimplePreference.TYPE, "" -> SimplePreference(context, json)
         SectionSeparator.TYPE -> SectionSeparator(context, json)
         else -> {
