@@ -6,8 +6,8 @@ dependencies {
     implementation "$module_dependencies.google.material"
     implementation "$module_dependencies.google.recyclerview"
 
+    api project(":modules:load")
+    api project(":modules:ui:activity")
     api project(":modules:ui:style")
     api project(":modules:ui:recyclerview")
-    api project(":modules:ui:activity")
-    api project(":modules:load")
 }
