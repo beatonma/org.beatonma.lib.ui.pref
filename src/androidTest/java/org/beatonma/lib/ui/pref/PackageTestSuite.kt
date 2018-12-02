@@ -5,6 +5,7 @@ package org.beatonma.lib.ui.pref
 import org.beatonma.lib.ui.pref.color.SwatchColorPreferenceActivityTest
 import org.beatonma.lib.ui.pref.list.ListPreferenceActivityTestSuite
 import org.beatonma.lib.ui.pref.preferences.ParcelableTest
+import org.beatonma.lib.ui.pref.preferences.SeekbarPreferenceActivityTestSuite
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
@@ -24,6 +25,7 @@ class PackageTestSuite
 @Suite.SuiteClasses(
         ListPreferenceActivityTestSuite::class,
         ParcelableTest::class,
+        SeekbarPreferenceActivityTestSuite::class,
         SwatchColorPreferenceActivityTest::class
 )
 class PackageMediumTestSuite
