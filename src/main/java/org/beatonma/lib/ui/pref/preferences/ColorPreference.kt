@@ -109,7 +109,7 @@ class ColorPreference : BasePreference {
     }
 
     override fun sameContents(other: Any?): Boolean {
-        other as? ColorPreference ?: return false
+        if (other !is ColorPreference) return false
         return color == other.color
                 && alphaEnabled == other.alphaEnabled
                 && super.sameContents(other)
