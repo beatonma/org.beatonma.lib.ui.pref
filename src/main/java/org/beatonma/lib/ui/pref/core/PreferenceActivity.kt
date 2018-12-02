@@ -2,15 +2,16 @@ package org.beatonma.lib.ui.pref.core
 
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.transaction
-import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.activity.BaseActivity
-import org.beatonma.lib.ui.activity.databinding.RecyclerviewBinding
-import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.pref.R
 
+private const val FRAGMENT_TAG = "simple_preference_fragment_impl"
+
+/**
+ * Implement this class to create a simple activity wrapper for [PreferenceFragment]
+ */
 abstract class PreferenceActivity: BaseActivity() {
-    companion object {
-        private const val FRAGMENT_TAG = "simple_preference_fragment_impl"
-    }
+
     /**
      * Layout resource file for this activity
      */
@@ -49,7 +50,6 @@ class SimplePreferenceFragmentImpl : PreferenceFragment() {
     }
 
     override fun init(binding: ViewDataBinding) {
-        binding as RecyclerviewBinding
-        binding.recyclerview.setup(adapter)
+        (binding as RecyclerviewBinding).recyclerview.setup(adapter)
     }
 }
