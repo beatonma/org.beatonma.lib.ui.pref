@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
+import androidx.core.content.edit
 import androidx.databinding.ViewDataBinding
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
@@ -16,7 +17,6 @@ import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.ui.activity.popup.RecyclerViewPopupActivity
 import org.beatonma.lib.ui.pref.R
-import org.beatonma.lib.ui.pref.databinding.VhListItemSingleBinding
 import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
 import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
@@ -37,14 +37,10 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
         const val REQUEST_CODE_UPDATE = 936
     }
 
-    private lateinit var mListPreference: ListPreference
+    private lateinit var listPreference: ListPreference
 
-//    private lateinit var activityBinding: ActivityListBinding
     private lateinit var adapter: ListAdapter
     private var listItems: List<ListItem>? = null
-
-//    override val contentLayoutID: Int
-//        get() = R.layout.activity_list
 
     open fun buildAdapter(): ListAdapter {
         return ListAdapter()
@@ -53,37 +49,28 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
     override fun initExtras(extras: Bundle?) {
         super.initExtras(extras)
         extras?.getParcelable<ListPreference>(EXTRA_LIST_PREFERENCE)?.let {
-            mListPreference = it
+            listPreference = it
         }
     }
 
     fun saveAndClose(item: ListItem) {
-        mListPreference.selectedValue = item.value
-        mListPreference.selectedDisplay = item.text
+        listPreference.selectedValue = item.value
+        listPreference.selectedDisplay = item.text
 
-        val editor = getSharedPreferences(mListPreference.prefs, Context.MODE_PRIVATE).edit()
-        mListPreference.save(editor)
-        editor.commit()
+
+        getSharedPreferences(listPreference.prefs, Context.MODE_PRIVATE).edit(commit = true) {
+            listPreference.save(this)
+        }
 
         val intent = Intent()
-        intent.putExtra(EXTRA_LIST_PREFERENCE, mListPreference)
+        intent.putExtra(EXTRA_LIST_PREFERENCE, listPreference)
         setResult(Activity.RESULT_OK, intent)
         close()
     }
 
-//    override fun initContentLayout(binding: ViewDataBinding) {
-//        adapter = buildAdapter()
-//        activityBinding = binding as ActivityListBinding
-//        binding.recyclerview.setup(adapter)
-//
-//        setTitle(mListPreference.name)
-//
-//        LoaderManager.getInstance(this).initLoader(LIST_LOADER, null, this)
-//    }
-
     override fun initLayout(binding: ViewDataBinding) {
         super.initLayout(binding)
-        setTitle(mListPreference.name)
+        setTitle(listPreference.name)
         LoaderManager.getInstance(this).initLoader(LIST_LOADER, null, this)
     }
 
@@ -94,7 +81,7 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
 
     @NonNull
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Result<List<ListItem>>> {
-        return PrefListLoader(this, mListPreference)
+        return PrefListLoader(this, listPreference)
     }
 
     override fun onLoadFinished(loader: Loader<Result<List<ListItem>>>,
