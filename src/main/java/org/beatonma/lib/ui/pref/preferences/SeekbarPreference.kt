@@ -15,13 +15,14 @@ private const val SEEKBAR_MAX = "max"
 private const val SEEKBAR_STEP_SIZE = "step_size"
 private const val SEEKBAR_SELECTED_STEP = "selected_step"
 
-@VisibleForTesting fun seekbarValueKey(key: String) = "${key}_$SEEKBAR_VALUE"
+@VisibleForTesting
+fun seekbarValueKey(key: String) = "${key}_$SEEKBAR_VALUE"
 
 
-abstract class SeekbarPreference<N: Number>: BasePreference {
+abstract class SeekbarPreference<N : Number> : BasePreference {
     abstract val params: SeekbarParams<N>
 
-    constructor(source: SeekbarPreference<N>): super(source)
+    constructor(source: SeekbarPreference<N>) : super(source)
     constructor(context: Context, obj: JSONObject) : super(context, obj)
     constructor(bundle: Bundle?) : super(bundle)
 
@@ -46,8 +47,8 @@ class IntSeekbarPreference : SeekbarPreference<Int> {
 
     override val params: SeekbarParams<Int> = IntSeekbarParams(key = key, min = 0, max = 2)
 
-    constructor(source: IntSeekbarPreference): super(source) {
-        source.params.let {other ->
+    constructor(source: IntSeekbarPreference) : super(source) {
+        source.params.let { other ->
             params.apply {
                 max = other.max
                 min = other.min
@@ -64,7 +65,9 @@ class IntSeekbarPreference : SeekbarPreference<Int> {
             min = getInt(context, obj.optString(SEEKBAR_MIN, "0"))
             max = getInt(context, obj.optString(SEEKBAR_MAX, "2"))
             stepSize = getInt(context, obj.optString(SEEKBAR_STEP_SIZE, "1"))
-            selectedStep = valueToSeekbarStep(getInt(context, obj.optString(SEEKBAR_SELECTED_STEP, "0")))
+            defaultValue = getInt(context, obj.optString(SEEKBAR_VALUE, "$min"))
+            selectedStep = valueToSeekbarStep(
+                    getInt(context, obj.optString(SEEKBAR_SELECTED_STEP, "$defaultValue")))
         }
     }
 
@@ -117,8 +120,8 @@ class FloatSeekbarPreference : SeekbarPreference<Float> {
 
     override val params: SeekbarParams<Float> = FloatSeekbarParams(key = key, min = 0F, max = 1F)
 
-    constructor(source: FloatSeekbarPreference): super(source) {
-        source.params.let {other ->
+    constructor(source: FloatSeekbarPreference) : super(source) {
+        source.params.let { other ->
             params.apply {
                 max = other.max
                 min = other.min
@@ -134,7 +137,9 @@ class FloatSeekbarPreference : SeekbarPreference<Float> {
             min = getFloat(context, obj.optString(SEEKBAR_MIN, "0"))
             max = getFloat(context, obj.optString(SEEKBAR_MAX, "2"))
             stepSize = getFloat(context, obj.optString(SEEKBAR_STEP_SIZE, "1"))
-            selectedStep = valueToSeekbarStep(getFloat(context, obj.optString(SEEKBAR_SELECTED_STEP, "0")))
+            defaultValue = getFloat(context, obj.optString(SEEKBAR_VALUE, "$min"))
+            selectedStep = valueToSeekbarStep(
+                    getFloat(context, obj.optString(SEEKBAR_SELECTED_STEP, "$defaultValue")))
         }
     }
 
@@ -183,7 +188,7 @@ class FloatSeekbarPreference : SeekbarPreference<Float> {
 }
 
 
-abstract class SeekbarParams<N: Number>(val key: String) {
+abstract class SeekbarParams<N : Number>(val key: String) {
     abstract var max: N
     abstract var min: N
     abstract var stepSize: N
@@ -191,9 +196,11 @@ abstract class SeekbarParams<N: Number>(val key: String) {
 
     abstract val value: N
     internal abstract val range: N
+
+    // This is the number of gaps between nodes, not the number of nodes.
     internal abstract val stepCount: Int
 
-    var selectedStep: Int = 0
+    abstract var selectedStep: Int
 
     /**
      * Take a value and return the corresponding position on the SeekBar
@@ -221,9 +228,10 @@ class IntSeekbarParams(
     override val range: Int
         get() = max - min
     override val stepCount
-        get() = (range + stepSize) / stepSize
+        get() = range / stepSize
     override val value: Int
         get() = min + (selectedStep * stepSize)
+    override var selectedStep: Int = valueToSeekbarStep(defaultValue)
 
     override fun load(sharedPreferences: SharedPreferences) {
         val concreteValue = sharedPreferences.getInt(seekbarValueKey(key), defaultValue)
@@ -234,8 +242,8 @@ class IntSeekbarParams(
         editor.putInt(seekbarValueKey(key), value)
     }
 
-    override fun valueToSeekbarStep(value: Int) : Int {
-        return ((value - min) / stepSize).coerceIn(0, stepCount - 1)
+    override fun valueToSeekbarStep(value: Int): Int {
+        return ((value - min) / stepSize).coerceIn(0, stepCount)
     }
 
     override fun toBundle(bundle: Bundle) {
@@ -259,18 +267,19 @@ class FloatSeekbarParams(
         override var min: Float = 0F,
         override var stepSize: Float = 1F,
         override var defaultValue: Float = min
-): SeekbarParams<Float>(key) {
+) : SeekbarParams<Float>(key) {
     override val range
         get() = max - min
     override val stepCount
-        get() = ((range + stepSize) / stepSize).toInt()
+        get() = (range / stepSize).toInt()
     override val value
         get() = min + (selectedStep * stepSize)
+    override var selectedStep: Int = valueToSeekbarStep(defaultValue)
 
     override fun load(sharedPreferences: SharedPreferences) {
         val concreteValue = sharedPreferences.getFloat(seekbarValueKey(key), defaultValue)
         selectedStep = valueToSeekbarStep(concreteValue)
-}
+    }
 
     override fun save(editor: SharedPreferences.Editor) {
         editor.putFloat(seekbarValueKey(key), value)
@@ -280,7 +289,7 @@ class FloatSeekbarParams(
         return ((value - min)
                 / stepSize)
                 .toInt()
-                .coerceIn(0, stepCount - 1)
+                .coerceIn(0, stepCount)
     }
 
     override fun toBundle(bundle: Bundle) {
