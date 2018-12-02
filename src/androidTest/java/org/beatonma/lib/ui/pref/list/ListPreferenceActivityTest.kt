@@ -6,15 +6,12 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.MediumTest
 import org.beatonma.lib.testing.espresso.ViewHeightAtLeast
 import org.beatonma.lib.testing.espresso.ViewHeightAtMost
 import org.beatonma.lib.testing.espresso.ViewHeightIs
-import org.beatonma.lib.testing.espresso.click
+import org.beatonma.lib.testing.espresso.action.click
 import org.beatonma.lib.testing.kotlin.extensions.ActivityTest
 import org.beatonma.lib.testing.kotlin.extensions.assertions.assertTrue
 import org.beatonma.lib.testing.kotlin.extensions.testRule
