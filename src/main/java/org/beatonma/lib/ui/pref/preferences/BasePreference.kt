@@ -83,8 +83,8 @@ abstract class BasePreference : Parcelable {
     /**
      * True if dependency condition is met, or no dependency is defined
      */
-    var allowDisplay: Boolean = true
-        get() = dependency?.passed ?: true
+    open var allowDisplay: Boolean = true
+        get() = (dependency?.passed ?: true)
 
     abstract val type: String
 
@@ -180,8 +180,10 @@ abstract class BasePreference : Parcelable {
     }
 
     override fun equals(other: Any?): Boolean {
-        other as? BasePreference ?: return false
-        return sameObject(other) && sameContents(other)
+        return when (other) {
+            is BasePreference -> sameObject(other) && sameContents(other)
+            else -> false
+        }
     }
 
     override fun writeToParcel(parcel: Parcel?, flags: Int) {
