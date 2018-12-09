@@ -1,10 +1,10 @@
 dependencies {
-    implementation "$module_dependencies.google.constraint"
-    implementation "$module_dependencies.google.ktx.core"
-    implementation "$module_dependencies.google.ktx.fragment"
-    implementation "$module_dependencies.google.lifecycle.extensions"
-    implementation "$module_dependencies.google.material"
-    implementation "$module_dependencies.google.recyclerview"
+    implementation "androidx.constraintlayout:constraintlayout:$versions.constraint"
+    implementation "androidx.core:core-ktx:$versions.ktx_core"
+    implementation "androidx.fragment:fragment-ktx:$versions.androidx"
+    implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
+    implementation "com.google.android.material:material:$versions.androidx"
+    implementation "androidx.recyclerview:recyclerview:$versions.androidx"
 
     api project(":modules:load")
     api project(":modules:ui:activity")
