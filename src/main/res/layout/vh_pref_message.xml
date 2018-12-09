@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/Card.FullWidthOnSmall"
+        tools:layout_width="match_parent">
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Text.Primary.Header.Card"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title"/>
+
+        <TextView
+            android:id="@+id/description"
+            style="@style/Text.Primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:text="Message content"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/dismiss_button"
+            style="@style/Button.Flat.Dialog"
+            android:text="@string/dialog_dismiss"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/description"
+            tools:text="@string/dialog_dismiss" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
