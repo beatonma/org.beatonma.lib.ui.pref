@@ -17,10 +17,12 @@ import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
 import org.beatonma.lib.ui.activity.popup.RecyclerViewPopupActivity
 import org.beatonma.lib.ui.pref.R
+import org.beatonma.lib.ui.pref.databinding.VhListItemSingleBinding
 import org.beatonma.lib.ui.pref.preferences.ListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
-import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.LoadingRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.recyclerview.simpleDiffCallback
 import org.beatonma.lib.ui.style.Views
 import org.beatonma.lib.util.kotlin.extensions.autotag
 import org.beatonma.lib.util.kotlin.extensions.toPrettyString
@@ -91,7 +93,11 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
                 if (result.isFailure) {
                     Log.w(TAG, "List loading failed: ${result.errors.toPrettyString()}")
                 }
-                adapter.diff(listItems, result.data)
+                adapter.diff(
+                        simpleDiffCallback(
+                                listItems, result.data,
+                                sameItem = { old, new -> old?.text?.equals(new?.text) ?: false },
+                                sameContent = { old, new -> old?.checked == new?.checked }))
                 listItems = result.data
             }
         }
@@ -144,7 +150,7 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
         }
     }
 
-    open inner class ListAdapter : EmptyBaseRecyclerViewAdapter {
+    open inner class ListAdapter : LoadingRecyclerViewAdapter {
         constructor() : super()
         constructor(nullLayoutID: Int) : super(nullLayoutID = nullLayoutID)
 
@@ -172,14 +178,12 @@ open class ListPreferenceActivity : RecyclerViewPopupActivity(),
                 itemBinding.description.text = item.description
                 Views.hideIfEmpty(itemBinding.text, itemBinding.description)
 
-                val clickListener = View.OnClickListener {
-                    Log.d(autotag, "item click at $adapterPosition")
+                val clickListener = View.OnClickListener { _ ->
                     val adapterPosition = adapterPosition
                     for (i in 0 until adapter.itemCount) {
-
                         val holder = recyclerView
                                 .findViewHolderForAdapterPosition(i) as? ItemViewHolder
-                        holder?.let { it.itemBinding.radioButton.isChecked = i == adapterPosition }
+                        holder?.itemBinding?.radioButton?.isChecked = i == adapterPosition
                     }
 
                     saveAndClose(item)

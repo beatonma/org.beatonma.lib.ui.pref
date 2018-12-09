@@ -19,8 +19,9 @@ import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.databinding.VhAppListItemSingleBinding
 import org.beatonma.lib.ui.pref.preferences.AppListPreference
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
-import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.LoadingRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.recyclerview.simpleDiffCallback
 import org.beatonma.lib.ui.style.Views
 import org.beatonma.lib.util.kotlin.extensions.autotag
 import org.beatonma.lib.util.kotlin.extensions.toPrettyString
@@ -49,10 +50,7 @@ open class AppListPreferenceActivity : RecyclerViewPopupActivity(),
         private const val APP_LIST_LOADER = 237
     }
 
-//    override val contentLayoutID: Int = R.layout.activity_list
-
     private lateinit var preference: AppListPreference
-//    private lateinit var binding: ActivityListBinding
     private lateinit var adapter: AppListAdapter
 
     private var apps: List<App>? = null
@@ -111,7 +109,14 @@ open class AppListPreferenceActivity : RecyclerViewPopupActivity(),
                 if (result.isFailure) {
                     Log.w(autotag, "App list loading failed: ${result.errors.toPrettyString()}")
                 }
-                adapter.diff(apps, result.data)
+                adapter.diff(
+                        simpleDiffCallback(apps, result.data,
+                                sameItem = { old, new ->
+                                    (old?.packageName?.equals(new?.packageName) ?: false)
+                                            && (old?.activityName?.equals(new?.activityName)
+                                            ?: false)
+                                },
+                                sameContent = { old, new -> old?.selected == new?.selected }))
                 apps = result.data
             }
         }
@@ -121,7 +126,7 @@ open class AppListPreferenceActivity : RecyclerViewPopupActivity(),
 
     }
 
-    open inner class AppListAdapter : EmptyBaseRecyclerViewAdapter {
+    open inner class AppListAdapter : LoadingRecyclerViewAdapter {
         constructor() : super()
         constructor(nullLayoutID: Int) : super(nullLayoutID = nullLayoutID)
 

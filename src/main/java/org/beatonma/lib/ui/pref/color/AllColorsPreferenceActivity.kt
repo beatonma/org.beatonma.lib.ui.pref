@@ -10,13 +10,15 @@ import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
 import org.beatonma.lib.load.Result
 import org.beatonma.lib.load.SupportBaseAsyncTaskLoader
+import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.R
 import org.beatonma.lib.ui.pref.databinding.ActivityAllColorsBinding
-import org.beatonma.lib.ui.activity.popup.PopupActivity
 import org.beatonma.lib.ui.pref.preferences.ColorItem
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
-import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.LoadingRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.VIEW_TYPE_DEFAULT
 import org.beatonma.lib.ui.recyclerview.kotlin.extensions.setup
+import org.beatonma.lib.ui.recyclerview.simpleDiffCallback
 
 class AllColorsPreferenceActivity : PopupActivity(),
         LoaderManager.LoaderCallbacks<Result<MutableList<ColorItem>>> {
@@ -65,7 +67,11 @@ class AllColorsPreferenceActivity : PopupActivity(),
                                 result: Result<MutableList<ColorItem>>?) {
         when (loader.id) {
             LOADER_COLORS -> {
-                colorAdapter.diff(colors, result?.data)
+                colorAdapter.diff(
+                        simpleDiffCallback(
+                                colors, result?.data,
+                                sameItem = { old, new -> old?.color == new?.color },
+                                sameContent = { old, new -> old?.color == new?.color }))
                 colors = result?.data
             }
         }
@@ -75,7 +81,7 @@ class AllColorsPreferenceActivity : PopupActivity(),
 
     }
 
-    inner class ColorAdapter : EmptyBaseRecyclerViewAdapter() {
+    inner class ColorAdapter : LoadingRecyclerViewAdapter() {
         override val items: List<ColorItem>?
             get() = colors
 
