@@ -123,6 +123,8 @@ private fun childFromJson(
     return when (type) {
         BooleanPreference.TYPE -> BooleanPreference(context, json)
 
+        MessagePreference.TYPE -> MessagePreference(context, json)
+
         ListPreference.TYPE -> ListPreference(context, json)
         AppListPreference.TYPE -> AppListPreference(context, json)
 
