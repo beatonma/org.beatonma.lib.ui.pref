@@ -1,3 +1,10 @@
+/**
+ *
+ *    "dismissible": "true"     // boolean string, optional, default "false"
+ *                              // If true, this item can be removed by the user by swiping
+ *                              // Simple way to show extra information to new users. They can
+ *                              // dismiss it once they get the hang of it.
+ */
 package org.beatonma.lib.ui.pref.preferences
 
 import android.content.Context
