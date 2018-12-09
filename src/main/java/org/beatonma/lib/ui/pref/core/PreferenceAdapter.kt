@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.CallSuper
+import androidx.annotation.LayoutRes
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +26,8 @@ import org.beatonma.lib.ui.pref.list.ListPreferenceActivity
 import org.beatonma.lib.ui.pref.preferences.*
 import org.beatonma.lib.ui.recyclerview.BaseRecyclerViewAdapter
 import org.beatonma.lib.ui.recyclerview.BaseViewHolder
-import org.beatonma.lib.ui.recyclerview.EmptyBaseRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.LoadingRecyclerViewAdapter
+import org.beatonma.lib.ui.recyclerview.SimpleItemTouchHelperCallback
 import org.beatonma.lib.util.Sdk
 import org.beatonma.lib.util.kotlin.extensions.clone
 import org.beatonma.lib.util.kotlin.extensions.hideIfEmpty
@@ -37,12 +40,13 @@ const val PREFERENCE_TYPE_LIST_MULTI = 3   // Not yet implemented
 const val PREFERENCE_TYPE_LIST_APPS = 4
 const val PREFERENCE_TYPE_SEEKBAR_INT = 5
 const val PREFERENCE_TYPE_SEEKBAR_FLOAT = 6
+const val PREFERENCE_TYPE_MESSAGE = 7
 const val PREFERENCE_TYPE_COLOR_SINGLE = 11
 const val PREFERENCE_TYPE_COLOR_GROUP = 12
 const val PREFERENCE_TYPE_SECTION = 61
 const val PREFERENCE_TYPE_GROUP = 65       // Not yet implemented
 
-open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
+open class PreferenceAdapter : LoadingRecyclerViewAdapter {
     override val items: List<*>?
         get() = preferenceGroup?.displayablePreferences
 
@@ -62,6 +66,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * - 'title'
      * - 'description'
      */
+    @LayoutRes
     open val simpleLayout: Int = R.layout.vh_pref_simple
 
     /**
@@ -72,6 +77,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain a [CompoundButton] (or subclass) view with ID:
      * - 'checkable'
      */
+    @LayoutRes
     open val switchLayout: Int = R.layout.vh_pref_switch
 
     /**
@@ -84,7 +90,9 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     //     * - 'min'
     //     * - 'max'
      */
+    @LayoutRes
     open val seekbarIntLayout: Int = R.layout.vh_pref_seekbar
+    @LayoutRes
     open val seekbarFloatLayout: Int = R.layout.vh_pref_seekbar
 
     /**
@@ -103,6 +111,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain a ColorPatch with ID:
      * - 'color'
      */
+    @LayoutRes
     open val colorSingleLayout: Int = R.layout.vh_pref_color_single
 
     /**
@@ -113,9 +122,14 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
      * Layout must contain a [RecyclerView] with ID:
      * - 'colors'
      */
+    @LayoutRes
     open val colorGroupLayout: Int = R.layout.vh_pref_color_group
 
+    @LayoutRes
     open val sectionSeparatorLayout: Int = R.layout.vh_pref_section_separator
+
+    @LayoutRes
+    open val messageLayout: Int = R.layout.vh_pref_message
 
     /**
      * Constructors
@@ -170,10 +184,31 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         return false
     }
 
+    override fun onItemDismiss(position: Int) {
+        when (val item = preferenceGroup?.displayablePreferences?.get(position)) {
+            is DismissiblePreference -> {
+                item.dismiss(weakPrefs?.get())
+                notifyUpdate(item)
+            }
+            else -> super.onItemDismiss(position)
+        }
+    }
+
+    override fun setupTouchHelper(recyclerView: RecyclerView?, callback: SimpleItemTouchHelperCallback?) {
+        if (callback == null) {
+            super.setupTouchHelper(
+                    recyclerView,
+                    SimpleItemTouchHelperCallback.getSimpleCallback(
+                            recyclerView, this, true, false))
+        } else {
+            super.setupTouchHelper(recyclerView, callback)
+        }
+    }
+
     private fun diffCallback(old: List<BasePreference>?,
                              new: MutableList<BasePreference>?
-    ): EmptyBaseRecyclerViewAdapter.DiffAdapter<BasePreference> {
-        return object : EmptyBaseRecyclerViewAdapter.DiffAdapter<BasePreference>(old, new) {
+    ): LoadingRecyclerViewAdapter.DiffAdapter<BasePreference> {
+        return object : LoadingRecyclerViewAdapter.DiffAdapter<BasePreference>(old, new) {
             override fun getOldListSize(): Int {
                 return oldList?.size ?: 1
             }
@@ -212,6 +247,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             SectionSeparator.TYPE -> PREFERENCE_TYPE_SECTION
             IntSeekbarPreference.TYPE -> PREFERENCE_TYPE_SEEKBAR_INT
             FloatSeekbarPreference.TYPE -> PREFERENCE_TYPE_SEEKBAR_FLOAT
+            MessagePreference.TYPE -> PREFERENCE_TYPE_MESSAGE
             else -> super.getItemViewType(position)
         }
     }
@@ -227,6 +263,7 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
             PREFERENCE_TYPE_SECTION -> SectionSeparatorViewHolder(inflate(parent, sectionSeparatorLayout))
             PREFERENCE_TYPE_SEEKBAR_INT -> SeekbarIntViewHolder(inflate(parent, seekbarIntLayout))
             PREFERENCE_TYPE_SEEKBAR_FLOAT -> SeekbarFloatViewHolder(inflate(parent, seekbarFloatLayout))
+            PREFERENCE_TYPE_MESSAGE -> MessageViewHolder(inflate(parent, messageLayout))
             0 -> SimplePreferenceViewHolder(inflate(parent, simpleLayout))
             else -> super.onCreateViewHolder(parent, viewType)
         }
@@ -383,20 +420,36 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
     open inner class SeekbarIntViewHolder(view: View) : SeekbarViewHolder<Int>(view)
     open inner class SeekbarFloatViewHolder(view: View) : SeekbarViewHolder<Float>(view)
 
+    open inner class MessageViewHolder(view: View) : BasePreferenceViewHolder<MessagePreference>(view) {
+        val dismissButton: Button = view.findViewById(R.id.dismiss_button)
+
+        override fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: MessagePreference?) {
+            super.bind(weakPrefs, preference)
+            preference ?: return
+
+            dismissButton.setOnClickListener { dismiss(preference) }
+        }
+    }
+
     abstract inner class BasePreferenceViewHolder<T : BasePreference>(view: View) : BaseViewHolder(view) {
         private var mWeakPrefs: WeakReference<SharedPreferences>? = null
 
         private val title: TextView = itemView.findViewById(R.id.title)
         private val description: TextView? = itemView.findViewById(R.id.description)
 
+        var datasetPosition: Int = -1
+        var dismissible: Boolean = false
+
         @Suppress("UNCHECKED_CAST")
         override fun bind(position: Int) {
+            datasetPosition = position
             bind(weakPrefs, preferenceGroup?.displayablePreferences?.get(position) as? T)
         }
 
         @CallSuper
         open fun bind(weakPrefs: WeakReference<SharedPreferences>?, preference: T?) {
             mWeakPrefs = weakPrefs
+            dismissible = preference is DismissiblePreference && preference.dismissible //preference?.dismissible ?: false
             updateTitle(preference?.name)
             updateDescription(preference?.contextDescription)
         }
@@ -424,6 +477,14 @@ open class PreferenceAdapter : EmptyBaseRecyclerViewAdapter {
         fun updateDescription(resID: Int) {
             description?.setText(resID)
             description?.hideIfEmpty()
+        }
+
+        fun dismiss(preference: BasePreference?) {
+            if (preference is DismissiblePreference) {
+                preference.dismiss(mWeakPrefs?.get())
+
+                notifyUpdate(preference)
+            }
         }
     }
 }
